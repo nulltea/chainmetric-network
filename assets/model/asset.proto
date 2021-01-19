@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "assets/model";
+
+message Asset {
+  string uniqueID = 1;
+  string size = 2;
+  string owner = 3;
+  string value = 4;
+}
+
+message AssetInput {
+  string size = 2;
+  string owner = 3;
+  string value = 4;
+}
+
+message AssetFilter {
+  string uniqueID = 1;
+}
