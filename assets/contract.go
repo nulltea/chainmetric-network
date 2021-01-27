@@ -39,7 +39,7 @@ func (c *AssetsContract) InsertAsset(ctx contractapi.TransactionContextInterface
 	id := xid.NewWithTime(time.Now()).String()
 	asset := &model.Asset{
 		UniqueID: id,
-		Size: input.Size,
+		Size_: input.Size_,
 		Owner: input.Owner,
 		Value: input.Value,
 	}
