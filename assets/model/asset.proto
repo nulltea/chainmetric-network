@@ -6,15 +6,19 @@ option go_package = "assets/model";
 
 message Asset {
   string uniqueID = 1;
-  string size = 2;
-  string owner = 3;
-  string value = 4;
+  string name = 2;
+  string description = 3;
+  string size = 4;
+  string owner = 5;
+  string value = 6;
 }
 
 message AssetInput {
-  string size = 2;
-  string owner = 3;
-  string value = 4;
+  string name = 1;
+  string description = 2;
+  string size = 3;
+  string owner = 4;
+  string value = 5;
 }
 
 message AssetFilter {

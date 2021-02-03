@@ -23,10 +23,12 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 
 type Asset struct {
-	UniqueID string `protobuf:"bytes,1,opt,name=uniqueID,proto3" json:"uniqueID,omitempty"`
-	Size_    string `protobuf:"bytes,2,opt,name=size,proto3" json:"size,omitempty"`
-	Owner    string `protobuf:"bytes,3,opt,name=owner,proto3" json:"owner,omitempty"`
-	Value    string `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
+	UniqueID    string `protobuf:"bytes,1,opt,name=uniqueID,proto3" json:"uniqueID,omitempty"`
+	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Size_       string `protobuf:"bytes,4,opt,name=size,proto3" json:"size,omitempty"`
+	Owner       string `protobuf:"bytes,5,opt,name=owner,proto3" json:"owner,omitempty"`
+	Value       string `protobuf:"bytes,6,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *Asset) Reset()         { *m = Asset{} }
@@ -69,6 +71,20 @@ func (m *Asset) GetUniqueID() string {
 	return ""
 }
 
+func (m *Asset) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Asset) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
 func (m *Asset) GetSize_() string {
 	if m != nil {
 		return m.Size_
@@ -91,9 +107,11 @@ func (m *Asset) GetValue() string {
 }
 
 type AssetInput struct {
-	Size_ string `protobuf:"bytes,2,opt,name=size,proto3" json:"size,omitempty"`
-	Owner string `protobuf:"bytes,3,opt,name=owner,proto3" json:"owner,omitempty"`
-	Value string `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
+	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Size_       string `protobuf:"bytes,3,opt,name=size,proto3" json:"size,omitempty"`
+	Owner       string `protobuf:"bytes,4,opt,name=owner,proto3" json:"owner,omitempty"`
+	Value       string `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *AssetInput) Reset()         { *m = AssetInput{} }
@@ -128,6 +146,20 @@ func (m *AssetInput) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_AssetInput proto.InternalMessageInfo
+
+func (m *AssetInput) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AssetInput) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
 
 func (m *AssetInput) GetSize_() string {
 	if m != nil {
@@ -203,19 +235,22 @@ func init() {
 func init() { proto.RegisterFile("asset.proto", fileDescriptor_4785e5163229d617) }
 
 var fileDescriptor_4785e5163229d617 = []byte{
-	// 181 bytes of a gzipped FileDescriptorProto
+	// 234 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4e, 0x2c, 0x2e, 0x4e,
-	0x2d, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xcd, 0xcd, 0x4f, 0x49, 0xcd, 0x51, 0x4a,
-	0xe6, 0x62, 0x75, 0x04, 0x89, 0x0a, 0x49, 0x71, 0x71, 0x94, 0xe6, 0x65, 0x16, 0x96, 0xa6, 0x7a,
-	0xba, 0x48, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06, 0xc1, 0xf9, 0x42, 0x42, 0x5c, 0x2c, 0xc5, 0x99,
-	0x55, 0xa9, 0x12, 0x4c, 0x60, 0x71, 0x30, 0x5b, 0x48, 0x84, 0x8b, 0x35, 0xbf, 0x3c, 0x2f, 0xb5,
-	0x48, 0x82, 0x19, 0x2c, 0x08, 0xe1, 0x80, 0x44, 0xcb, 0x12, 0x73, 0x4a, 0x53, 0x25, 0x58, 0x20,
-	0xa2, 0x60, 0x8e, 0x92, 0x0f, 0x17, 0x17, 0xd8, 0x12, 0xcf, 0xbc, 0x82, 0xd2, 0x12, 0x8a, 0x4d,
-	0xd3, 0xe4, 0xe2, 0x06, 0x9b, 0xe6, 0x96, 0x99, 0x53, 0x92, 0x5a, 0x84, 0xcf, 0xe1, 0x4e, 0x6a,
-	0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72,
-	0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0xc5, 0x03, 0x0e, 0x8b, 0x62, 0x7d,
-	0x70, 0x28, 0x24, 0xb1, 0x81, 0xc3, 0xc4, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x75, 0x7b, 0x9a,
-	0x19, 0x22, 0x01, 0x00, 0x00,
+	0x2d, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xcd, 0xcd, 0x4f, 0x49, 0xcd, 0x51, 0x9a,
+	0xc9, 0xc8, 0xc5, 0xea, 0x08, 0x12, 0x16, 0x92, 0xe2, 0xe2, 0x28, 0xcd, 0xcb, 0x2c, 0x2c, 0x4d,
+	0xf5, 0x74, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x82, 0xf3, 0x85, 0x84, 0xb8, 0x58, 0xf2,
+	0x12, 0x73, 0x53, 0x25, 0x98, 0xc0, 0xe2, 0x60, 0xb6, 0x90, 0x02, 0x17, 0x77, 0x4a, 0x6a, 0x71,
+	0x72, 0x51, 0x66, 0x41, 0x49, 0x66, 0x7e, 0x9e, 0x04, 0x33, 0x58, 0x0a, 0x59, 0x08, 0xa4, 0xab,
+	0x38, 0xb3, 0x2a, 0x55, 0x82, 0x05, 0xa2, 0x0b, 0xc4, 0x16, 0x12, 0xe1, 0x62, 0xcd, 0x2f, 0xcf,
+	0x4b, 0x2d, 0x92, 0x60, 0x05, 0x0b, 0x42, 0x38, 0x20, 0xd1, 0xb2, 0xc4, 0x9c, 0xd2, 0x54, 0x09,
+	0x36, 0x88, 0x28, 0x98, 0xa3, 0xd4, 0xc4, 0xc8, 0xc5, 0x05, 0x76, 0x9b, 0x67, 0x5e, 0x41, 0x69,
+	0x09, 0xdc, 0x11, 0x8c, 0xb8, 0x1d, 0xc1, 0x84, 0xdb, 0x11, 0xcc, 0xd8, 0x1c, 0xc1, 0x82, 0xd5,
+	0x11, 0xac, 0xc8, 0x8e, 0xd0, 0xe4, 0xe2, 0x06, 0xbb, 0xc1, 0x2d, 0x33, 0xa7, 0x24, 0xb5, 0x08,
+	0x5f, 0x28, 0x39, 0xa9, 0x9d, 0x78, 0x24, 0xc7, 0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72,
+	0x8c, 0x13, 0x1e, 0xcb, 0x31, 0x5c, 0x78, 0x2c, 0xc7, 0x70, 0xe3, 0xb1, 0x1c, 0x43, 0x14, 0x0f,
+	0x38, 0xe4, 0x8b, 0xf5, 0xc1, 0x61, 0x9e, 0xc4, 0x06, 0x8e, 0x01, 0x63, 0x40, 0x00, 0x00, 0x00,
+	0xff, 0xff, 0x9c, 0xfd, 0x68, 0x5e, 0x90, 0x01, 0x00, 0x00,
 }
 
 func (m *Asset) Marshal() (dAtA []byte, err error) {
@@ -239,20 +274,32 @@ func (m *Asset) MarshalTo(dAtA []byte) (int, error) {
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.UniqueID)))
 		i += copy(dAtA[i:], m.UniqueID)
 	}
-	if len(m.Size_) > 0 {
+	if len(m.Name) > 0 {
 		dAtA[i] = 0x12
+		i++
+		i = encodeVarintAsset(dAtA, i, uint64(len(m.Name)))
+		i += copy(dAtA[i:], m.Name)
+	}
+	if len(m.Description) > 0 {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintAsset(dAtA, i, uint64(len(m.Description)))
+		i += copy(dAtA[i:], m.Description)
+	}
+	if len(m.Size_) > 0 {
+		dAtA[i] = 0x22
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Size_)))
 		i += copy(dAtA[i:], m.Size_)
 	}
 	if len(m.Owner) > 0 {
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x2a
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Owner)))
 		i += copy(dAtA[i:], m.Owner)
 	}
 	if len(m.Value) > 0 {
-		dAtA[i] = 0x22
+		dAtA[i] = 0x32
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Value)))
 		i += copy(dAtA[i:], m.Value)
@@ -275,20 +322,32 @@ func (m *AssetInput) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Size_) > 0 {
+	if len(m.Name) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintAsset(dAtA, i, uint64(len(m.Name)))
+		i += copy(dAtA[i:], m.Name)
+	}
+	if len(m.Description) > 0 {
 		dAtA[i] = 0x12
+		i++
+		i = encodeVarintAsset(dAtA, i, uint64(len(m.Description)))
+		i += copy(dAtA[i:], m.Description)
+	}
+	if len(m.Size_) > 0 {
+		dAtA[i] = 0x1a
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Size_)))
 		i += copy(dAtA[i:], m.Size_)
 	}
 	if len(m.Owner) > 0 {
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Owner)))
 		i += copy(dAtA[i:], m.Owner)
 	}
 	if len(m.Value) > 0 {
-		dAtA[i] = 0x22
+		dAtA[i] = 0x2a
 		i++
 		i = encodeVarintAsset(dAtA, i, uint64(len(m.Value)))
 		i += copy(dAtA[i:], m.Value)
@@ -339,6 +398,14 @@ func (m *Asset) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovAsset(uint64(l))
 	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovAsset(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovAsset(uint64(l))
+	}
 	l = len(m.Size_)
 	if l > 0 {
 		n += 1 + l + sovAsset(uint64(l))
@@ -360,6 +427,14 @@ func (m *AssetInput) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovAsset(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovAsset(uint64(l))
+	}
 	l = len(m.Size_)
 	if l > 0 {
 		n += 1 + l + sovAsset(uint64(l))
@@ -457,6 +532,70 @@ func (m *Asset) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAsset
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAsset
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAsset
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAsset
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAsset
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAsset
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Size_", wireType)
 			}
 			var stringLen uint64
@@ -487,7 +626,7 @@ func (m *Asset) Unmarshal(dAtA []byte) error {
 			}
 			m.Size_ = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
 			}
@@ -519,7 +658,7 @@ func (m *Asset) Unmarshal(dAtA []byte) error {
 			}
 			m.Owner = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}
@@ -604,7 +743,71 @@ func (m *AssetInput) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: AssetInput: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAsset
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAsset
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAsset
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAsset
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAsset
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAsset
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Size_", wireType)
 			}
@@ -636,7 +839,7 @@ func (m *AssetInput) Unmarshal(dAtA []byte) error {
 			}
 			m.Size_ = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
 			}
@@ -668,7 +871,7 @@ func (m *AssetInput) Unmarshal(dAtA []byte) error {
 			}
 			m.Owner = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}
