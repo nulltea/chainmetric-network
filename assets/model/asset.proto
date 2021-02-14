@@ -5,22 +5,12 @@ package model;
 option go_package = "assets/model";
 
 message Asset {
-  string uniqueID = 1;
-  string name = 2;
-  string description = 3;
-  string size = 4;
-  string owner = 5;
-  string value = 6;
-}
-
-message AssetInput {
-  string name = 1;
-  string description = 2;
-  string size = 3;
-  string owner = 4;
-  string value = 5;
-}
-
-message AssetFilter {
-  string uniqueID = 1;
+  string id = 1;
+  string sku = 2;
+  string name = 3;
+  string type = 4;
+  string info = 5;
+  double cost = 7;
+  string owner = 8;
+  repeated string tags = 9;
 }

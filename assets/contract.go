@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -19,9 +20,8 @@ func NewAssetsContact() *AssetsContract {
 	return &AssetsContract{}
 }
 
-func (c *AssetsContract) RetrieveAsset(ctx contractapi.TransactionContextInterface, id string) (*model.Asset, error) {
-	data, err := ctx.GetStub().GetState(id)
-	if err != nil {
+func (c *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Asset, error) {
+	data, err := ctx.GetStub().GetState(id); if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
 	}
 	if data == nil {
@@ -35,7 +35,7 @@ func (c *AssetsContract) RetrieveAsset(ctx contractapi.TransactionContextInterfa
 	return &asset, nil
 }
 
-func (c *AssetsContract) ListAssets(ctx contractapi.TransactionContextInterface) ([]*model.Asset, error) {
+func (c *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Asset, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -57,57 +57,32 @@ func (c *AssetsContract) ListAssets(ctx contractapi.TransactionContextInterface)
 	return assets, nil
 }
 
-func (c *AssetsContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	assets := []*model.Asset{
-		&model.Asset{
-			UniqueID: xid.NewWithTime(time.Now()).String(),
-			Name: "Asset1",
-			Description: "Asset1",
-			Size_: "1.0",
-			Owner: "admin",
-			Value: "1.0",
-		},
-		&model.Asset{
-			UniqueID: xid.NewWithTime(time.Now()).String(),
-			Name: "Asset2",
-			Description: "Asset2",
-			Size_: "1.5",
-			Owner: "admin",
-			Value: "5.0",
-		},
+func (c *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+	asset := &model.Asset{}
+	if err := json.Unmarshal([]byte(data), asset); err != nil {
+		return "", err
 	}
-	for _, asset := range assets {
-		c.inputAsset(ctx, asset)
-	}
-	return nil
+	asset.Id = xid.NewWithTime(time.Now()).String()
+	return asset.Id, c.save(ctx, asset)
 }
 
-func (c *AssetsContract) InsertAsset(ctx contractapi.TransactionContextInterface, name, desc, size, owner, value string) (string, error) {
-	id := xid.NewWithTime(time.Now()).String()
-	asset := &model.Asset{
-		UniqueID: id,
-		Name: name,
-		Description: desc,
-		Size_: size,
-		Owner: owner,
-		Value: value,
-	}
-	return id, c.inputAsset(ctx, asset)
-}
-
-func (c *AssetsContract) inputAsset(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
-	if len(asset.UniqueID) == 0 {
-		return fmt.Errorf("the unique id must be setted up for asset")
-	}
-	data, err := proto.Marshal(asset); if err != nil {
+func (c *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, owner string) error {
+	asset, err := c.Retrieve(ctx, id); if err != nil {
 		return err
 	}
-	return ctx.GetStub().PutState(asset.UniqueID, data)
+	asset.Owner = owner
+	return c.save(ctx, asset)
 }
 
-func (c *AssetsContract) RemoveAsset(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := c.AssetExists(ctx, id);
-	if err != nil {
+func (c *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	data, err := ctx.GetStub().GetState(id); if err != nil {
+		return false, err
+	}
+	return data != nil, nil
+}
+
+func (c *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := c.Exists(ctx, id); if err != nil {
 		return err
 	}
 	if !exists {
@@ -116,17 +91,12 @@ func (c *AssetsContract) RemoveAsset(ctx contractapi.TransactionContextInterface
 	return ctx.GetStub().DelState(id)
 }
 
-func (c *AssetsContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, owner string) error {
-	asset, err := c.RetrieveAsset(ctx, id); if err != nil {
+func (c *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
+	if len(asset.Id) == 0 {
+		return fmt.Errorf("the unique id must be setted up for asset")
+	}
+	data, err := proto.Marshal(asset); if err != nil {
 		return err
 	}
-	asset.Owner = owner
-	return c.inputAsset(ctx, asset)
-}
-
-func (c *AssetsContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return false, err
-	}
-	return data != nil, nil
+	return ctx.GetStub().PutState(asset.Id, data)
 }
