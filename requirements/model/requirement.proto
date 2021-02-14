@@ -5,18 +5,8 @@ package model;
 option go_package = "requirements/model";
 
 message Requirement {
-  string uniqueID = 1;
+  string id = 1;
   string property = 2;
-  float minThreshold = 3;
-  float maxThreshold = 4;
-}
-
-message RequirementInput {
-  string property = 2;
-  float minThreshold = 3;
-  float maxThreshold = 4;
-}
-
-message RequirementFilter {
-  string uniqueID = 1;
+  double minThreshold = 3;
+  double maxThreshold = 4;
 }

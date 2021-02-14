@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d580e1f7-a71d-4cf0-9358-a8a02ea1b434" name="Default Changelist" comment="" />
+    <list default="true" id="d580e1f7-a71d-4cf0-9358-a8a02ea1b434" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../assets/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assets/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assets/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assets/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assets/model/asset.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/model/asset.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assets/model/asset.proto" beforeDir="false" afterPath="$PROJECT_DIR$/../assets/model/asset.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/requirement.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/requirement.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/requirement.proto" beforeDir="false" afterPath="$PROJECT_DIR$/model/requirement.proto" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="GOROOT" path="C:\GO\ROOT\go1.15.5" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
@@ -16,6 +33,7 @@
     <option name="namespace" value="default" />
   </component>
   <component name="ProjectId" id="1nI2113vv2iRbS5oD6mytdxUUSX" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
