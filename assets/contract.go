@@ -91,6 +91,22 @@ func (c *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id 
 	return ctx.GetStub().DelState(id)
 }
 
+func (c *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
+	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	if err != nil {
+		return fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	for iterator.HasNext() {
+		result, err := iterator.Next(); if err != nil {
+			log.Error(err)
+			continue
+		}
+		c.Remove(ctx, result.Key)
+	}
+	return nil
+}
+
 func (c *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
 	if len(asset.Id) == 0 {
 		return fmt.Errorf("the unique id must be setted up for asset")

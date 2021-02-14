@@ -4,8 +4,17 @@
     <list default="true" id="f12e3d48-7c66-4324-8a03-d1a768d4be76" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/asset.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/asset.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/asset.proto" beforeDir="false" afterPath="$PROJECT_DIR$/model/asset.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/model/requirement.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/model/requirement.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../requirements/model/requirement.proto" beforeDir="false" afterPath="$PROJECT_DIR$/../requirements/model/requirement.proto" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

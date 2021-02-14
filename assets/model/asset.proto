@@ -12,5 +12,4 @@ message Asset {
   string info = 5;
   double cost = 7;
   string owner = 8;
-  repeated string tags = 9;
 }
