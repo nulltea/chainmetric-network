@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -60,13 +59,17 @@ func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*
 }
 
 func (c *DevicesContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
-	device := &model.Device{}
+	var (
+		device = &model.Device{}
+		err error
+	)
 
-	if err := json.Unmarshal([]byte(data), device); err != nil {
+	if device, err = device.Decode([]byte(data)); err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return "", err
 	}
+
 	device.ID = xid.NewWithTime(time.Now()).String()
 
 	return device.ID, c.save(ctx, device)

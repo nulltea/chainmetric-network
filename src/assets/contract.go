@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -66,7 +65,7 @@ func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, da
 		err error
 	)
 
-	if err = json.Unmarshal([]byte(data), asset); err != nil {
+	if asset, err = asset.Decode([]byte(data)); err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return "", err
