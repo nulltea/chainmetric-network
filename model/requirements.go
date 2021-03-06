@@ -10,12 +10,15 @@ type Requirement struct {
 	MaxLimit float64 `json:"maxThreshold,omitempty"`
 }
 
+// RequirementsMap represents map with Metric key and corresponding Requirement value
+type RequirementsMap map[Metric]Requirement
+
 // Requirement defines requirements data model
 type Requirements struct {
-	ID      string                 `json:"id,omitempty"`
-	Type    string                 `json:"type,omitempty"`
-	AssetID AssetID                `json:"asset_id,omitempty"`
-	Metrics map[Metric]Requirement `json:"metrics,omitempty"`
+	ID      string          `json:"id,omitempty"`
+	Type    string          `json:"type,omitempty"`
+	AssetID string          `json:"asset_id,omitempty"`
+	Metrics RequirementsMap `json:"metrics,omitempty"`
 }
 
 func (m Requirements) Encode() []byte {
