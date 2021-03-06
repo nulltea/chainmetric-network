@@ -36,8 +36,8 @@ func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterf
 	return model.Requirements{}.Decode(data)
 }
 
-func (c *RequirementsContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Requirements, error) {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*model.Requirements, error) {
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { assetID })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -62,14 +62,22 @@ func (c *RequirementsContract) List(ctx contractapi.TransactionContextInterface)
 }
 
 func (c *RequirementsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
-	requirements := &model.Requirements{}
+	var (
+		requirements = &model.Requirements{}
+		err error
+	)
 
-	if err := json.Unmarshal([]byte(data), requirements); err != nil {
+	if err = json.Unmarshal([]byte(data), requirements); err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return "", err
 	}
-	requirements.ID = xid.NewWithTime(time.Now()).String()
+
+	if requirements.ID, err = generateCompositeKey(ctx, requirements); err != nil {
+		err = errors.Wrap(err, "failed to generate composite key")
+		shared.Logger.Error(err)
+		return "", err
+	}
 
 	return requirements.ID, c.save(ctx, requirements)
 }
@@ -122,4 +130,12 @@ func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface,
 	}
 
 	return ctx.GetStub().PutState(requirement.ID, requirement.Encode())
+}
+
+
+func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *model.Requirements) (string, error) {
+	return ctx.GetStub().CreateCompositeKey("requirements", []string{
+		req.AssetID,
+		xid.NewWithTime(time.Now()).String(),
+	})
 }

@@ -21,7 +21,7 @@ func NewAssetsContact() *AssetsContract {
 	return &AssetsContract{}
 }
 
-func (c *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Asset, error) {
+func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Asset, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -35,7 +35,7 @@ func (c *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, i
 	return model.Asset{}.Decode(data)
 }
 
-func (c *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Asset, error) {
+func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Asset, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -60,29 +60,37 @@ func (c *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*m
 	return assets, nil
 }
 
-func (c *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
-	asset := &model.Asset{}
-	if err := json.Unmarshal([]byte(data), asset); err != nil {
+func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+	var (
+		asset = &model.Asset{}
+		err error
+	)
+
+	if err = json.Unmarshal([]byte(data), asset); err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return "", err
 	}
 
-	asset.ID = model.AssetID(xid.NewWithTime(time.Now()).String())
+	if asset.ID, err = generateCompositeKey(ctx, asset); err != nil {
+		err = errors.Wrap(err, "failed to generate composite key")
+		shared.Logger.Error(err)
+		return "", err
+	}
 
-	return asset.ID.String(), c.save(ctx, asset)
+	return asset.ID, ac.save(ctx, asset)
 }
 
-func (c *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, owner string) error {
-	asset, err := c.Retrieve(ctx, id); if err != nil {
+func (ac *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, owner string) error {
+	asset, err := ac.Retrieve(ctx, id); if err != nil {
 		return err
 	}
 	asset.Holder = owner
 
-	return c.save(ctx, asset)
+	return ac.save(ctx, asset)
 }
 
-func (c *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+func (ac *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -92,8 +100,8 @@ func (c *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id 
 	return data != nil, nil
 }
 
-func (c *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := c.Exists(ctx, id); if err != nil {
+func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := ac.Exists(ctx, id); if err != nil {
 		return err
 	}
 	if !exists {
@@ -102,7 +110,7 @@ func (c *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id 
 	return ctx.GetStub().DelState(id)
 }
 
-func (c *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
+func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -124,10 +132,17 @@ func (c *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) 
 	return nil
 }
 
-func (c *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
+func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
 	if len(asset.ID) == 0 {
 		return fmt.Errorf("the unique id must be defined for asset")
 	}
 
-	return ctx.GetStub().PutState(asset.ID.String(), asset.Encode())
+	return ctx.GetStub().PutState(asset.ID, asset.Encode())
+}
+
+func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *model.Asset) (string, error) {
+	return ctx.GetStub().CreateCompositeKey("asset", []string{
+		shared.Hash(asset.SKU),
+		xid.NewWithTime(time.Now()).String(),
+	})
 }

@@ -4,14 +4,14 @@ import "encoding/json"
 
 // Device defines device data model
 type Device struct {
-	ID         string  `json:"id,omitempty"`
-	URL        string  `json:"url,omitempty"`
-	Name       string  `json:"name,omitempty"`
-	Profile    string  `json:"profile,omitempty"`
-	Supporting Metrics `json:"supporting,omitempty"`
-	Holder     string  `json:"holder,omitempty"`
-	State      string  `json:"state,omitempty"`
-	Location string   `json:"location,omitempty"`
+	ID       string  `json:"id,omitempty"`
+	URL      string  `json:"url,omitempty"`
+	Name     string  `json:"name,omitempty"`
+	Profile  string  `json:"profile,omitempty"`
+	Supports Metrics `json:"supports,omitempty"`
+	Holder   string  `json:"holder,omitempty"`
+	State    string  `json:"state,omitempty"`
+	Location string  `json:"location,omitempty"`
 }
 
 func (m Device) Encode() []byte {
