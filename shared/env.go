@@ -1,9 +1,12 @@
 package shared
 
-import "os"
+import (
+	"os"
+)
 
 var (
 	ChaincodeID = os.Getenv("CHAINCODE_CCID")
 	ChaincodeAddress = os.Getenv("CHAINCODE_ADDRESS")
 	ChaincodeName = os.Getenv("CHAINCODE_NAME")
+	LogLevel = os.Getenv("LOGGING")
 )

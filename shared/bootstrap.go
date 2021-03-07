@@ -14,17 +14,17 @@ func BootstrapContract(contract contractapi.ContractInterface) {
 	}
 
 	server := &shim.ChaincodeServer{
-		CCID: os.Getenv("CHAINCODE_CCID"),
-		Address: os.Getenv("CHAINCODE_ADDRESS"),
+		CCID: ChaincodeID,
+		Address: ChaincodeAddress,
 		CC: chaincode,
 		TLSProps: shim.TLSProperties{
 			Disabled: true,
 		},
 	}
 
+	Logger.Info("Contract is up and running...")
+
 	if err = server.Start(); err != nil {
 		Logger.Fatalf("Error starting %s chaincode: %s", os.Getenv("CHAINCODE_NAME"), err)
 	}
-
-	Logger.Info("Contract up and running...")
 }
