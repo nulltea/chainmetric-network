@@ -1,8 +1,8 @@
-package model
+package models
 
 import "encoding/json"
 
-// Device defines device data model
+// Device defines device data models
 type Device struct {
 	ID       string  `json:"id,omitempty"`
 	URL      string  `json:"url,omitempty"`

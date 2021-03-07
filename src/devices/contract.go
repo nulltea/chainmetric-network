@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
-	"github.com/timoth-y/iot-blockchain-contracts/model"
+	"github.com/timoth-y/iot-blockchain-contracts/models"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -20,7 +20,7 @@ func NewDevicesContact() *DevicesContract {
 	return &DevicesContract{}
 }
 
-func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Device, error) {
+func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Device, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -31,10 +31,10 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 		return nil, fmt.Errorf("the device %s does not exist", id)
 	}
 
-	return model.Device{}.Decode(data)
+	return models.Device{}.Decode(data)
 }
 
-func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Device, error) {
+func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -42,14 +42,14 @@ func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*
 		return nil, err
 	}
 
-	var devices []*model.Device
+	var devices []*models.Device
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
 
-		device, err := model.Device{}.Decode(result.Value); if err != nil {
+		device, err := models.Device{}.Decode(result.Value); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
@@ -60,7 +60,7 @@ func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*
 
 func (c *DevicesContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
-		device = &model.Device{}
+		device = &models.Device{}
 		err error
 	)
 
@@ -114,7 +114,7 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 	return nil
 }
 
-func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, device *model.Device) error {
+func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, device *models.Device) error {
 	if len(device.ID) == 0 {
 		return fmt.Errorf("the unique id must be defined for device")
 	}

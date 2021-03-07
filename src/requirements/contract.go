@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
-	"github.com/timoth-y/iot-blockchain-contracts/model"
+	"github.com/timoth-y/iot-blockchain-contracts/models"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -22,7 +22,7 @@ func NewRequirementsContract() *RequirementsContract {
 	return &RequirementsContract{}
 }
 
-func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Requirements, error) {
+func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Requirements, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -33,10 +33,10 @@ func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterf
 		return nil, fmt.Errorf("the requirement with ID %q does not exist", id)
 	}
 
-	return model.Requirements{}.Decode(data)
+	return models.Requirements{}.Decode(data)
 }
 
-func (c *RequirementsContract) ListAll(ctx contractapi.TransactionContextInterface) ([]*model.Requirements, error) {
+func (c *RequirementsContract) ListAll(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -47,7 +47,7 @@ func (c *RequirementsContract) ListAll(ctx contractapi.TransactionContextInterfa
 	return c.iterate(iterator)
 }
 
-func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*model.Requirements, error) {
+func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { assetID })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -60,7 +60,7 @@ func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextIn
 
 func (c *RequirementsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
-		requirements = &model.Requirements{}
+		requirements = &models.Requirements{}
 		err error
 	)
 
@@ -121,15 +121,15 @@ func (c *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInter
 	return nil
 }
 
-func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*model.Requirements, error) {
-	var requirements []*model.Requirements
+func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
+	var requirements []*models.Requirements
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
 
-		requirement, err := model.Requirements{}.Decode(result.Value); if err != nil {
+		requirement, err := models.Requirements{}.Decode(result.Value); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
@@ -139,7 +139,7 @@ func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface
 	return requirements, nil
 }
 
-func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *model.Requirements) error {
+func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements) error {
 	if len(requirement.ID) == 0 {
 		return errors.New("the unique id must be defined for requirement")
 	}
@@ -148,7 +148,7 @@ func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface,
 }
 
 
-func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *model.Requirements) (string, error) {
+func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.Requirements) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("requirements", []string{
 		req.AssetID,
 		xid.NewWithTime(time.Now()).String(),

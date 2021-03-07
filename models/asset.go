@@ -1,8 +1,8 @@
-package model
+package models
 
 import "encoding/json"
 
-// Asset defines asset data model
+// Asset defines asset data models
 type Asset struct {
 	ID       string  `json:"id,omitempty"`
 	SKU      string   `json:"sku,omitempty"`

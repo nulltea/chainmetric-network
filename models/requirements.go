@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ type Requirement struct {
 // RequirementsMap represents map with Metric key and corresponding Requirement value
 type RequirementsMap map[Metric]Requirement
 
-// Requirement defines requirements data model
+// Requirement defines requirements data models
 type Requirements struct {
 	ID      string          `json:"id,omitempty"`
 	Type    string          `json:"type,omitempty"`

@@ -1,11 +1,11 @@
-package model
+package models
 
 import (
 	"encoding/json"
 	"time"
 )
 
-// MetricReadings defines data model for readings from sensors
+// MetricReadings defines data models for readings from sensors
 type MetricReadings struct {
 	ID        string                 `json:"id,omitempty"`
 	AssetID   string                 `json:"asset_id,omitempty"`

@@ -1,4 +1,4 @@
-package model
+package models
 
 // Metric represents tracking properties considered by the asset holder
 type Metric string

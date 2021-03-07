@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
-	"github.com/timoth-y/iot-blockchain-contracts/model"
+	"github.com/timoth-y/iot-blockchain-contracts/models"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -20,7 +20,7 @@ func NewAssetsContact() *AssetsContract {
 	return &AssetsContract{}
 }
 
-func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*model.Asset, error) {
+func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Asset, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -31,10 +31,10 @@ func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 		return nil, fmt.Errorf("the asset with ID %q does not exist", id)
 	}
 
-	return model.Asset{}.Decode(data)
+	return models.Asset{}.Decode(data)
 }
 
-func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*model.Asset, error) {
+func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -42,14 +42,14 @@ func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*
 		return nil, err
 	}
 
-	var assets []*model.Asset
+	var assets []*models.Asset
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
 
-		asset, err := model.Asset{}.Decode(result.Value); if err != nil {
+		asset, err := models.Asset{}.Decode(result.Value); if err != nil {
 			shared.Logger.Error(err)
 			continue
 		}
@@ -61,7 +61,7 @@ func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*
 
 func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
-		asset = &model.Asset{}
+		asset = &models.Asset{}
 		err error
 	)
 
@@ -131,7 +131,7 @@ func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 	return nil
 }
 
-func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *model.Asset) error {
+func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset) error {
 	if len(asset.ID) == 0 {
 		return fmt.Errorf("the unique id must be defined for asset")
 	}
@@ -139,7 +139,7 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 	return ctx.GetStub().PutState(asset.ID, asset.Encode())
 }
 
-func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *model.Asset) (string, error) {
+func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("asset", []string{
 		shared.Hash(asset.SKU),
 		xid.NewWithTime(time.Now()).String(),
