@@ -21,7 +21,7 @@ func InitLogger() {
 	logging.SetBackend(backend)
 
 	level, err := logging.LogLevel(LogLevel); if err != nil {
-		level = logging.INFO
+		level = logging.WARNING
 	}
 	logging.SetLevel(level, ChaincodeName)
 }
