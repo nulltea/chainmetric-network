@@ -35,7 +35,7 @@ func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 }
 
 func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -110,7 +110,7 @@ func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id
 }
 
 func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)

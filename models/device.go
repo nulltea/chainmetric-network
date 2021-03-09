@@ -5,12 +5,14 @@ import "encoding/json"
 // Device defines device data models
 type Device struct {
 	ID       string  `json:"id,omitempty"`
-	URL      string  `json:"url,omitempty"`
+	IP       string  `json:"ip,omitempty"`
+	MAC      string  `json:"mac,omitempty"`
 	Name     string  `json:"name,omitempty"`
-	Profile  string  `json:"profile,omitempty"`
+	Hostname string  `json:"hostname,omitempty"`
+	Profile  string  `json:"profile,omitempty"  metadata:",optional"`
 	Supports Metrics `json:"supports,omitempty"`
 	Holder   string  `json:"holder,omitempty"`
-	State    string  `json:"state,omitempty"`
+	State    string  `json:"state,omitempty" metadata:",optional"`
 	Location string  `json:"location,omitempty"`
 }
 

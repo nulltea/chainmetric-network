@@ -35,7 +35,7 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 }
 
 func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -70,7 +70,11 @@ func (c *DevicesContract) Insert(ctx contractapi.TransactionContextInterface, da
 		return "", err
 	}
 
-	device.ID = xid.NewWithTime(time.Now()).String()
+	if device.ID, err = generateCompositeKey(ctx, device); err != nil {
+		err = errors.Wrap(err, "failed to generate composite key")
+		shared.Logger.Error(err)
+		return "", err
+	}
 
 	return device.ID, c.save(ctx, device)
 }
@@ -93,7 +97,7 @@ func (c *DevicesContract) Remove(ctx contractapi.TransactionContextInterface, id
 }
 
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -119,4 +123,11 @@ func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, devi
 		return fmt.Errorf("the unique id must be defined for device")
 	}
 	return ctx.GetStub().PutState(device.ID, device.Encode())
+}
+
+func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
+	return ctx.GetStub().CreateCompositeKey("device", []string{
+		dev.Hostname,
+		xid.NewWithTime(time.Now()).String(),
+	})
 }

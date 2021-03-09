@@ -6,8 +6,8 @@ import (
 
 // Requirement defines per metric requirement properties limits
 type Requirement struct {
-	MinLimit float64 `json:"minThreshold,omitempty"`
-	MaxLimit float64 `json:"maxThreshold,omitempty"`
+	MinLimit float64 `json:"min_limit,omitempty"`
+	MaxLimit float64 `json:"max_limit,omitempty"`
 }
 
 // RequirementsMap represents map with Metric key and corresponding Requirement value

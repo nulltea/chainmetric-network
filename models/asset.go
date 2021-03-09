@@ -12,9 +12,9 @@ type Asset struct {
 	Cost     float64  `json:"cost,omitempty"`
 	Amount   int      `json:"amount,omitempty"`
 	Holder   string   `json:"holder,omitempty"`
-	State    string   `json:"state,omitempty"`
+	State    string   `json:"state,omitempty" metadata:",optional"`
 	Location string   `json:"location,omitempty"`
-	Tags     []string `json:"tags,omitempty"`
+	Tags     []string `json:"tags,omitempty" metadata:",optional"`
 }
 
 func (m Asset) Encode() []byte {
