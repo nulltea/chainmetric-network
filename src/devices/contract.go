@@ -9,6 +9,7 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/timoth-y/iot-blockchain-contracts/models"
+	"github.com/timoth-y/iot-blockchain-contracts/models/request"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -58,10 +59,11 @@ func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*
 	return devices, nil
 }
 
-func (c *DevicesContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (c *DevicesContract) Upsert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		device = &models.Device{}
 		err error
+		event = "inserted"
 	)
 
 	if device, err = device.Decode([]byte(data)); err != nil {
@@ -70,13 +72,51 @@ func (c *DevicesContract) Insert(ctx contractapi.TransactionContextInterface, da
 		return "", err
 	}
 
-	if device.ID, err = generateCompositeKey(ctx, device); err != nil {
-		err = errors.Wrap(err, "failed to generate composite key")
+	if len(device.ID) == 0 {
+		event = "updated"
+
+		if device.ID, err = generateCompositeKey(ctx, device); err != nil {
+			err = errors.Wrap(err, "failed to generate composite key")
+			shared.Logger.Error(err)
+			return "", err
+		}
+	}
+
+	if err := c.save(ctx, device, event); err != nil {
+		err = errors.Wrap(err, "failed saving device")
 		shared.Logger.Error(err)
 		return "", err
 	}
 
-	return device.ID, c.save(ctx, device)
+	return device.ID, nil
+}
+
+func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id string, request *request.DeviceUpdateRequest) (*models.Device, error) {
+	if len(id) == 0 {
+		return nil, errors.New("device id must be provided in order to update one")
+	}
+
+	if request == nil {
+		return nil, errors.New("update request is required to update device")
+	}
+
+	device, err := c.Retrieve(ctx, id); if err != nil {
+		return nil, err
+	}
+
+	request.Update(device)
+
+	if err = device.Validate(); err != nil {
+		return nil, errors.Wrap(err, "device is not valid")
+	}
+	
+	if err := c.save(ctx, device, "updated"); err != nil {
+		err = errors.Wrap(err, "failed updating device")
+		shared.Logger.Error(err)
+		return nil, err
+	}
+
+	return device, nil
 }
 
 func (c *DevicesContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
@@ -90,9 +130,11 @@ func (c *DevicesContract) Remove(ctx contractapi.TransactionContextInterface, id
 	exists, err := c.Exists(ctx, id); if err != nil {
 		return err
 	}
+
 	if !exists {
 		return fmt.Errorf("the device with ID %q does not exist", id)
 	}
+
 	return ctx.GetStub().DelState(id)
 }
 
@@ -118,11 +160,22 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 	return nil
 }
 
-func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, device *models.Device) error {
+func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, device *models.Device, events ...string) error {
 	if len(device.ID) == 0 {
-		return fmt.Errorf("the unique id must be defined for device")
+		return errors.New("the unique id must be defined for device")
 	}
-	return ctx.GetStub().PutState(device.ID, device.Encode())
+
+	if err := ctx.GetStub().PutState(device.ID, device.Encode()); err != nil {
+		return err
+	}
+
+	if len(events) != 0 {
+		for _, event := range events {
+			ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s", event), device.Encode())
+		}
+	}
+
+	return nil
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
