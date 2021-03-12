@@ -1,6 +1,8 @@
 package request
 
 import (
+	"encoding/json"
+
 	"github.com/timoth-y/iot-blockchain-contracts/models"
 )
 
@@ -39,4 +41,16 @@ func (u *DeviceUpdateRequest) Update(device *models.Device) {
 	if u.Location != nil {
 		device.Location = *u.Location
 	}
+}
+
+func (m DeviceUpdateRequest) Encode() []byte {
+	data, err := json.Marshal(m); if err != nil {
+		return nil
+	}
+	return data
+}
+
+func (m DeviceUpdateRequest) Decode(b []byte) (*DeviceUpdateRequest, error) {
+	err := json.Unmarshal(b, &m)
+	return &m, err
 }

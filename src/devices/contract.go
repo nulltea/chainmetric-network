@@ -91,25 +91,26 @@ func (c *DevicesContract) Upsert(ctx contractapi.TransactionContextInterface, da
 	return device.ID, nil
 }
 
-func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id string, request *request.DeviceUpdateRequest) (*models.Device, error) {
+func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id string, data string) (*models.Device, error) {
 	if len(id) == 0 {
 		return nil, errors.New("device id must be provided in order to update one")
-	}
-
-	if request == nil {
-		return nil, errors.New("update request is required to update device")
 	}
 
 	device, err := c.Retrieve(ctx, id); if err != nil {
 		return nil, err
 	}
 
-	request.Update(device)
+	req, err := request.DeviceUpdateRequest{}.Decode([]byte(data)); if err != nil {
+		err = errors.Wrap(err, "failed to deserialize input")
+		shared.Logger.Error(err)
+	}
+
+	req.Update(device)
 
 	if err = device.Validate(); err != nil {
 		return nil, errors.Wrap(err, "device is not valid")
 	}
-	
+
 	if err := c.save(ctx, device, "updated"); err != nil {
 		err = errors.Wrap(err, "failed updating device")
 		shared.Logger.Error(err)
