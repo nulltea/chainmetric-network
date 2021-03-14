@@ -137,7 +137,13 @@ func (c *DevicesContract) Remove(ctx contractapi.TransactionContextInterface, id
 		return fmt.Errorf("the device with ID %q does not exist", id)
 	}
 
-	return ctx.GetStub().DelState(id)
+	if err = ctx.GetStub().DelState(id); err != nil {
+		return err
+	}
+
+	ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode())
+
+	return nil
 }
 
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
@@ -158,7 +164,8 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 			shared.Logger.Error(err)
 			continue
 		}
-		ctx.GetStub().SetEvent("devices.removed", result.Value)
+
+		ctx.GetStub().SetEvent("devices.removed", models.Device{ID: result.Key}.Encode())
 	}
 	return nil
 }
@@ -183,7 +190,7 @@ func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, devi
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("device", []string{
-		dev.Hostname,
+		shared.Hash(dev.Hostname),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
