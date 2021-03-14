@@ -59,7 +59,7 @@ func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*
 	return devices, nil
 }
 
-func (c *DevicesContract) Upsert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		device = &models.Device{}
 		err error
