@@ -63,7 +63,7 @@ func (c *DevicesContract) Upsert(ctx contractapi.TransactionContextInterface, da
 	var (
 		device = &models.Device{}
 		err error
-		event = "inserted"
+		event = "updated"
 	)
 
 	if device, err = device.Decode([]byte(data)); err != nil {
@@ -73,7 +73,7 @@ func (c *DevicesContract) Upsert(ctx contractapi.TransactionContextInterface, da
 	}
 
 	if len(device.ID) == 0 {
-		event = "updated"
+		event = "inserted"
 
 		if device.ID, err = generateCompositeKey(ctx, device); err != nil {
 			err = errors.Wrap(err, "failed to generate composite key")
@@ -103,6 +103,7 @@ func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id
 	req, err := request.DeviceUpdateRequest{}.Decode([]byte(data)); if err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
+		return nil, err
 	}
 
 	req.Update(device)
@@ -157,6 +158,7 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 			shared.Logger.Error(err)
 			continue
 		}
+		ctx.GetStub().SetEvent("devices.removed", result.Value)
 	}
 	return nil
 }
