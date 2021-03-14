@@ -10,10 +10,10 @@ import (
 type Device struct {
 	ID       string      `json:"id,omitempty"`
 	IP       string      `json:"ip,omitempty"`
-	MAC      string      `json:"mac,omitempty"`
-	Name     string      `json:"name,omitempty"`
+	MAC      string      `json:"mac,omitempty" metadata:",optional"`
+	Name     string      `json:"name,omitempty" metadata:",optional"`
 	Hostname string      `json:"hostname,omitempty"`
-	Profile  string      `json:"profile,omitempty"  metadata:",optional"`
+	Profile  string      `json:"profile,omitempty" metadata:",optional"`
 	Supports Metrics     `json:"supports,omitempty"`
 	Holder   string      `json:"holder,omitempty"`
 	State    DeviceState `json:"state,omitempty" metadata:",optional"`
