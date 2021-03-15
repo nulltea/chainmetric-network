@@ -50,3 +50,17 @@ func (m *Requirements) Validate() error {
 
 	return nil
 }
+
+func (rm RequirementsMap) Metrics() Metrics {
+	var (
+		metrics = make(Metrics, len(rm))
+		i = 0
+	)
+
+	for m := range rm {
+		metrics[i] = m
+		i++
+	}
+
+	return metrics
+}

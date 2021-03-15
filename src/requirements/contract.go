@@ -22,7 +22,7 @@ func NewRequirementsContract() *RequirementsContract {
 	return &RequirementsContract{}
 }
 
-func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Requirements, error) {
+func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Requirements, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -36,7 +36,7 @@ func (c *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterf
 	return models.Requirements{}.Decode(data)
 }
 
-func (c *RequirementsContract) ListAll(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
+func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -44,10 +44,10 @@ func (c *RequirementsContract) ListAll(ctx contractapi.TransactionContextInterfa
 		return nil, err
 	}
 
-	return c.iterate(iterator)
+	return rc.iterate(iterator)
 }
 
-func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
+func (rc *RequirementsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { assetID })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -55,10 +55,26 @@ func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextIn
 		return nil, err
 	}
 
-	return c.iterate(iterator)
+	return rc.iterate(iterator)
 }
 
-func (c *RequirementsContract) Assign(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (rc *RequirementsContract) ForAssets(ctx contractapi.TransactionContextInterface, assetIDs []string) ([]*models.Requirements, error) {
+	var (
+		results = make([]*models.Requirements, 0)
+	)
+
+	for i := range assetIDs {
+		reqs, err := rc.ForAsset(ctx, assetIDs[i]); if err != nil {
+			continue
+		}
+
+		results = append(results, reqs...)
+	}
+
+	return results, nil
+}
+
+func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		requirements = &models.Requirements{}
 		err error
@@ -85,10 +101,10 @@ func (c *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfac
 		return "", errors.Wrap(err, "requirements are not valid")
 	}
 
-	return requirements.ID, c.save(ctx, requirements, event)
+	return requirements.ID, rc.save(ctx, requirements, event)
 }
 
-func (c *RequirementsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+func (rc *RequirementsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -98,8 +114,8 @@ func (c *RequirementsContract) Exists(ctx contractapi.TransactionContextInterfac
 	return data != nil, nil
 }
 
-func (c *RequirementsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := c.Exists(ctx, id); if err != nil {
+func (rc *RequirementsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
 	if !exists {
@@ -108,7 +124,7 @@ func (c *RequirementsContract) Remove(ctx contractapi.TransactionContextInterfac
 	return ctx.GetStub().DelState(id)
 }
 
-func (c *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
+func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -130,7 +146,7 @@ func (c *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInter
 	return nil
 }
 
-func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
+func (rc *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
 	var requirements []*models.Requirements
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
@@ -148,7 +164,7 @@ func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface
 	return requirements, nil
 }
 
-func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements, events ...string) error {
+func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements, events ...string) error {
 	if len(requirement.ID) == 0 {
 		return errors.New("the unique id must be defined for requirement")
 	}
