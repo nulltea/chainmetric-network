@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 // Requirement defines per metric requirement properties limits
@@ -31,4 +32,21 @@ func (m Requirements) Encode() []byte {
 func (m Requirements) Decode(b []byte) (*Requirements, error) {
 	err := json.Unmarshal(b, &m)
 	return &m, err
+}
+
+
+func (m *Requirements) Validate() error {
+	if len(m.ID) == 0 {
+		return errors.New("id must be assigned to requirements")
+	}
+
+	if len(m.AssetID) == 0 {
+		return errors.New("requirements must be assigned to asset (assetID is required)")
+	}
+
+	if len(m.Metrics) == 0 {
+		return errors.New("requirements must to contain at least one metric")
+	}
+
+	return nil
 }

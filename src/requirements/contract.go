@@ -58,10 +58,11 @@ func (c *RequirementsContract) ListForAsset(ctx contractapi.TransactionContextIn
 	return c.iterate(iterator)
 }
 
-func (c *RequirementsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (c *RequirementsContract) Assign(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		requirements = &models.Requirements{}
 		err error
+		event = "updated"
 	)
 
 	if requirements, err = requirements.Decode([]byte(data)); err != nil {
@@ -70,13 +71,21 @@ func (c *RequirementsContract) Insert(ctx contractapi.TransactionContextInterfac
 		return "", err
 	}
 
-	if requirements.ID, err = generateCompositeKey(ctx, requirements); err != nil {
-		err = errors.Wrap(err, "failed to generate composite key")
-		shared.Logger.Error(err)
-		return "", err
+	if len(requirements.ID) == 0 {
+		event = "inserted"
+
+		if requirements.ID, err = generateCompositeKey(ctx, requirements); err != nil {
+			err = errors.Wrap(err, "failed to generate composite key")
+			shared.Logger.Error(err)
+			return "", err
+		}
 	}
 
-	return requirements.ID, c.save(ctx, requirements)
+	if err = requirements.Validate(); err != nil {
+		return "", errors.Wrap(err, "requirements are not valid")
+	}
+
+	return requirements.ID, c.save(ctx, requirements, event)
 }
 
 func (c *RequirementsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
@@ -139,14 +148,23 @@ func (c *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface
 	return requirements, nil
 }
 
-func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements) error {
+func (c *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements, events ...string) error {
 	if len(requirement.ID) == 0 {
 		return errors.New("the unique id must be defined for requirement")
 	}
 
-	return ctx.GetStub().PutState(requirement.ID, requirement.Encode())
-}
+	if err := ctx.GetStub().PutState(requirement.ID, requirement.Encode()); err != nil {
+		return err
+	}
 
+	if len(events) != 0 {
+		for _, event := range events {
+			ctx.GetStub().SetEvent(fmt.Sprintf("requirements.%s", event), requirement.Encode())
+		}
+	}
+
+	return nil
+}
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.Requirements) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("requirements", []string{

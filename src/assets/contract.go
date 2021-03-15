@@ -136,7 +136,11 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 		return fmt.Errorf("the unique id must be defined for asset")
 	}
 
-	return ctx.GetStub().PutState(asset.ID, asset.Encode())
+	if err := ctx.GetStub().PutState(asset.ID, asset.Encode()); err != nil {
+		return err
+	}
+
+	return ctx.GetStub().SetEvent("assets.inserted", asset.Encode())
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {

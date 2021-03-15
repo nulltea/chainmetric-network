@@ -82,6 +82,10 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 		}
 	}
 
+	if err = device.Validate(); err != nil {
+		return "", errors.Wrap(err, "device is not valid")
+	}
+
 	if err := c.save(ctx, device, event); err != nil {
 		err = errors.Wrap(err, "failed saving device")
 		shared.Logger.Error(err)
