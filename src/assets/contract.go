@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
 	"github.com/timoth-y/iot-blockchain-contracts/models"
+	"github.com/timoth-y/iot-blockchain-contracts/models/request"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -34,7 +36,7 @@ func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 	return models.Asset{}.Decode(data)
 }
 
-func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
+func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -42,21 +44,29 @@ func (ac *AssetsContract) List(ctx contractapi.TransactionContextInterface) ([]*
 		return nil, err
 	}
 
-	var assets []*models.Asset
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
+	return ac.iterate(iterator)
+}
 
-		asset, err := models.Asset{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		assets = append(assets, asset)
+func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, query string) ([]*models.Asset, error) {
+	q, err := request.AssetsQuery{}.Decode([]byte(query)); if err != nil {
+		err = errors.Wrap(err, "failed to deserialize input")
+		shared.Logger.Error(err)
+		return nil, err
 	}
 
-	return assets, nil
+	// TODO consider using CouchDB as a state database
+	assets, err := ac.All(ctx); if err != nil {
+		return nil, err
+	}
+
+	queried := make([]*models.Asset, 0)
+	for _, asset := range assets {
+		if q.Satisfies(asset) {
+			queried = append(queried, asset)
+		}
+	}
+
+	return queried, nil
 }
 
 func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
@@ -129,6 +139,24 @@ func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 		}
 	}
 	return nil
+}
+
+func (ac *AssetsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Asset, error) {
+	var assets []*models.Asset
+	for iterator.HasNext() {
+		result, err := iterator.Next(); if err != nil {
+			shared.Logger.Error(err)
+			continue
+		}
+
+		asset, err := models.Asset{}.Decode(result.Value); if err != nil {
+			shared.Logger.Error(err)
+			continue
+		}
+		assets = append(assets, asset)
+	}
+
+	return assets, nil
 }
 
 func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset) error {
