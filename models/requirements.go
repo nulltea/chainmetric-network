@@ -17,8 +17,8 @@ type RequirementsMap map[Metric]Requirement
 // Requirement defines requirements data models
 type Requirements struct {
 	ID      string          `json:"id,omitempty"`
-	Type    string          `json:"type,omitempty"`
 	AssetID string          `json:"asset_id,omitempty"`
+	Period  int             `json:"period,omitempty"`
 	Metrics RequirementsMap `json:"metrics,omitempty"`
 }
 
