@@ -10,8 +10,8 @@ type MetricReadings struct {
 	ID        string                 `json:"id,omitempty"`
 	AssetID   string                 `json:"asset_id,omitempty"`
 	DeviceID  string                 `json:"device_id,omitempty"`
-	Values    map[Metric]interface{} `json:"values,omitempty"`
 	Timestamp time.Time              `json:"timestamp,omitempty"`
+	Values    map[Metric]interface{} `json:"values,omitempty"`
 }
 
 func (m MetricReadings) Encode() []byte {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
@@ -21,7 +22,7 @@ func NewReadingsContract() *ReadingsContract {
 	return &ReadingsContract{}
 }
 
-func (c *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.MetricReadings, error) {
+func (rc *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.MetricReadings, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -35,32 +36,18 @@ func (c *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface,
 	return models.MetricReadings{}.Decode(data)
 }
 
-func (c *ReadingsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.MetricReadings, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { assetID })
+func (rc *ReadingsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.MetricReadings, error) {
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
 		return nil, err
 	}
 
-	var readings []*models.MetricReadings
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		requirement, err := models.MetricReadings{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		readings = append(readings, requirement)
-	}
-
-	return readings, nil
+	return rc.iterate(iterator)
 }
 
-func (c *ReadingsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		readings = &models.MetricReadings{}
 		err error
@@ -78,10 +65,10 @@ func (c *ReadingsContract) Insert(ctx contractapi.TransactionContextInterface, d
 		return "", err
 	}
 
-	return readings.ID, c.save(ctx, readings)
+	return readings.ID, rc.save(ctx, readings)
 }
 
-func (c *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+func (rc *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -91,8 +78,8 @@ func (c *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, i
 	return data != nil, nil
 }
 
-func (c *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := c.Exists(ctx, id); if err != nil {
+func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
 	if !exists {
@@ -101,7 +88,7 @@ func (c *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, i
 	return ctx.GetStub().DelState(id)
 }
 
-func (c *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
+func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -123,7 +110,26 @@ func (c *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface
 	return nil
 }
 
-func (c *ReadingsContract) save(ctx contractapi.TransactionContextInterface, readings *models.MetricReadings) error {
+func (rc *ReadingsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
+	var readings []*models.MetricReadings
+
+	for iterator.HasNext() {
+		result, err := iterator.Next(); if err != nil {
+			shared.Logger.Error(err)
+			continue
+		}
+
+		requirement, err := models.MetricReadings{}.Decode(result.Value); if err != nil {
+			shared.Logger.Error(err)
+			continue
+		}
+		readings = append(readings, requirement)
+	}
+
+	return readings, nil
+}
+
+func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, readings *models.MetricReadings) error {
 	if len(readings.ID) == 0 {
 		return errors.New("the unique id must be defined for readings")
 	}
@@ -133,7 +139,7 @@ func (c *ReadingsContract) save(ctx contractapi.TransactionContextInterface, rea
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("readings", []string{
-		req.AssetID,
+		shared.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
