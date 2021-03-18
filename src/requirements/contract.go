@@ -37,7 +37,7 @@ func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInter
 }
 
 func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -48,7 +48,7 @@ func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface)
 }
 
 func (rc *RequirementsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { assetID })
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { shared.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -125,7 +125,7 @@ func (rc *RequirementsContract) Remove(ctx contractapi.TransactionContextInterfa
 }
 
 func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -148,6 +148,7 @@ func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInte
 
 func (rc *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
 	var requirements []*models.Requirements
+
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
 			shared.Logger.Error(err)
@@ -184,7 +185,7 @@ func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.Requirements) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("requirements", []string{
-		req.AssetID,
+		shared.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
