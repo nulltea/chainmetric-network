@@ -35,7 +35,7 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 	return models.Device{}.Decode(data)
 }
 
-func (c *DevicesContract) List(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
+func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
