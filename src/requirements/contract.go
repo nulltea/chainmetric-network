@@ -65,6 +65,7 @@ func (rc *RequirementsContract) ForAssets(ctx contractapi.TransactionContextInte
 
 	for i := range assetIDs {
 		reqs, err := rc.ForAsset(ctx, assetIDs[i]); if err != nil {
+			shared.Logger.Error(err)
 			continue
 		}
 
@@ -142,6 +143,8 @@ func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInte
 			shared.Logger.Error(err)
 			continue
 		}
+
+		ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: result.Key}.Encode())
 	}
 	return nil
 }

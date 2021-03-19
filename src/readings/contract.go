@@ -36,7 +36,7 @@ func (rc *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface
 	return models.MetricReadings{}.Decode(data)
 }
 
-func (rc *ReadingsContract) ListForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.MetricReadings, error) {
+func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.MetricReadings, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -89,7 +89,7 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 }
 
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByRange("", "")
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
