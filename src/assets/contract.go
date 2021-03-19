@@ -87,7 +87,7 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 	var (
 		ids = make([]string, len(assets))
 		reqs []*models.Requirements
-		reqsMap map[string][]*models.Requirements
+		reqsMap = make(map[string][]*models.Requirements)
 	)
 
 	for i := range assets {
