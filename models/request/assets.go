@@ -9,11 +9,13 @@ import (
 
 type AssetsQuery struct {
 	IDs      []string `json:"type,omitempty"`
-	Type     *string   `json:"type,omitempty"`
-	Holder   *string   `json:"holder,omitempty"`
-	State    *string   `json:"state,omitempty"`
-	Location *string   `json:"location,omitempty"`
-	Tag      *string `json:"tag,omitempty"`
+	Type     *string  `json:"type,omitempty"`
+	Holder   *string  `json:"holder,omitempty"`
+	State    *string  `json:"state,omitempty"`
+	Location *string  `json:"location,omitempty"`
+	Tag      *string  `json:"tag,omitempty"`
+	Limit    int32    `json:"limit,omitempty"`
+	ScrollID string   `json:"scroll_id,omitempty"`
 }
 
 func (q *AssetsQuery) Satisfies(asset *models.Asset) bool {

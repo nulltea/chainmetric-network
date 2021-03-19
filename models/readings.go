@@ -7,11 +7,11 @@ import (
 
 // MetricReadings defines data models for readings from sensors
 type MetricReadings struct {
-	ID        string                 `json:"id,omitempty"`
-	AssetID   string                 `json:"asset_id,omitempty"`
-	DeviceID  string                 `json:"device_id,omitempty"`
-	Timestamp time.Time              `json:"timestamp,omitempty"`
-	Values    map[Metric]interface{} `json:"values,omitempty"`
+	ID        string                 `json:"id"`
+	AssetID   string                 `json:"asset_id"`
+	DeviceID  string                 `json:"device_id"`
+	Timestamp time.Time              `json:"timestamp"`
+	Values    map[Metric]interface{} `json:"values"`
 }
 
 func (m MetricReadings) Encode() []byte {

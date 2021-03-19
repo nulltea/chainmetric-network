@@ -1,16 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
 	"github.com/timoth-y/iot-blockchain-contracts/models"
 	"github.com/timoth-y/iot-blockchain-contracts/models/request"
+	"github.com/timoth-y/iot-blockchain-contracts/models/response"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -47,7 +50,11 @@ func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*m
 	return ac.iterate(iterator)
 }
 
-func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, query string) ([]*models.Asset, error) {
+func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, query string) (*response.AssetsResponse, error) {
+	var (
+		resp = &response.AssetsResponse{}
+		iterator shim.StateQueryIteratorInterface
+	)
 	q, err := request.AssetsQuery{}.Decode([]byte(query)); if err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
@@ -55,18 +62,73 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 	}
 
 	// TODO consider using CouchDB as a state database
-	assets, err := ac.All(ctx); if err != nil {
-		return nil, err
-	}
-
-	queried := make([]*models.Asset, 0)
-	for _, asset := range assets {
-		if q.Satisfies(asset) {
-			queried = append(queried, asset)
+	if q.Limit != 0 {
+		var md *peer.QueryResponseMetadata
+		iterator, md, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination("asset", []string {}, q.Limit, q.ScrollID)
+		if err != nil {
+			err = errors.Wrap(err, "failed to read from world state")
+			shared.Logger.Error(err)
+			return nil, err
+		}
+		resp.ScrollID = md.GetBookmark()
+	} else {
+		iterator, err = ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
+		if err != nil {
+			err = errors.Wrap(err, "failed to read from world state")
+			shared.Logger.Error(err)
+			return nil, err
 		}
 	}
 
-	return queried, nil
+	assets, err := ac.iterate(iterator); if err != nil {
+		return nil, err
+	}
+
+	var (
+		ids = make([]string, len(assets))
+		reqs []*models.Requirements
+		reqsMap map[string][]*models.Requirements
+	)
+
+	for i := range assets {
+		ids[i] = assets[i].ID
+	}
+
+	reqResp, err := shared.CrossChaincodeCall(ctx, "requirements", "ForAssets", shared.MustEncode(ids))
+	if err != nil {
+		shared.Logger.Error(err, "failed requesting requirements for assets")
+		return nil, err
+	}
+
+	if err = json.Unmarshal(reqResp, &reqs); err != nil {
+		shared.Logger.Error(err, "failed decoding requirements for assets")
+		return nil, err
+	}
+
+	for _, req := range reqs {
+		if val, ok := reqsMap[req.AssetID]; ok {
+			reqsMap[req.AssetID] = append(val, req)
+		} else {
+			reqsMap[req.AssetID] = []*models.Requirements {req}
+		}
+	}
+
+	for _, asset := range assets {
+		if q.Satisfies(asset) {
+			var r *models.Requirements
+
+			if val, ok := reqsMap[asset.ID]; ok {
+				r = val[0]
+			}
+
+			resp.Items = append(resp.Items, response.AssetResponseItem{
+				Asset: *asset,
+				Requirements: r,
+			})
+		}
+	}
+
+	return resp, nil
 }
 
 func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
@@ -177,3 +239,4 @@ func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *mo
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
+

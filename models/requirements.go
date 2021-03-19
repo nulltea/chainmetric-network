@@ -34,7 +34,6 @@ func (m Requirements) Decode(b []byte) (*Requirements, error) {
 	return &m, err
 }
 
-
 func (m *Requirements) Validate() error {
 	if len(m.ID) == 0 {
 		return errors.New("id must be assigned to requirements")
