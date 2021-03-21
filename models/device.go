@@ -8,16 +8,16 @@ import (
 
 // Device defines device data models
 type Device struct {
-	ID       string      `json:"id,omitempty"`
-	IP       string      `json:"ip,omitempty"`
+	ID       string      `json:"id"`
+	IP       string      `json:"ip"`
 	MAC      string      `json:"mac,omitempty" metadata:",optional"`
 	Name     string      `json:"name,omitempty" metadata:",optional"`
-	Hostname string      `json:"hostname,omitempty"`
+	Hostname string      `json:"hostname"`
 	Profile  string      `json:"profile,omitempty" metadata:",optional"`
-	Supports Metrics     `json:"supports,omitempty"`
-	Holder   string      `json:"holder,omitempty"`
+	Supports Metrics     `json:"supports"`
+	Holder   string      `json:"holder"`
 	State    DeviceState `json:"state,omitempty" metadata:",optional"`
-	Location string      `json:"location,omitempty"`
+	Location string      `json:"location"`
 }
 
 type DeviceState string

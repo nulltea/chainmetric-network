@@ -132,7 +132,7 @@ func (c *DevicesContract) Exists(ctx contractapi.TransactionContextInterface, id
 	return data != nil, nil
 }
 
-func (c *DevicesContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := c.Exists(ctx, id); if err != nil {
 		return err
 	}
