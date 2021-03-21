@@ -50,6 +50,30 @@ func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*m
 	return ac.iterate(iterator)
 }
 
+func (ac *AssetsContract) QueryRaw(ctx contractapi.TransactionContextInterface, query string) ([]*models.Asset, error) {
+	var (
+		queried []*models.Asset
+	)
+	q, err := request.AssetsQuery{}.Decode([]byte(query)); if err != nil {
+		err = errors.Wrap(err, "failed to deserialize input")
+		shared.Logger.Error(err)
+		return nil, err
+	}
+
+	// TODO consider using CouchDB as a state database
+	assets, err := ac.All(ctx); if err != nil {
+		return nil, err
+	}
+
+	for _, asset := range assets {
+		if q.Satisfies(asset) {
+			queried = append(queried, asset)
+		}
+	}
+
+	return queried, nil
+}
+
 func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, query string) (*response.AssetsResponse, error) {
 	var (
 		resp = &response.AssetsResponse{}
@@ -131,9 +155,10 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 	return resp, nil
 }
 
-func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+func (ac *AssetsContract) Upsert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		asset = &models.Asset{}
+		event = "updated"
 		err error
 	)
 
@@ -143,13 +168,18 @@ func (ac *AssetsContract) Insert(ctx contractapi.TransactionContextInterface, da
 		return "", err
 	}
 
-	if asset.ID, err = generateCompositeKey(ctx, asset); err != nil {
-		err = errors.Wrap(err, "failed to generate composite key")
-		shared.Logger.Error(err)
-		return "", err
+	if len(asset.ID) == 0 {
+		event = "inserted"
+
+		if asset.ID, err = generateCompositeKey(ctx, asset); err != nil {
+			err = errors.Wrap(err, "failed to generate composite key")
+			shared.Logger.Error(err)
+			return "", err
+		}
 	}
 
-	return asset.ID, ac.save(ctx, asset)
+
+	return asset.ID, ac.save(ctx, asset, event)
 }
 
 func (ac *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, owner string) error {
@@ -221,7 +251,7 @@ func (ac *AssetsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]
 	return assets, nil
 }
 
-func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset) error {
+func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset, events ...string) error {
 	if len(asset.ID) == 0 {
 		return fmt.Errorf("the unique id must be defined for asset")
 	}
@@ -230,7 +260,13 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 		return err
 	}
 
-	return ctx.GetStub().SetEvent("assets.inserted", asset.Encode())
+	if len(events) != 0 {
+		for _, event := range events {
+			ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s", event), asset.Encode())
+		}
+	}
+
+	return nil
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
