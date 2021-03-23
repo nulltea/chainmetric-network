@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"hash/fnv"
+	"strconv"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -11,7 +12,7 @@ import (
 func Hash(value string) string {
 	h := fnv.New32a()
 	h.Write([]byte(value))
-	return string(h.Sum32())
+	return strconv.Itoa(int(h.Sum32()))
 }
 
 func ContainsString(value string, values []string) bool {
