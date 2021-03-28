@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -17,6 +19,13 @@ import (
 // ReadingsContract provides functions for managing an models.MetricReadings from models.Device sensors
 type ReadingsContract struct {
 	contractapi.Contract
+	emitterRequests map[string]EventEmittingRequest
+}
+
+type EventEmittingRequest struct {
+	assetID string
+	metric models.Metric
+	expiry time.Time
 }
 
 func NewReadingsContract() *ReadingsContract {
@@ -124,6 +133,24 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, da
 		return "", err
 	}
 
+	// Emitting requested events
+	for token, request := range rc.emitterRequests {
+		if request.assetID == readings.AssetID {
+			if value, ok := readings.Values[request.metric];  ok {
+				artifact := response.MetricReadingsPoint {
+					DeviceID: readings.DeviceID,
+					Location: readings.Location,
+					Timestamp: readings.Timestamp,
+					Value: value,
+				}
+
+				if payload, err := json.Marshal(artifact); err != nil {
+					ctx.GetStub().SetEvent(token, payload)
+				}
+			}
+		}
+	}
+
 	return readings.ID, rc.save(ctx, readings)
 }
 
@@ -167,6 +194,26 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 		}
 	}
 	return nil
+}
+
+func (rc *ReadingsContract) RequestEventEmittingFor(assetID, metric string) string {
+	var (
+		timestamp = time.Now()
+		eventToken = shared.Hash(strings.Join([]string{assetID, metric, timestamp.String()}, ""))
+		request = EventEmittingRequest{
+			assetID: assetID,
+			metric: models.Metric(metric),
+			expiry: timestamp.Add(time.Hour * 1),
+		}
+	)
+
+	rc.emitterRequests[eventToken] = request
+
+	return eventToken
+}
+
+func (rc *ReadingsContract) CancelEventEmitting(eventToken string) {
+	delete(rc.emitterRequests, eventToken)
 }
 
 func (rc *ReadingsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
