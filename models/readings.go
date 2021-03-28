@@ -10,6 +10,7 @@ type MetricReadings struct {
 	ID        string                 `json:"id"`
 	AssetID   string                 `json:"asset_id"`
 	DeviceID  string                 `json:"device_id"`
+	Location  string                 `json:"location"`
 	Timestamp time.Time              `json:"timestamp"`
 	Values    map[Metric]interface{} `json:"values"`
 }

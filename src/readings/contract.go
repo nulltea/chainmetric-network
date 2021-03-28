@@ -10,6 +10,7 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/timoth-y/iot-blockchain-contracts/models"
+	"github.com/timoth-y/iot-blockchain-contracts/models/response"
 	"github.com/timoth-y/iot-blockchain-contracts/shared"
 )
 
@@ -36,7 +37,14 @@ func (rc *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface
 	return models.MetricReadings{}.Decode(data)
 }
 
-func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.MetricReadings, error) {
+func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) (*response.MetricReadingsResponse, error) {
+	var (
+		resp = &response.MetricReadingsResponse{
+			AssetID: assetID,
+			Streams: map[models.Metric]response.MetricReadingsStream{},
+		}
+	)
+
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
@@ -44,7 +52,58 @@ func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface
 		return nil, err
 	}
 
-	return rc.iterate(iterator)
+	readings, err := rc.iterate(iterator); if err != nil {
+		err = errors.Wrap(err, "failed to iterate through readings data")
+		shared.Logger.Error(err)
+		return nil, err
+	}
+
+	for _, reading := range readings {
+		for metric, value := range reading.Values {
+			resp.Streams[metric] = append(resp.Streams[metric], response.MetricReadingsPoint {
+				DeviceID: reading.DeviceID,
+				Location: reading.Location,
+				Timestamp: reading.Timestamp,
+				Value: value,
+			})
+		}
+	}
+
+	return resp, nil
+}
+
+
+func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterface, assetID string, metricID string) (response.MetricReadingsStream, error) {
+	var (
+		stream = response.MetricReadingsStream{}
+		metric = models.Metric(metricID)
+	)
+
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
+	if err != nil {
+		err = errors.Wrap(err, "failed to read from world state")
+		shared.Logger.Error(err)
+		return nil, err
+	}
+
+	readings, err := rc.iterate(iterator); if err != nil {
+		err = errors.Wrap(err, "failed to iterate through readings data")
+		shared.Logger.Error(err)
+		return nil, err
+	}
+
+	for _, reading := range readings {
+		if value, ok := reading.Values[metric];  ok {
+			stream = append(stream, response.MetricReadingsPoint {
+				DeviceID: reading.DeviceID,
+				Location: reading.Location,
+				Timestamp: reading.Timestamp,
+				Value: value,
+			})
+		}
+	}
+
+	return stream, nil
 }
 
 func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, data string) (string, error) {
