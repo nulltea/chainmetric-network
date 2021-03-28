@@ -29,7 +29,9 @@ type EventEmittingRequest struct {
 }
 
 func NewReadingsContract() *ReadingsContract {
-	return &ReadingsContract{}
+	return &ReadingsContract{
+		emitterRequests: map[string]EventEmittingRequest{},
+	}
 }
 
 func (rc *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.MetricReadings, error) {
@@ -144,7 +146,7 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, da
 					Value: value,
 				}
 
-				if payload, err := json.Marshal(artifact); err != nil {
+				if payload, err := json.Marshal(artifact); err == nil {
 					ctx.GetStub().SetEvent(token, payload)
 				}
 			}
