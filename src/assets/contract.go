@@ -130,11 +130,7 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 	}
 
 	for _, req := range reqs {
-		if val, ok := reqsMap[req.AssetID]; ok {
-			reqsMap[req.AssetID] = append(val, req)
-		} else {
-			reqsMap[req.AssetID] = []*models.Requirements {req}
-		}
+		reqsMap[req.AssetID] = append(reqsMap[req.AssetID], req)
 	}
 
 	for _, asset := range assets {

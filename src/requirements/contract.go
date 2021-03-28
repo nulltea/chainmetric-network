@@ -115,7 +115,7 @@ func (rc *RequirementsContract) Exists(ctx contractapi.TransactionContextInterfa
 	return data != nil, nil
 }
 
-func (rc *RequirementsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
+func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
