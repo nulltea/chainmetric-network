@@ -37,6 +37,7 @@ After this whenever an upgrade must be performed simply add `--upgrade` flag to 
 - Violations rule engine
 - Transaction for assets changes history retrieving
 - Devices location management business logic
+- Users contract
 
 ## Wrap up
 
