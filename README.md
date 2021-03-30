@@ -1,7 +1,6 @@
 # ChainMetric: Smart Contracts
 
 [![golang badge]][golang]&nbsp;
-[![lines counter]][this repo]&nbsp;
 [![commit activity badge]][repo commit activity]&nbsp;
 [![blockchain badge]][hyperledger fabric url]&nbsp;
 [![kubernetes badge]][kubernetes url]&nbsp;
