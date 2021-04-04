@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -136,22 +135,37 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, da
 	}
 
 	// Emitting requested events
-	for token, request := range rc.emitterRequests {
-		if request.assetID == readings.AssetID {
-			if value, ok := readings.Values[request.metric];  ok {
-				artifact := response.MetricReadingsPoint {
-					DeviceID: readings.DeviceID,
-					Location: readings.Location,
-					Timestamp: readings.Timestamp,
-					Value: value,
-				}
+	go func() {
+		var (
+			now = time.Now()
+		)
 
-				if payload, err := json.Marshal(artifact); err == nil {
-					ctx.GetStub().SetEvent(token, payload)
+		for token, request := range rc.emitterRequests {
+			if now.After(request.expiry) {
+				delete(rc.emitterRequests, token)
+				shared.Logger.Debug(fmt.Sprintf("event emitter '%s' expired, currently registered: %d",
+					token, len(rc.emitterRequests)),
+				)
+
+				continue
+			}
+
+			if request.assetID == readings.AssetID {
+				if value, ok := readings.Values[request.metric];  ok {
+					artifact := response.MetricReadingsPoint {
+						DeviceID: readings.DeviceID,
+						Location: readings.Location,
+						Timestamp: readings.Timestamp,
+						Value: value,
+					}
+
+					if payload, err := json.Marshal(artifact); err == nil {
+						ctx.GetStub().SetEvent(token, payload)
+					}
 				}
 			}
 		}
-	}
+	}()
 
 	return readings.ID, rc.save(ctx, readings)
 }
@@ -198,10 +212,12 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 	return nil
 }
 
-func (rc *ReadingsContract) RequestEventEmittingFor(assetID, metric string) string {
+func (rc *ReadingsContract) RequestEventEmittingFor(ctx contractapi.TransactionContextInterface, assetID, metric string) string {
 	var (
 		timestamp = time.Now()
-		eventToken = shared.Hash(strings.Join([]string{assetID, metric, timestamp.String()}, ""))
+		clientID, _ = ctx.GetClientIdentity().GetID()
+		clientHash = shared.Hash(clientID)
+		eventToken = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
 		request = EventEmittingRequest{
 			assetID: assetID,
 			metric: models.Metric(metric),
@@ -211,11 +227,15 @@ func (rc *ReadingsContract) RequestEventEmittingFor(assetID, metric string) stri
 
 	rc.emitterRequests[eventToken] = request
 
+	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' added, currently registered: %d", eventToken, len(rc.emitterRequests)))
+
 	return eventToken
 }
 
-func (rc *ReadingsContract) CancelEventEmitting(eventToken string) {
+func (rc *ReadingsContract) CancelEventEmitting(ctx contractapi.TransactionContextInterface, eventToken string) {
 	delete(rc.emitterRequests, eventToken)
+
+	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' canceled, currently registered: %d", eventToken, len(rc.emitterRequests)))
 }
 
 func (rc *ReadingsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
