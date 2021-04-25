@@ -1,6 +1,6 @@
 package response
 
-import "github.com/timoth-y/iot-blockchain-contracts/models"
+import "github.com/timoth-y/chainmetric-core/models"
 
 type AssetResponseItem struct {
 	models.Asset

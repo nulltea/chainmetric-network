@@ -3,8 +3,8 @@ package request
 import (
 	"encoding/json"
 
-	"github.com/timoth-y/iot-blockchain-contracts/models"
-	"github.com/timoth-y/iot-blockchain-contracts/shared"
+	"github.com/timoth-y/chainmetric-core/models"
+	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 type AssetsQuery struct {

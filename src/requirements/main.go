@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/timoth-y/iot-blockchain-contracts/shared"
+	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 func init() {

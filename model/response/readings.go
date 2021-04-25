@@ -3,7 +3,7 @@ package response
 import (
 	"time"
 
-	"github.com/timoth-y/iot-blockchain-contracts/models"
+	"github.com/timoth-y/chainmetric-core/models"
 )
 
 // MetricReadingsResponse aggregates readings for asset into per metric reading streams

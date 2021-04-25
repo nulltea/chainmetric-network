@@ -8,9 +8,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
-	"github.com/timoth-y/iot-blockchain-contracts/models"
-	"github.com/timoth-y/iot-blockchain-contracts/models/request"
-	"github.com/timoth-y/iot-blockchain-contracts/shared"
+	"github.com/timoth-y/chainmetric-core/models"
+
+	"github.com/timoth-y/chainmetric-contracts/model/request"
+	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 type DevicesContract struct {

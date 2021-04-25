@@ -9,8 +9,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 
-	"github.com/timoth-y/iot-blockchain-contracts/models"
-	"github.com/timoth-y/iot-blockchain-contracts/shared"
+	"github.com/timoth-y/chainmetric-core/models"
+
+	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 // RequirementsContract provides functions for managing an Requirements

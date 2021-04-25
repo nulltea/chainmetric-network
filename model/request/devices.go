@@ -3,7 +3,7 @@ package request
 import (
 	"encoding/json"
 
-	"github.com/timoth-y/iot-blockchain-contracts/models"
+	"github.com/timoth-y/chainmetric-core/models"
 )
 
 // DeviceUpdateRequest defines update request for models.Device
