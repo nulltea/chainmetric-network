@@ -13,7 +13,7 @@ import (
 
 	"github.com/timoth-y/chainmetric-core/models"
 
-	"github.com/timoth-y/chainmetric-contracts/model/request"
+	"github.com/timoth-y/chainmetric-core/models/requests"
 	"github.com/timoth-y/chainmetric-contracts/model/response"
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
@@ -55,7 +55,7 @@ func (ac *AssetsContract) QueryRaw(ctx contractapi.TransactionContextInterface, 
 	var (
 		queried []*models.Asset
 	)
-	q, err := request.AssetsQuery{}.Decode([]byte(query)); if err != nil {
+	q, err := requests.AssetsQuery{}.Decode([]byte(query)); if err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return nil, err
@@ -80,7 +80,7 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 		resp = &response.AssetsResponse{}
 		iterator shim.StateQueryIteratorInterface
 	)
-	q, err := request.AssetsQuery{}.Decode([]byte(query)); if err != nil {
+	q, err := requests.AssetsQuery{}.Decode([]byte(query)); if err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return nil, err

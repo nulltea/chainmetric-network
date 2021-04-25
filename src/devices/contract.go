@@ -10,7 +10,8 @@ import (
 
 	"github.com/timoth-y/chainmetric-core/models"
 
-	"github.com/timoth-y/chainmetric-contracts/model/request"
+	"github.com/timoth-y/chainmetric-core/models/requests"
+
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
@@ -105,7 +106,7 @@ func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id
 		return nil, err
 	}
 
-	req, err := request.DeviceUpdateRequest{}.Decode([]byte(data)); if err != nil {
+	req, err := requests.DeviceUpdateRequest{}.Decode([]byte(data)); if err != nil {
 		err = errors.Wrap(err, "failed to deserialize input")
 		shared.Logger.Error(err)
 		return nil, err

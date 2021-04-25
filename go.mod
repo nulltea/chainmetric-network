@@ -9,5 +9,5 @@ require (
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/rs/xid v1.2.1
-	github.com/timoth-y/chainmetric-core v0.0.0-20210425172703-de75e31e3f41 // indirect
+	github.com/timoth-y/chainmetric-core v0.0.0-20210425175834-f63fbab3cdc7
 )
