@@ -92,53 +92,6 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 	return device.ID, nil
 }
 
-// Command handles models.DeviceCommand execution requests for devices.
-// It will also log execution status in as a models.DeviceCommandLogEntry in the blockchain ledger.
-func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, payload string) error {
-	req, err := requests.DeviceCommandRequest{}.Decode([]byte(payload)); if err != nil {
-		return shared.LoggedError(err, "failed to deserialize request")
-	}
-
-	if err = req.Validate(); err != nil {
-		return err
-	}
-
-	if exists, err := c.Exists(ctx, req.DeviceID); err != nil {
-		return shared.LoggedError(err, "failed to verify device existence")
-	} else if !exists {
-		return errors.Errorf("device with id '%s' does not registered in the blockchain", req.DeviceID)
-	}
-
-	var key string
-	if key, err = ctx.GetStub().CreateCompositeKey("command", []string{
-		shared.Hash(req.DeviceID),
-		xid.NewWithTime(time.Now()).String(),
-	}); err != nil {
-		return shared.LoggedError(err, "failed to generate device command composite key")
-	}
-
-	if err := ctx.GetStub().PutState(key, []byte(shared.MustEncode(models.DeviceCommandLogEntry{
-		DeviceID: req.DeviceID,
-		Command: req.Command,
-		Args: req.Args,
-		Status: models.DeviceCmdProcessing,
-		Timestamp: time.Now().UTC(),
-	}))); err != nil {
-		return shared.LoggedError(err, "failed to log device command in blockchain ledger")
-	}
-
-	if err := ctx.GetStub().SetEvent("devices.command", requests.DeviceCommandEventPayload{
-		ID: key,
-		DeviceCommandRequest: *req,
-	}.Encode()); err != nil {
-		return shared.LoggedErrorf(err,
-			"failed to emit '%s' command event for device '%s'", req.Command, req.DeviceID,
-		)
-	}
-
-	return nil
-}
-
 // Update updates models.Device state in blockchain ledger with requested properties.
 func (c *DevicesContract) Update(
 	ctx contractapi.TransactionContextInterface,
