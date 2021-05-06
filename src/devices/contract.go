@@ -92,6 +92,11 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 	return device.ID, nil
 }
 
+// Update updates models.Device state in blockchain ledger with requested properties.
+func (c *DevicesContract) Update(
+	ctx contractapi.TransactionContextInterface,
+	id string, payload string,
+) (*models.Device, error) {
 	if len(id) == 0 {
 		return nil, errors.New("device id must be provided in order to update one")
 	}
@@ -100,10 +105,8 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 		return nil, err
 	}
 
-	req, err := requests.DeviceUpdateRequest{}.Decode([]byte(data)); if err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return nil, err
+	req, err := requests.DeviceUpdateRequest{}.Decode([]byte(payload)); if err != nil {
+		return nil, shared.LoggedError(err, "failed to deserialize request")
 	}
 
 	req.Update(device)
