@@ -15,19 +15,20 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
+// DevicesContract defines devices-managing Smart Contract.
 type DevicesContract struct {
 	contractapi.Contract
 }
 
+// NewDevicesContact creates new DevicesContract instance.
 func NewDevicesContact() *DevicesContract {
 	return &DevicesContract{}
 }
 
+// Retrieve retrieves models.Device from blockchain ledger.
 func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Device, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
@@ -37,12 +38,11 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 	return models.Device{}.Decode(data)
 }
 
+// All retrieves all models.Device records from blockchain ledger.
 func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	var devices []*models.Device
@@ -61,26 +61,23 @@ func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*m
 	return devices, nil
 }
 
-func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+// Register creates and registers new device in the blockchain ledger.
+func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, payload string) (string, error) {
 	var (
 		device = &models.Device{}
 		err error
 		event = "updated"
 	)
 
-	if device, err = device.Decode([]byte(data)); err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return "", err
+	if device, err = device.Decode([]byte(payload)); err != nil {
+		return "", shared.LoggedError(err, "failed to deserialize request")
 	}
 
 	if len(device.ID) == 0 {
 		event = "inserted"
 
 		if device.ID, err = generateCompositeKey(ctx, device); err != nil {
-			err = errors.Wrap(err, "failed to generate composite key")
-			shared.Logger.Error(err)
-			return "", err
+			return "", shared.LoggedError(err, "failed to generate composite key")
 		}
 	}
 
@@ -89,15 +86,12 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 	}
 
 	if err := c.save(ctx, device, event); err != nil {
-		err = errors.Wrap(err, "failed saving device")
-		shared.Logger.Error(err)
-		return "", err
+		return "", shared.LoggedError(err, "failed saving device")
 	}
 
 	return device.ID, nil
 }
 
-func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id string, data string) (*models.Device, error) {
 	if len(id) == 0 {
 		return nil, errors.New("device id must be provided in order to update one")
 	}
@@ -119,14 +113,13 @@ func (c *DevicesContract) Update(ctx contractapi.TransactionContextInterface, id
 	}
 
 	if err := c.save(ctx, device, "updated"); err != nil {
-		err = errors.Wrap(err, "failed updating device")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to update device")
 	}
 
 	return device, nil
 }
 
+// Exists determines whether the models.Device exists in the blockchain ledger.
 func (c *DevicesContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		return false, err
@@ -134,6 +127,7 @@ func (c *DevicesContract) Exists(ctx contractapi.TransactionContextInterface, id
 	return data != nil, nil
 }
 
+// Unbind removes models.Device from the blockchain ledger.
 func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := c.Exists(ctx, id); if err != nil {
 		return err
@@ -144,7 +138,7 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 	}
 
 	if err = ctx.GetStub().DelState(id); err != nil {
-		return err
+		return shared.LoggedError(err, "failed to remove device")
 	}
 
 	ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode())
@@ -152,11 +146,14 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 	return nil
 }
 
+// RemoveAll removes all registered devices from the blockchain ledger.
+// This method is for development use only and it must be removed when all dev phases will be completed.
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
+
 		return err
 	}
 
@@ -176,7 +173,11 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 	return nil
 }
 
-func (c *DevicesContract) save(ctx contractapi.TransactionContextInterface, device *models.Device, events ...string) error {
+func (c *DevicesContract) save(
+	ctx contractapi.TransactionContextInterface,
+	device *models.Device,
+	events ...string,
+) error {
 	if len(device.ID) == 0 {
 		return errors.New("the unique id must be defined for device")
 	}
