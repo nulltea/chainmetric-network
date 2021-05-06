@@ -2,11 +2,11 @@ package shared
 
 import (
 	"encoding/json"
-	"errors"
 	"hash/fnv"
 	"strconv"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/pkg/errors"
 )
 
 func Hash(value string) string {
@@ -63,4 +63,20 @@ func MustEncode(v interface{}) string {
 	}
 
 	return string(data)
+}
+
+// LoggedError wraps `err` error with `msg` message and logs it.
+func LoggedError(err error, msg string) error {
+	err = errors.Wrap(err, msg)
+	defer Logger.Error(err)
+
+	return err
+}
+
+// LoggedErrorf wraps `err` error with formatted message and logs it.
+func LoggedErrorf(err error, format string, args ...interface{}) error {
+	err = errors.Wrapf(err, format, args)
+	defer Logger.Error(err)
+
+	return err
 }
