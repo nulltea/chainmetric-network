@@ -1,5 +1,5 @@
 # This image is a microservice in golang for the Degree chaincode
-FROM golang:1.15-alpine AS build
+FROM golang:1.16-alpine AS build
 
 WORKDIR /go/src/github.com/timoth-y/chainmetric-contracts/
 COPY .. .

@@ -1,6 +1,6 @@
 module github.com/timoth-y/chainmetric-contracts
 
-go 1.15
+go 1.16
 
 require (
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20200424173110-d7076418f212
@@ -9,5 +9,5 @@ require (
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/rs/xid v1.2.1
-	github.com/timoth-y/chainmetric-core v0.0.0-20210425175834-f63fbab3cdc7
+	github.com/timoth-y/chainmetric-core v0.0.0-20210507165628-5fe5ef08aa84
 )
