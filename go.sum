@@ -99,6 +99,8 @@ github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/timoth-y/chainmetric-core v0.0.0-20210507165628-5fe5ef08aa84 h1:aSI8QcDxVqOG9FP5xYnV9TmfpbluoD2NhKqIe9GWwT8=
 github.com/timoth-y/chainmetric-core v0.0.0-20210507165628-5fe5ef08aa84/go.mod h1:7Xhj5phFaJfR7PrxlPkGzl3ImxUAszyyzHGgkj4X3l0=
+github.com/timoth-y/chainmetric-core v0.0.0-20210508235635-b52bece06238 h1:hcZl4318mfcuX1w4t/SrI0D67+VtuUDIy5vsOaBZlBo=
+github.com/timoth-y/chainmetric-core v0.0.0-20210508235635-b52bece06238/go.mod h1:7Xhj5phFaJfR7PrxlPkGzl3ImxUAszyyzHGgkj4X3l0=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f h1:J9EGpcZtP0E/raorCMxlFGSTBrsSlaDGf3jU/qvAE2c=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
