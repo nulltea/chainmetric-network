@@ -14,6 +14,7 @@ import (
 	"github.com/timoth-y/chainmetric-core/models"
 
 	"github.com/timoth-y/chainmetric-core/models/requests"
+
 	"github.com/timoth-y/chainmetric-contracts/model/response"
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
