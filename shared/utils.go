@@ -67,6 +67,10 @@ func MustEncode(v interface{}) string {
 
 // LoggedError wraps `err` error with `msg` message and logs it.
 func LoggedError(err error, msg string) error {
+	if err == nil {
+		return nil
+	}
+
 	err = errors.Wrap(err, msg)
 	defer Logger.Error(err)
 
@@ -75,6 +79,10 @@ func LoggedError(err error, msg string) error {
 
 // LoggedErrorf wraps `err` error with formatted message and logs it.
 func LoggedErrorf(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+
 	err = errors.Wrapf(err, format, args)
 	defer Logger.Error(err)
 

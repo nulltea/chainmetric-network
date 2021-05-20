@@ -144,9 +144,12 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 		return shared.LoggedError(err, "failed to remove device")
 	}
 
-	ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode())
 
-	return nil
+
+	return shared.LoggedError(
+		ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode()),
+		"failed to emit event on device remove",
+	)
 }
 
 // RemoveAll removes all registered devices from the blockchain ledger.
@@ -171,7 +174,9 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 			continue
 		}
 
-		ctx.GetStub().SetEvent("devices.removed", models.Device{ID: result.Key}.Encode())
+		if err := ctx.GetStub().SetEvent("devices.removed", models.Device{ID: result.Key}.Encode()); err != nil {
+			shared.Logger.Error(errors.Wrap(err , "failed to emit event on device remove"))
+		}
 	}
 	return nil
 }
@@ -191,7 +196,10 @@ func (c *DevicesContract) save(
 
 	if len(events) != 0 {
 		for _, event := range events {
-			ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s", event), device.Encode())
+			event := fmt.Sprintf("devices.%s", event)
+			if err := ctx.GetStub().SetEvent(event, device.Encode()); err != nil {
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
+			}
 		}
 	}
 
