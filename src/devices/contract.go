@@ -15,7 +15,7 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
-// DevicesContract defines devices-managing Smart Contract.
+// DevicesContract implements devices-managing Smart Contract transaction handlers.
 type DevicesContract struct {
 	contractapi.Contract
 }
@@ -141,10 +141,8 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 	}
 
 	if err = ctx.GetStub().DelState(id); err != nil {
-		return shared.LoggedError(err, "failed to remove device")
+		return shared.LoggedErrorf(err, "failed to unbind device with id: %s", id)
 	}
-
-
 
 	return shared.LoggedError(
 		ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode()),
@@ -153,7 +151,7 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 }
 
 // RemoveAll removes all registered devices from the blockchain ledger.
-// This method is for development use only and it must be removed when all dev phases will be completed.
+// !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
@@ -198,7 +196,7 @@ func (c *DevicesContract) save(
 		for _, event := range events {
 			event := fmt.Sprintf("devices.%s", event)
 			if err := ctx.GetStub().SetEvent(event, device.Encode()); err != nil {
-				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event devices.%s", event))
 			}
 		}
 	}

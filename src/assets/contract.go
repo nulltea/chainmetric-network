@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-contracts/model"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -19,124 +20,129 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
+// AssetsContract implements assets-managing Smart Contract transaction handlers.
 type AssetsContract struct {
 	contractapi.Contract
 }
 
+// NewAssetsContact constructs new AssetsContract instance.
 func NewAssetsContact() *AssetsContract {
 	return &AssetsContract{}
 }
 
+// Retrieve retrieves models.Asset from blockchain ledger.
 func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Asset, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
-		return nil, fmt.Errorf("the asset with ID %q does not exist", id)
+		return nil, errors.Errorf("the asset with ID %q does not exist", id)
 	}
 
 	return models.Asset{}.Decode(data)
 }
 
+// All retrieves all models.Asset records from blockchain ledger.
 func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return ac.iterate(iterator)
+	return ac.iterate(iter)
 }
 
-func (ac *AssetsContract) QueryRaw(ctx contractapi.TransactionContextInterface, query string) ([]*models.Asset, error) {
+// QueryRaw performs rich query against blockchain ledger in search of specific models.Asset records.
+func (ac *AssetsContract) QueryRaw(
+	ctx contractapi.TransactionContextInterface,
+	queryPayload string,
+) ([]*models.Asset, error) {
 	var (
-		queried []*models.Asset
+		results []*models.Asset
+		iter shim.StateQueryIteratorInterface
 	)
-	q, err := requests.AssetsQuery{}.Decode([]byte(query)); if err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
+
+	query, err := requests.AssetsQuery{}.Decode([]byte(queryPayload)); if err != nil {
+		return nil, shared.LoggedError(err, "failed to deserialize input")
+	}
+
+	if iter, err = ctx.GetStub().GetQueryResult(queryPayload); err != nil {
+		return nil,  shared.LoggedError(err, "failed to read from world state")
+	}
+
+	if results, err = ac.iterate(iter); err != nil {
 		return nil, err
 	}
 
-	// TODO consider using CouchDB as a state database
-	assets, err := ac.All(ctx); if err != nil {
-		return nil, err
-	}
-
-	for _, asset := range assets {
-		if q.Satisfies(asset) {
-			queried = append(queried, asset)
-		}
-	}
-
-	return queried, nil
+	return results, nil
 }
 
-func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, query string) (*response.AssetsResponse, error) {
+// Query performs rich query against blockchain ledger in search of specific models.Asset records.
+//
+// To support pagination it returns results wrapped in response.AssetsResponse,
+// where `scroll_id` will contain special key for continuing from where the previous request ended.
+func (ac *AssetsContract) Query(
+	ctx contractapi.TransactionContextInterface,
+	queryPayload string,
+) (*response.AssetsResponse, error) {
 	var (
+		results []*models.Asset
 		resp = &response.AssetsResponse{}
-		iterator shim.StateQueryIteratorInterface
+		iter shim.StateQueryIteratorInterface
 	)
-	q, err := requests.AssetsQuery{}.Decode([]byte(query)); if err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return nil, err
+
+	query, err := requests.AssetsQuery{}.Decode([]byte(queryPayload)); if err != nil {
+		return nil, shared.LoggedError(err, "failed to deserialize input")
 	}
 
-	// TODO consider using CouchDB as a state database
-	if q.Limit != 0 {
+	if query.Limit != 0 {
 		var md *peer.QueryResponseMetadata
-		iterator, md, err = ctx.GetStub().GetStateByPartialCompositeKeyWithPagination("asset", []string {}, q.Limit, q.ScrollID)
-		if err != nil {
-			err = errors.Wrap(err, "failed to read from world state")
-			shared.Logger.Error(err)
-			return nil, err
+
+		if iter, md, err = ctx.GetStub().GetQueryResultWithPagination(
+			"",
+			query.Limit,
+			query.ScrollID,
+		); err != nil {
+			return nil, shared.LoggedError(err, "failed to read from world state")
 		}
+
 		resp.ScrollID = md.GetBookmark()
 	} else {
-		iterator, err = ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
-		if err != nil {
-			err = errors.Wrap(err, "failed to read from world state")
-			shared.Logger.Error(err)
-			return nil, err
+		if iter, err = ctx.GetStub().GetQueryResult(""); err != nil {
+			return nil, shared.LoggedError(err, "failed to read from world state")
 		}
 	}
 
-	assets, err := ac.iterate(iterator); if err != nil {
+	if results, err = ac.iterate(iter); err != nil {
 		return nil, err
 	}
 
 	var (
-		ids = make([]string, len(assets))
+		ids = make([]string, len(results))
 		reqs []*models.Requirements
 		reqsMap = make(map[string][]*models.Requirements)
 	)
 
-	for i := range assets {
-		ids[i] = assets[i].ID
+	for i := range results {
+		ids[i] = results[i].ID
 	}
 
 	reqResp, err := shared.CrossChaincodeCall(ctx, "requirements", "ForAssets", shared.MustEncode(ids))
 	if err != nil {
-		shared.Logger.Error(err, "failed requesting requirements for assets")
-		return nil, err
+		return nil, shared.LoggedError(err, "failed requesting requirements for assets")
 	}
 
 	if err = json.Unmarshal(reqResp, &reqs); err != nil {
-		shared.Logger.Error(err, "failed decoding requirements for assets")
-		return nil, err
+		return nil, shared.LoggedError(err, "failed decoding requirements for assets")
 	}
 
 	for _, req := range reqs {
 		reqsMap[req.AssetID] = append(reqsMap[req.AssetID], req)
 	}
 
-	for _, asset := range assets {
-		if q.Satisfies(asset) {
+	for _, asset := range results {
+		if query.Satisfies(asset) {
 			var r *models.Requirements
 
 			if val, ok := reqsMap[asset.ID]; ok {
@@ -153,6 +159,7 @@ func (ac *AssetsContract) Query(ctx contractapi.TransactionContextInterface, que
 	return resp, nil
 }
 
+// Upsert inserts new models.Asset record into the blockchain ledger or updates existing one.
 func (ac *AssetsContract) Upsert(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		asset = &models.Asset{}
@@ -161,60 +168,66 @@ func (ac *AssetsContract) Upsert(ctx contractapi.TransactionContextInterface, da
 	)
 
 	if asset, err = asset.Decode([]byte(data)); err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return "", err
+		return "", shared.LoggedError(err, "failed to deserialize input")
 	}
 
 	if len(asset.ID) == 0 {
 		event = "inserted"
 
 		if asset.ID, err = generateCompositeKey(ctx, asset); err != nil {
-			err = errors.Wrap(err, "failed to generate composite key")
-			shared.Logger.Error(err)
-			return "", err
+			return "", shared.LoggedError(err, "failed to generate composite key")
 		}
 	}
-
 
 	return asset.ID, ac.save(ctx, asset, event)
 }
 
-func (ac *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, owner string) error {
+// Transfer changes holder of the specific models.Asset.
+func (ac *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, id string, holder string) error {
 	asset, err := ac.Retrieve(ctx, id); if err != nil {
 		return err
 	}
-	asset.Holder = owner
+
+	asset.Holder = holder
 
 	return ac.save(ctx, asset)
 }
 
+// Exists determines whether the models.Asset exists in the blockchain ledger.
 func (ac *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return false, err
+		return false, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
 }
 
+// Remove removes models.Asset from the blockchain ledger.
 func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := ac.Exists(ctx, id); if err != nil {
 		return err
 	}
+
 	if !exists {
-		return fmt.Errorf("the asset with ID %q does not exist", id)
+		return errors.Errorf("the asset with ID %q does not exist", id)
 	}
-	return ctx.GetStub().DelState(id)
+
+	if err := ctx.GetStub().DelState(id); err != nil {
+		return shared.LoggedErrorf(err, "failed to remove asset record for id: %s", id)
+	}
+
+	return shared.LoggedError(
+		ctx.GetStub().SetEvent("assets.removed", models.Asset{ID: id}.Encode()),
+		"failed to emit event on asset remove",
+	)
 }
 
+// RemoveAll removes all assets from the blockchain ledger.
+// !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return err
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
 	for iterator.HasNext() {
@@ -251,16 +264,18 @@ func (ac *AssetsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]
 
 func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset, events ...string) error {
 	if len(asset.ID) == 0 {
-		return fmt.Errorf("the unique id must be defined for asset")
+		return errors.New("the unique id must be defined for asset")
 	}
 
-	if err := ctx.GetStub().PutState(asset.ID, asset.Encode()); err != nil {
-		return err
+	if err := ctx.GetStub().PutState(asset.ID, model.NewAssetRecord(asset).Encode()); err != nil {
+		return shared.LoggedError(err, "failed to save asset record to blockchain ledger")
 	}
 
 	if len(events) != 0 {
 		for _, event := range events {
-			ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s", event), asset.Encode())
+			if err := ctx.GetStub().SetEvent(fmt.Sprintf("assets.%s", event), asset.Encode()); err != nil {
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event assets.%s", event))
+			}
 		}
 	}
 
