@@ -1,14 +1,16 @@
 package shared
 
-import "encoding/json"
+import (
+	"github.com/timoth-y/chainmetric-core/utils"
+)
 
 // BuildQuery builds CouchDB query by given parameters:
 //
-// `selector`: a filter string declaring which documents to return.
+// `selector`: a filter string declaring which documents to return
 //
 // `fields`: specifying which fields to be returned
 //
-// `sort`: expression containing how to sort selected records
+// `sort`: expression containing how to sort selected records.
 func BuildQuery(selector map[string]interface{}, sort map[string]interface{}, fields []string) string {
 	query := map[string]interface{}{
 		"selector": selector,
@@ -22,9 +24,6 @@ func BuildQuery(selector map[string]interface{}, sort map[string]interface{}, fi
 		query["fields"] = fields
 	}
 
-	payload, err := json.Marshal(query)
-	if err != nil {
-		Logger.Fa("failed to serialize query")
-	}
+	return utils.MustEncode(query)
 }
 
