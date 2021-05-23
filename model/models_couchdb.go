@@ -10,25 +10,25 @@ import (
 type (
 	// Asset wraps models.Asset with additional database specific fields.
 	Asset struct {
-		RecordType string `json:"record_type"` // record_type: 'asset'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': 'asset'
 		*models.Asset
 	}
 
 	// Device wraps models.Device with additional database specific fields.
 	Device struct {
-		RecordType string `json:"record_type"` // record_type: 'device'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': 'device'
 		*models.Device
 	}
 
 	// Requirements wraps models.Requirements with additional database specific fields.
 	Requirements struct {
-		RecordType string `json:"record_type"` // record_type: 'requirements'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': 'requirements'
 		*models.Requirements
 	}
 
 	// MetricReadings wraps models.MetricReadings with additional database specific fields.
 	MetricReadings struct {
-		RecordType string `json:"record_type"`  // record_type: 'metric_readings'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': 'metric_readings'
 		*models.MetricReadings
 	}
 )
