@@ -1,0 +1,8 @@
+{
+  "index":{
+    "fields":["record_type", "id", "hostname", "holder"]
+  },
+  "ddoc":"devicesDoc",
+  "name":"devices",
+  "type":"json"
+}

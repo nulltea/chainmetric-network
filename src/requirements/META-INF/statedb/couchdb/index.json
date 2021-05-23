@@ -1,0 +1,8 @@
+{
+  "index":{
+    "fields":["record_type", "id", "asset_id"]
+  },
+  "ddoc":"requirementsDoc",
+  "name":"requirements",
+  "type":"json"
+}

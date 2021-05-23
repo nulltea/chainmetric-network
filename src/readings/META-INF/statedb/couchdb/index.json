@@ -1,0 +1,8 @@
+{
+  "index":{
+    "fields":["record_type", "id", "asset_id", "timestamp"]
+  },
+  "ddoc":"metricReadingsDoc",
+  "name":"metric_readings",
+  "type":"json"
+}

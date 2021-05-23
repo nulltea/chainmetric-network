@@ -22,7 +22,7 @@ type (
 
 	// Requirements wraps models.Requirements with additional database specific fields.
 	Requirements struct {
-		RecordType string `json:"record_type"` // record_type: 'requirement'
+		RecordType string `json:"record_type"` // record_type: 'requirements'
 		*models.Requirements
 	}
 
