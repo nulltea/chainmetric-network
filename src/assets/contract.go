@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/fatih/structs"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -51,10 +52,12 @@ func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*m
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return ac.iterate(iter)
+	return ac.iterate(iter, nil)
 }
 
 // QueryRaw performs rich query against blockchain ledger in search of specific models.Asset records.
+// This transaction handler will ignore 'limit' and 'scroll_id' props of the requests.AssetsQuery,
+// so as not supports pagination presenting.
 func (ac *AssetsContract) QueryRaw(
 	ctx contractapi.TransactionContextInterface,
 	queryPayload string,
@@ -68,11 +71,15 @@ func (ac *AssetsContract) QueryRaw(
 		return nil, shared.LoggedError(err, "failed to deserialize input")
 	}
 
-	if iter, err = ctx.GetStub().GetQueryResult(queryPayload); err != nil {
+	if iter, err = ctx.GetStub().GetQueryResult(buildDBQuery(query)); err != nil {
 		return nil,  shared.LoggedError(err, "failed to read from world state")
 	}
 
-	if results, err = ac.iterate(iter); err != nil {
+	if results, err = ac.iterate(iter, func(a *models.Asset) bool {
+		// Since location query assertion cannot be performed by state db,
+		// the additional check must be performed
+		return query.Location == nil || query.Location.Satisfies(a.Location)
+	}); err != nil {
 		return nil, err
 	}
 
@@ -82,7 +89,7 @@ func (ac *AssetsContract) QueryRaw(
 // Query performs rich query against blockchain ledger in search of specific models.Asset records.
 //
 // To support pagination it returns results wrapped in response.AssetsResponse,
-// where `scroll_id` will contain special key for continuing from where the previous request ended.
+// where 'scroll_id' will contain special key for continuing from where the previous request ended.
 func (ac *AssetsContract) Query(
 	ctx contractapi.TransactionContextInterface,
 	queryPayload string,
@@ -101,7 +108,7 @@ func (ac *AssetsContract) Query(
 		var md *peer.QueryResponseMetadata
 
 		if iter, md, err = ctx.GetStub().GetQueryResultWithPagination(
-			"",
+			buildDBQuery(query),
 			query.Limit,
 			query.ScrollID,
 		); err != nil {
@@ -110,12 +117,16 @@ func (ac *AssetsContract) Query(
 
 		resp.ScrollID = md.GetBookmark()
 	} else {
-		if iter, err = ctx.GetStub().GetQueryResult(""); err != nil {
+		if iter, err = ctx.GetStub().GetQueryResult(buildDBQuery(query)); err != nil {
 			return nil, shared.LoggedError(err, "failed to read from world state")
 		}
 	}
 
-	if results, err = ac.iterate(iter); err != nil {
+	if results, err = ac.iterate(iter, func(a *models.Asset) bool {
+		// Since location query assertion cannot be performed by state db,
+		// the additional check must be performed
+		return query.Location == nil || query.Location.Satisfies(a.Location)
+	}); err != nil {
 		return nil, err
 	}
 
@@ -245,7 +256,10 @@ func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 	return nil
 }
 
-func (ac *AssetsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Asset, error) {
+func (ac *AssetsContract) iterate(
+	iterator shim.StateQueryIteratorInterface,
+	predicate func(a *models.Asset) bool,
+) ([]*models.Asset, error) {
 	var assets []*models.Asset
 	for iterator.HasNext() {
 		result, err := iterator.Next(); if err != nil {
@@ -257,6 +271,11 @@ func (ac *AssetsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]
 			shared.Logger.Error(err)
 			continue
 		}
+
+		if predicate != nil && !predicate(asset) {
+			continue
+		}
+
 		assets = append(assets, asset)
 	}
 
@@ -281,6 +300,17 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 	}
 
 	return nil
+}
+
+func buildDBQuery(req *requests.AssetsQuery) string {
+	// LocationQuery field of `req` does not fit as a selector query,
+	// thus it must be removed from request query object
+	if req.Location != nil {
+		req.Location = nil
+	}
+
+	qMap := structs.Map(req)
+	return shared.BuildQuery(qMap, nil, nil)
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
