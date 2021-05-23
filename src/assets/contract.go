@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-contracts/model"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -128,7 +129,7 @@ func (ac *AssetsContract) Query(
 		ids[i] = results[i].ID
 	}
 
-	reqResp, err := shared.CrossChaincodeCall(ctx, "requirements", "ForAssets", shared.MustEncode(ids))
+	reqResp, err := shared.CrossChaincodeCall(ctx, "requirements", "ForAssets", utils.MustEncode(ids))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed requesting requirements for assets")
 	}

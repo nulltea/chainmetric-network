@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	shared.InitLogger()
+	shared.InitCore()
 }
 
 func main() {

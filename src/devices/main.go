@@ -3,7 +3,7 @@ package main
 import "github.com/timoth-y/chainmetric-contracts/shared"
 
 func init() {
-	shared.InitLogger()
+	shared.InitCore()
 }
 
 func main() {

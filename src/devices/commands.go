@@ -9,6 +9,7 @@ import (
 	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/models/requests"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
@@ -38,7 +39,7 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 		return shared.LoggedError(err, "failed to generate device command composite key")
 	}
 
-	if err := ctx.GetStub().PutState(key, []byte(shared.MustEncode(models.DeviceCommandLogEntry{
+	if err := ctx.GetStub().PutState(key, []byte(utils.MustEncode(models.DeviceCommandLogEntry{
 		DeviceID: req.DeviceID,
 		Command: req.Command,
 		Args: req.Args,
