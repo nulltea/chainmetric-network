@@ -41,12 +41,12 @@ func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInter
 
 // All retrieves all models.Requirements records from blockchain ledger.
 func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return rc.drain(iter)
+	return rc.drain(iter), nil
 }
 
 // ForAsset retrieves all models.Requirements records from blockchain ledger for specific asset by given `assetID`.
@@ -54,12 +54,12 @@ func (rc *RequirementsContract) ForAsset(
 	ctx contractapi.TransactionContextInterface,
 	assetID string,
 ) ([]*models.Requirements, error) {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string {utils.Hash(assetID) })
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{utils.Hash(assetID)})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return rc.drain(iter)
+	return rc.drain(iter), nil
 }
 
 // ForAssets retrieves all models.Requirements records from blockchain ledger for multiply assets by given `assetIDs`.
@@ -72,7 +72,7 @@ func (rc *RequirementsContract) ForAssets(
 			"asset_id": map[string]interface{}{
 				"$in": assetIDs,
 			},
-			"record_type": "requirements",
+			"record_type": model.RequirementsRecordType,
 		}
 	)
 
@@ -81,7 +81,7 @@ func (rc *RequirementsContract) ForAssets(
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return rc.drain(iter)
+	return rc.drain(iter), nil
 }
 
 // Assign assigns models.Requirements to an asset and stores it in the blockchain ledger.
@@ -144,7 +144,7 @@ func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterfa
 // RemoveAll removes all registered models.Requirements records from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{})
 	if err != nil {
 		return shared.LoggedError(err, "failed to read from world state")
 	}
@@ -164,7 +164,7 @@ func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInte
 	return nil
 }
 
-func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
+func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) []*models.Requirements {
 	var requirements []*models.Requirements
 
 	shared.Iterate(iter, func(_ string, value []byte) error {
@@ -177,10 +177,14 @@ func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) ([]
 		return nil
 	})
 
-	return requirements, nil
+	return requirements
 }
 
-func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements, events ...string) error {
+func (rc *RequirementsContract) save(
+	ctx contractapi.TransactionContextInterface,
+	requirement *models.Requirements,
+	events ...string,
+) error {
 	if len(requirement.ID) == 0 {
 		return errors.New("the unique id must be defined for requirement")
 	}
@@ -205,7 +209,7 @@ func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.Requirements) (string, error) {
-	return ctx.GetStub().CreateCompositeKey("requirements", []string{
+	return ctx.GetStub().CreateCompositeKey(model.RequirementsRecordType, []string{
 		utils.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})

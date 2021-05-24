@@ -43,12 +43,12 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 
 // All retrieves all models.Device records from blockchain ledger.
 func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.DeviceRecordType, []string{})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return c.drain(iter, nil)
+	return c.drain(iter, nil), nil
 }
 
 // Register creates and registers new device in the blockchain ledger.
@@ -143,7 +143,7 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 // RemoveAll removes all registered devices from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.DeviceRecordType, []string{})
 	if err != nil {
 		return shared.LoggedError(err, "failed to read from world state")
 	}
@@ -166,7 +166,7 @@ func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 func (c *DevicesContract) drain(
 	iter shim.StateQueryIteratorInterface,
 	predicate func(d *models.Device) bool,
-) ([]*models.Device, error) {
+) []*models.Device {
 	var devices []*models.Device
 
 	shared.Iterate(iter, func(_ string, value []byte) error {
@@ -181,7 +181,7 @@ func (c *DevicesContract) drain(
 		return nil
 	})
 
-	return devices, nil
+	return devices
 }
 
 func (c *DevicesContract) save(
@@ -210,7 +210,7 @@ func (c *DevicesContract) save(
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
-	return ctx.GetStub().CreateCompositeKey("device", []string{
+	return ctx.GetStub().CreateCompositeKey(model.DeviceRecordType, []string{
 		utils.Hash(dev.Hostname),
 		xid.NewWithTime(time.Now()).String(),
 	})

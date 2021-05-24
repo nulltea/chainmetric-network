@@ -47,12 +47,12 @@ func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 
 // All retrieves all models.Asset records from blockchain ledger.
 func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.AssetRecordType, []string {})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return ac.drain(iter, nil)
+	return ac.drain(iter, nil), nil
 }
 
 // QueryRaw performs rich query against blockchain ledger in search of specific models.Asset records.
@@ -62,28 +62,19 @@ func (ac *AssetsContract) QueryRaw(
 	ctx contractapi.TransactionContextInterface,
 	queryPayload string,
 ) ([]*models.Asset, error) {
-	var (
-		results []*models.Asset
-		iter shim.StateQueryIteratorInterface
-	)
-
 	query, err := requests.AssetsQuery{}.Decode([]byte(queryPayload)); if err != nil {
 		return nil, shared.LoggedError(err, "failed to deserialize input")
 	}
 
-	if iter, err = ctx.GetStub().GetQueryResult(buildDBQuery(query)); err != nil {
-		return nil,  shared.LoggedError(err, "failed to read from world state")
+	iter, err := ctx.GetStub().GetQueryResult(buildDBQuery(query)); if err != nil {
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	if results, err = ac.drain(iter, func(a *models.Asset) bool {
+	return ac.drain(iter, func(a *models.Asset) bool {
 		// Since location query assertion cannot be performed by state db,
 		// the additional check must be performed
 		return query.Location == nil || query.Location.Satisfies(a.Location)
-	}); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+	}), nil
 }
 
 // Query performs rich query against blockchain ledger in search of specific models.Asset records.
@@ -95,7 +86,6 @@ func (ac *AssetsContract) Query(
 	queryPayload string,
 ) (*response.AssetsResponse, error) {
 	var (
-		results []*models.Asset
 		resp = &response.AssetsResponse{}
 		iter shim.StateQueryIteratorInterface
 	)
@@ -122,13 +112,11 @@ func (ac *AssetsContract) Query(
 		}
 	}
 
-	if results, err = ac.drain(iter, func(a *models.Asset) bool {
+	results := ac.drain(iter, func(a *models.Asset) bool {
 		// Since location query assertion cannot be performed by state db,
 		// the additional check must be performed
 		return query.Location == nil || query.Location.Satisfies(a.Location)
-	}); err != nil {
-		return nil, err
-	}
+	})
 
 	var (
 		ids = make([]string, len(results))
@@ -237,7 +225,7 @@ func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id
 // RemoveAll removes all assets from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.AssetRecordType, []string {})
 	if err != nil {
 		return shared.LoggedError(err, "failed to read from world state")
 	}
@@ -260,7 +248,7 @@ func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface)
 func (ac *AssetsContract) drain(
 	iter shim.StateQueryIteratorInterface,
 	predicate func(a *models.Asset) bool,
-) ([]*models.Asset, error) {
+) []*models.Asset {
 	var assets []*models.Asset
 
 	shared.Iterate(iter, func(_ string, value []byte) error {
@@ -275,7 +263,7 @@ func (ac *AssetsContract) drain(
 		return nil
 	})
 
-	return assets, nil
+	return assets
 }
 
 func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asset *models.Asset, events ...string) error {
@@ -307,13 +295,13 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 	}
 
 	qMap := structs.Map(req)
-	qMap["record_type"] = "asset"
+	qMap["record_type"] = model.AssetRecordType
 
 	return shared.BuildQuery(qMap, nil, nil)
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
-	return ctx.GetStub().CreateCompositeKey("asset", []string{
+	return ctx.GetStub().CreateCompositeKey(model.AssetRecordType, []string{
 		utils.Hash(asset.SKU),
 		xid.NewWithTime(time.Now()).String(),
 	})
