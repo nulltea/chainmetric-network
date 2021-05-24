@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -117,41 +116,7 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 		return "", shared.LoggedError(err, "failed to generate composite key")
 	}
 
-	// Emitting requested events
-	go func() {
-		var (
-			now = time.Now()
-		)
-
-		for token, request := range rc.socketTickets {
-			if now.After(request.expiry) {
-				delete(rc.socketTickets, token)
-				shared.Logger.Debug(fmt.Sprintf("event emitter '%s' expired, currently registered: %d",
-						token, len(rc.socketTickets),
-					),
-				)
-
-				continue
-			}
-
-			if request.assetID == readings.AssetID {
-				if value, ok := readings.Values[request.metric];  ok {
-					point := response.MetricReadingsPoint {
-						DeviceID: readings.DeviceID,
-						Location: readings.Location,
-						Timestamp: readings.Timestamp,
-						Value: value,
-					}
-
-					if pp, err := json.Marshal(point); err == nil {
-						if err = ctx.GetStub().SetEvent(token, pp); err != nil {
-							shared.Logger.Error("failed to send metric readings point through event socket")
-						}
-					}
-				}
-			}
-		}
-	}()
+	go rc.sendToSocketListeners(ctx, readings)
 
 	return readings.ID, rc.save(ctx, readings)
 }
@@ -170,10 +135,15 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
+
 	if !exists {
 		return errors.Errorf("the readings with ID %q does not exist", id)
 	}
-	return ctx.GetStub().DelState(id)
+
+	return shared.LoggedError(
+		ctx.GetStub().DelState(id),
+		"failed removing metric readings record",
+	)
 }
 
 // RemoveAll removes all models.MetricReadings records from the blockchain ledger.
@@ -193,32 +163,6 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 	})
 
 	return nil
-}
-
-func (rc *ReadingsContract) RequestEventEmittingFor(ctx contractapi.TransactionContextInterface, assetID, metric string) string {
-	var (
-		timestamp = time.Now()
-		clientID, _ = ctx.GetClientIdentity().GetID()
-		clientHash = utils.Hash(clientID)
-		eventToken = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
-		request = EventSocketSubscriptionTicket{
-			assetID: assetID,
-			metric: models.Metric(metric),
-			expiry: timestamp.Add(time.Hour * 1),
-		}
-	)
-
-	rc.socketTickets[eventToken] = request
-
-	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' added, currently registered: %d", eventToken, len(rc.socketTickets)))
-
-	return eventToken
-}
-
-func (rc *ReadingsContract) CancelEventEmitting(ctx contractapi.TransactionContextInterface, eventToken string) {
-	delete(rc.socketTickets, eventToken)
-
-	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' canceled, currently registered: %d", eventToken, len(rc.socketTickets)))
 }
 
 func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {
