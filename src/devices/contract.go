@@ -8,6 +8,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
@@ -105,7 +106,7 @@ func (c *DevicesContract) Update(
 	}
 
 	if err := c.save(ctx, device, "updated"); err != nil {
-		return nil, shared.LoggedError(err, "failed to update device")
+		return nil, shared.LoggedError(err, "failed to save device record")
 	}
 
 	return device, nil
@@ -192,15 +193,15 @@ func (c *DevicesContract) save(
 		return errors.New("the unique id must be defined for device")
 	}
 
-	if err := ctx.GetStub().PutState(device.ID, device.Encode()); err != nil {
+	if err := ctx.GetStub().PutState(device.ID, model.NewDeviceRecord(device).Encode()); err != nil {
 		return err
 	}
 
 	if len(events) != 0 {
 		for _, event := range events {
-			event := fmt.Sprintf("devices.%s", event)
+			event = fmt.Sprintf("devices.%s", event)
 			if err := ctx.GetStub().SetEvent(event, device.Encode()); err != nil {
-				shared.Logger.Error(errors.Wrapf(err , "failed to emit event devices.%s", event))
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
 			}
 		}
 	}

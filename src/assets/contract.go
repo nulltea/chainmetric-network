@@ -289,8 +289,9 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 
 	if len(events) != 0 {
 		for _, event := range events {
-			if err := ctx.GetStub().SetEvent(fmt.Sprintf("assets.%s", event), asset.Encode()); err != nil {
-				shared.Logger.Error(errors.Wrapf(err , "failed to emit event assets.%s", event))
+			event = fmt.Sprintf("assets.%s", event)
+			if err := ctx.GetStub().SetEvent(event, asset.Encode()); err != nil {
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
 			}
 		}
 	}
@@ -306,6 +307,8 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 	}
 
 	qMap := structs.Map(req)
+	qMap["record_type"] = "asset"
+
 	return shared.BuildQuery(qMap, nil, nil)
 }
 
