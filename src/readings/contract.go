@@ -186,7 +186,7 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 		return errors.New("the unique id must be defined for readings")
 	}
 
-	return ctx.GetStub().PutState(readings.ID, readings.Encode())
+	return ctx.GetStub().PutState(readings.ID, model.NewMetricReadingsRecord(readings).Encode())
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {

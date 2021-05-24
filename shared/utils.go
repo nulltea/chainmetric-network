@@ -11,7 +11,11 @@ func Iterate(
 	iter shim.StateQueryIteratorInterface,
 	fn func(key string, value []byte) error,
 ) {
-	defer iter.Close()
+	defer func() {
+		if err := iter.Close(); err != nil {
+			Logger.Error(errors.Wrap(err, "failed to close state query iterator"))
+		}
+	}()
 
 	for iter.HasNext() {
 		result, err := iter.Next(); if err != nil {
