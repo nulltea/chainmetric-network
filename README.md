@@ -34,8 +34,9 @@ After this whenever an upgrade must be performed simply add `--upgrade` flag to 
 ## Roadmap
 
 - [x] Device remote commands over blockchain events [(#1)](https://github.com/timoth-y/chainmetric-contracts/pull/1)
-- [ ] Requirements violation event streaming
+- [ ] Requirements violation notification
 - [ ] Violations rule engine
+- [ ] Cache layer for storing contracts operational data e.g. `EventSocketSubscriptionTicket`
 - [ ] Transaction for assets changes history retrieving
 - [ ] Devices location management business logic
 - [ ] Users contract
