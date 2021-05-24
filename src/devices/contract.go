@@ -8,6 +8,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -26,7 +27,7 @@ func NewDevicesContact() *DevicesContract {
 	return &DevicesContract{}
 }
 
-// Retrieve retrieves models.Device from blockchain ledger.
+// Retrieve retrieves single models.Device record from blockchain ledger  by a given `id`.
 func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Device, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
@@ -209,7 +210,7 @@ func (c *DevicesContract) save(
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("device", []string{
-		shared.Hash(dev.Hostname),
+		utils.Hash(dev.Hostname),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }

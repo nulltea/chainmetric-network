@@ -1,21 +1,10 @@
 package shared
 
 import (
-	"hash/fnv"
-	"strconv"
-
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 )
-
-// Hash returns the hash-sum of the given object.
-// It uses FNV32.
-func Hash(value string) string {
-	h := fnv.New32a()
-	h.Write([]byte(value))
-	return strconv.Itoa(int(h.Sum32()))
-}
 
 // Iterate performs iteration over state query results calling `fn` for each record.
 func Iterate(

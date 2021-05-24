@@ -33,7 +33,7 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 
 	var key string
 	if key, err = ctx.GetStub().CreateCompositeKey("command", []string{
-		shared.Hash(req.DeviceID),
+		utils.Hash(req.DeviceID),
 		xid.NewWithTime(time.Now()).String(),
 	}); err != nil {
 		return shared.LoggedError(err, "failed to generate device command composite key")
@@ -102,7 +102,7 @@ func (c *DevicesContract) CommandsLog(ctx contractapi.TransactionContextInterfac
 		return nil, errors.Errorf("device with id '%s' does not registered in the blockchain", deviceID)
 	}
 
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("command", []string{shared.Hash(deviceID)})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("command", []string{utils.Hash(deviceID)})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}

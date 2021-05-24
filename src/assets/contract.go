@@ -32,7 +32,7 @@ func NewAssetsContact() *AssetsContract {
 	return &AssetsContract{}
 }
 
-// Retrieve retrieves models.Asset from blockchain ledger.
+// Retrieve retrieves single models.Asset record from blockchain ledger by a given `id`.
 func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Asset, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
@@ -311,7 +311,7 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("asset", []string{
-		shared.Hash(asset.SKU),
+		utils.Hash(asset.SKU),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }

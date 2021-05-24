@@ -9,6 +9,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -56,7 +57,7 @@ func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface
 		}
 	)
 
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { utils.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -90,7 +91,7 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 		metric = models.Metric(metricID)
 	)
 
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
+	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { utils.Hash(assetID) })
 	if err != nil {
 		err = errors.Wrap(err, "failed to read from world state")
 		shared.Logger.Error(err)
@@ -212,7 +213,7 @@ func (rc *ReadingsContract) RequestEventEmittingFor(ctx contractapi.TransactionC
 	var (
 		timestamp = time.Now()
 		clientID, _ = ctx.GetClientIdentity().GetID()
-		clientHash = shared.Hash(clientID)
+		clientHash = utils.Hash(clientID)
 		eventToken = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
 		request = EventEmittingRequest{
 			assetID: assetID,
@@ -260,7 +261,7 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
 	return ctx.GetStub().CreateCompositeKey("readings", []string{
-		shared.Hash(req.AssetID),
+		utils.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
