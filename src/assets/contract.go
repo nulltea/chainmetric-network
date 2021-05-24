@@ -52,7 +52,7 @@ func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*m
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return ac.iterate(iter, nil)
+	return ac.drain(iter, nil)
 }
 
 // QueryRaw performs rich query against blockchain ledger in search of specific models.Asset records.
@@ -75,7 +75,7 @@ func (ac *AssetsContract) QueryRaw(
 		return nil,  shared.LoggedError(err, "failed to read from world state")
 	}
 
-	if results, err = ac.iterate(iter, func(a *models.Asset) bool {
+	if results, err = ac.drain(iter, func(a *models.Asset) bool {
 		// Since location query assertion cannot be performed by state db,
 		// the additional check must be performed
 		return query.Location == nil || query.Location.Satisfies(a.Location)
@@ -122,7 +122,7 @@ func (ac *AssetsContract) Query(
 		}
 	}
 
-	if results, err = ac.iterate(iter, func(a *models.Asset) bool {
+	if results, err = ac.drain(iter, func(a *models.Asset) bool {
 		// Since location query assertion cannot be performed by state db,
 		// the additional check must be performed
 		return query.Location == nil || query.Location.Satisfies(a.Location)
@@ -237,47 +237,43 @@ func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id
 // RemoveAll removes all assets from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("asset", []string {})
 	if err != nil {
 		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove asset record")
 		}
 
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
+		if err = ctx.GetStub().SetEvent("assets.removed", models.Asset{ID: key}.Encode()); err != nil {
+			return errors.Wrap(err, "failed to emit event on asset remove")
 		}
-	}
+
+		return nil
+	})
+
 	return nil
 }
 
-func (ac *AssetsContract) iterate(
-	iterator shim.StateQueryIteratorInterface,
+func (ac *AssetsContract) drain(
+	iter shim.StateQueryIteratorInterface,
 	predicate func(a *models.Asset) bool,
 ) ([]*models.Asset, error) {
 	var assets []*models.Asset
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		asset, err := models.Asset{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize asset record")
 		}
 
-		asset, err := models.Asset{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
+		if predicate == nil || predicate(asset) {
+			assets = append(assets, asset)
 		}
 
-		if predicate != nil && !predicate(asset) {
-			continue
-		}
-
-		assets = append(assets, asset)
-	}
+		return nil
+	})
 
 	return assets, nil
 }

@@ -110,7 +110,7 @@ func (c *DevicesContract) CommandsLog(ctx contractapi.TransactionContextInterfac
 	var entries []*models.DeviceCommandLogEntry
 	for iter.HasNext() {
 		result, err := iter.Next(); if err != nil {
-			shared.Logger.Error(errors.Wrap(err, "failed to iterate over command log results"))
+			shared.Logger.Error(errors.Wrap(err, "failed to drain over command log results"))
 			continue
 		}
 

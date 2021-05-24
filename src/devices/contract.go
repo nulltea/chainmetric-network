@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
@@ -40,25 +41,12 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 
 // All retrieves all models.Device records from blockchain ledger.
 func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	var devices []*models.Device
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		device, err := models.Device{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		devices = append(devices, device)
-	}
-	return devices, nil
+	return c.drain(iter, nil)
 }
 
 // Register creates and registers new device in the blockchain ledger.
@@ -153,30 +141,45 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 // RemoveAll removes all registered devices from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("device", []string{})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-
-		return err
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove device record")
 		}
 
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
+		if err = ctx.GetStub().SetEvent("devices.removed", models.Device{ID: key}.Encode()); err != nil {
+			return errors.Wrap(err, "failed to emit event on device remove")
 		}
 
-		if err := ctx.GetStub().SetEvent("devices.removed", models.Device{ID: result.Key}.Encode()); err != nil {
-			shared.Logger.Error(errors.Wrap(err , "failed to emit event on device remove"))
-		}
-	}
+		return nil
+	})
+
 	return nil
+}
+
+func (c *DevicesContract) drain(
+	iter shim.StateQueryIteratorInterface,
+	predicate func(d *models.Device) bool,
+) ([]*models.Device, error) {
+	var devices []*models.Device
+
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		device, err := models.Device{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize device record")
+		}
+
+		if predicate == nil || predicate(device) {
+			devices = append(devices, device)
+		}
+
+		return nil
+	})
+
+	return devices, nil
 }
 
 func (c *DevicesContract) save(

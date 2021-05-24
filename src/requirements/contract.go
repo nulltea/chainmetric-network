@@ -45,7 +45,7 @@ func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface)
 		return nil, err
 	}
 
-	return rc.iterate(iterator)
+	return rc.drain(iterator)
 }
 
 func (rc *RequirementsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
@@ -56,7 +56,7 @@ func (rc *RequirementsContract) ForAsset(ctx contractapi.TransactionContextInter
 		return nil, err
 	}
 
-	return rc.iterate(iterator)
+	return rc.drain(iterator)
 }
 
 func (rc *RequirementsContract) ForAssets(ctx contractapi.TransactionContextInterface, assetIDs []string) ([]*models.Requirements, error) {
@@ -127,44 +127,38 @@ func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterfa
 }
 
 func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return err
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove requirements record")
 		}
 
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
+		if err = ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: key}.Encode()); err != nil {
+			return errors.Wrap(err, "failed to emit event on requirements remove")
 		}
 
-		ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: result.Key}.Encode())
-	}
+		return nil
+	})
+
 	return nil
 }
 
-func (rc *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
+func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
 	var requirements []*models.Requirements
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		requirement, err := models.Requirements{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize requirements record")
 		}
 
-		requirement, err := models.Requirements{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
 		requirements = append(requirements, requirement)
-	}
+
+		return nil
+	})
 
 	return requirements, nil
 }

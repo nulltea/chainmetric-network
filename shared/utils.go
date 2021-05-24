@@ -4,6 +4,7 @@ import (
 	"hash/fnv"
 	"strconv"
 
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 )
@@ -14,6 +15,25 @@ func Hash(value string) string {
 	h := fnv.New32a()
 	h.Write([]byte(value))
 	return strconv.Itoa(int(h.Sum32()))
+}
+
+// Iterate performs iteration over state query results calling `fn` for each record.
+func Iterate(
+	iter shim.StateQueryIteratorInterface,
+	fn func(key string, value []byte) error,
+) {
+	defer iter.Close()
+
+	for iter.HasNext() {
+		result, err := iter.Next(); if err != nil {
+			Logger.Error(errors.Wrap(err, "failed to iterate over records"))
+			continue
+		}
+
+		if err := fn(result.Key, result.Value); err != nil {
+			Logger.Error(err)
+		}
+	}
 }
 
 // InvokeChaincodeParams builds chaincode invoke params object.

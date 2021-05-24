@@ -63,7 +63,7 @@ func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface
 		return nil, err
 	}
 
-	readings, err := rc.iterate(iterator); if err != nil {
+	readings, err := rc.drain(iterator); if err != nil {
 		err = errors.Wrap(err, "failed to iterate through readings data")
 		shared.Logger.Error(err)
 		return nil, err
@@ -97,7 +97,7 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 		return nil, err
 	}
 
-	readings, err := rc.iterate(iterator); if err != nil {
+	readings, err := rc.drain(iterator); if err != nil {
 		err = errors.Wrap(err, "failed to iterate through readings data")
 		shared.Logger.Error(err)
 		return nil, err
@@ -192,24 +192,19 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 }
 
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { })
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { })
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return err
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove readings record")
 		}
 
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-	}
+		return nil
+	})
+
 	return nil
 }
 
@@ -239,21 +234,18 @@ func (rc *ReadingsContract) CancelEventEmitting(ctx contractapi.TransactionConte
 	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' canceled, currently registered: %d", eventToken, len(rc.emitterRequests)))
 }
 
-func (rc *ReadingsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
+func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
 	var readings []*models.MetricReadings
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		record, err := models.MetricReadings{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize readings record")
 		}
 
-		requirement, err := models.MetricReadings{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		readings = append(readings, requirement)
-	}
+		readings = append(readings, record)
+
+		return nil
+	})
 
 	return readings, nil
 }
