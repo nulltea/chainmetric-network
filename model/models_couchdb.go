@@ -6,35 +6,43 @@ import (
 	"github.com/timoth-y/chainmetric-core/models"
 )
 
+const (
+	AssetRecordType           = "asset"
+	DeviceRecordType          = "device"
+	RequirementsRecordType    = "requirements"
+	ReadingsRecordType        = "readings"
+	CommandLogEntryRecordType = "device_command"
+)
+
 // CouchDB specific records model structure types for each entity: Asset, Device, Requirements, MetricReadings.
 type (
 	// Asset wraps models.Asset with additional database specific fields.
 	Asset struct {
-		RecordType string `json:"record_type"` // Constant value of 'record_type': 'asset'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': AssetRecordType
 		*models.Asset
 	}
 
 	// Device wraps models.Device with additional database specific fields.
 	Device struct {
-		RecordType string `json:"record_type"` // Constant value of 'record_type': 'device'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': DeviceRecordType
 		*models.Device
 	}
 
 	// Requirements wraps models.Requirements with additional database specific fields.
 	Requirements struct {
-		RecordType string `json:"record_type"` // Constant value of 'record_type': 'requirements'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': RequirementsRecordType
 		*models.Requirements
 	}
 
 	// MetricReadings wraps models.MetricReadings with additional database specific fields.
 	MetricReadings struct {
-		RecordType string `json:"record_type"` // Constant value of 'record_type': 'metric_readings'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': ReadingsRecordType
 		*models.MetricReadings
 	}
 
 	// DeviceCommandLogEntry wraps models.DeviceCommandLogEntry with additional database specific fields.
 	DeviceCommandLogEntry struct {
-		RecordType string `json:"record_type"` // Constant value of 'record_type': 'device_command'
+		RecordType string `json:"record_type"` // Constant value of 'record_type': CommandLogEntryRecordType
 		*models.DeviceCommandLogEntry
 	}
 )
@@ -42,7 +50,7 @@ type (
 // NewAssetRecord constructs new Asset record based on models.Asset with predefining database specific fields.
 func NewAssetRecord(base *models.Asset) *Asset {
 	return &Asset{
-		RecordType: "asset",
+		RecordType: AssetRecordType,
 		Asset:      base,
 	}
 }
@@ -50,7 +58,7 @@ func NewAssetRecord(base *models.Asset) *Asset {
 // NewDeviceRecord constructs new Device record based on models.Device with predefining database specific fields.
 func NewDeviceRecord(base *models.Device) *Device {
 	return &Device{
-		RecordType: "device",
+		RecordType: DeviceRecordType,
 		Device:     base,
 	}
 }
@@ -59,7 +67,7 @@ func NewDeviceRecord(base *models.Device) *Device {
 // with predefining database specific fields.
 func NewRequirementsRecord(base *models.Requirements) *Requirements {
 	return &Requirements{
-		RecordType:   "requirements",
+		RecordType:   RequirementsRecordType,
 		Requirements: base,
 	}
 }
@@ -68,7 +76,7 @@ func NewRequirementsRecord(base *models.Requirements) *Requirements {
 // with predefining database specific fields.
 func NewMetricReadingsRecord(base *models.MetricReadings) *MetricReadings {
 	return &MetricReadings{
-		RecordType:   "metric_readings",
+		RecordType:     ReadingsRecordType,
 		MetricReadings: base,
 	}
 }
@@ -77,7 +85,7 @@ func NewMetricReadingsRecord(base *models.MetricReadings) *MetricReadings {
 // with predefining database specific fields.
 func NewDeviceCommandLogEntry(base *models.DeviceCommandLogEntry) *DeviceCommandLogEntry {
 	return &DeviceCommandLogEntry{
-		RecordType:   "device_command",
+		RecordType:            CommandLogEntryRecordType,
 		DeviceCommandLogEntry: base,
 	}
 }
