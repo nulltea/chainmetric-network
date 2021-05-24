@@ -68,19 +68,20 @@ func (rc *RequirementsContract) ForAssets(
 	assetIDs []string,
 ) ([]*models.Requirements, error) {
 	var (
-		results = make([]*models.Requirements, 0)
+		qMap = map[string]interface{}{
+			"asset_id": map[string]interface{}{
+				"$in": assetIDs,
+			},
+			"record_type": "requirements",
+		}
 	)
 
-	for i := range assetIDs {
-		reqs, err := rc.ForAsset(ctx, assetIDs[i]); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		results = append(results, reqs...)
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
+	if err != nil {
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return results, nil
+	return rc.drain(iter)
 }
 
 // Assign assigns models.Requirements to an asset and stores it in the blockchain ledger.
