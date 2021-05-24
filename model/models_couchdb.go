@@ -31,6 +31,12 @@ type (
 		RecordType string `json:"record_type"` // Constant value of 'record_type': 'metric_readings'
 		*models.MetricReadings
 	}
+
+	// DeviceCommandLogEntry wraps models.DeviceCommandLogEntry with additional database specific fields.
+	DeviceCommandLogEntry struct {
+		RecordType string `json:"record_type"` // Constant value of 'record_type': 'device_command'
+		*models.DeviceCommandLogEntry
+	}
 )
 
 // NewAssetRecord constructs new Asset record based on models.Asset with predefining database specific fields.
@@ -67,6 +73,15 @@ func NewMetricReadingsRecord(base *models.MetricReadings) *MetricReadings {
 	}
 }
 
+// NewDeviceCommandLogEntry constructs new DeviceCommand record based on models.DeviceCommandLogEntry
+// with predefining database specific fields.
+func NewDeviceCommandLogEntry(base *models.DeviceCommandLogEntry) *DeviceCommandLogEntry {
+	return &DeviceCommandLogEntry{
+		RecordType:   "device_command",
+		DeviceCommandLogEntry: base,
+	}
+}
+
 // Encode serializes the Asset record.
 func (m *Asset) Encode() []byte {
 	data, err := json.Marshal(m); if err != nil {
@@ -96,6 +111,15 @@ func (m *Requirements) Encode() []byte {
 
 // Encode serializes the MetricReadings record.
 func (m *MetricReadings) Encode() []byte {
+	data, err := json.Marshal(m); if err != nil {
+		return nil
+	}
+
+	return data
+}
+
+// Encode serializes the DeviceCommandLogEntry record.
+func (m *DeviceCommandLogEntry) Encode() []byte {
 	data, err := json.Marshal(m); if err != nil {
 		return nil
 	}

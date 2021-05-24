@@ -7,6 +7,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/models/requests"
 	"github.com/timoth-y/chainmetric-core/utils"
@@ -32,24 +33,24 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 	}
 
 	var key string
-	if key, err = ctx.GetStub().CreateCompositeKey("command", []string{
+	if key, err = ctx.GetStub().CreateCompositeKey("device_command", []string{
 		utils.Hash(req.DeviceID),
 		xid.NewWithTime(time.Now()).String(),
 	}); err != nil {
 		return shared.LoggedError(err, "failed to generate device command composite key")
 	}
 
-	if err := ctx.GetStub().PutState(key, []byte(utils.MustEncode(models.DeviceCommandLogEntry{
+	if err = ctx.GetStub().PutState(key, model.NewDeviceCommandLogEntry(&models.DeviceCommandLogEntry{
 		DeviceID: req.DeviceID,
 		Command: req.Command,
 		Args: req.Args,
 		Status: models.DeviceCmdProcessing,
 		Timestamp: time.Now().UTC(),
-	}))); err != nil {
+	}).Encode()); err != nil {
 		return shared.LoggedError(err, "failed to log device command in blockchain ledger")
 	}
 
-	if err := ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s.command", req.DeviceID), requests.DeviceCommandEventPayload{
+	if err = ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s.command", req.DeviceID), requests.DeviceCommandEventPayload{
 		ID: key,
 		DeviceCommandRequest: *req,
 	}.Encode()); err != nil {
@@ -82,11 +83,11 @@ func (c *DevicesContract) SubmitCommandResults(ctx contractapi.TransactionContex
 		return shared.LoggedErrorf(err, "failed to deserialize command log entry with id '%s", entryID)
 	}
 
-	if err := req.Apply(entry); err != nil {
+	if err = req.Apply(entry); err != nil {
 		return errors.Wrap(err, "failed to apply submit request on command log entry")
 	}
 
-	if err := ctx.GetStub().PutState(entryID, req.Encode()); err != nil {
+	if err := ctx.GetStub().PutState(entryID, model.NewDeviceCommandLogEntry(entry).Encode()); err != nil {
 		return shared.LoggedError(err, "failed to update command log entry state")
 	}
 
@@ -102,7 +103,7 @@ func (c *DevicesContract) CommandsLog(ctx contractapi.TransactionContextInterfac
 		return nil, errors.Errorf("device with id '%s' does not registered in the blockchain", deviceID)
 	}
 
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("command", []string{utils.Hash(deviceID)})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey("device_command", []string{utils.Hash(deviceID)})
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
