@@ -38,7 +38,7 @@ After this whenever an upgrade must be performed simply add `--upgrade` flag to 
 - [ ] Violations rule engine
 - [ ] Cache layer for storing contracts operational data e.g. `EventSocketSubscriptionTicket`
 - [ ] Transaction for assets changes history retrieving
-- [ ] Devices location management business logic
+- [x] Devices location management business logic [(#2)](https://github.com/timoth-y/chainmetric-contracts/pull/2)
 - [ ] Users contract
 
 ## Wrap up
