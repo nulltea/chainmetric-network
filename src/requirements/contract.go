@@ -8,74 +8,83 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-contracts/model"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
 	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
-// RequirementsContract provides functions for managing an Requirements
+// RequirementsContract implements requirements-managing Smart Contract transaction handlers.
 type RequirementsContract struct {
 	contractapi.Contract
 }
 
+// NewRequirementsContract constructs new RequirementsContract instance.
 func NewRequirementsContract() *RequirementsContract {
 	return &RequirementsContract{}
 }
 
+// Retrieve retrieves single models.Requirements record from blockchain ledger by a given `id`.
 func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Requirements, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
-		return nil, fmt.Errorf("the requirement with ID %q does not exist", id)
+		return nil, errors.Errorf("the requirement with ID %q does not exist", id)
 	}
 
 	return models.Requirements{}.Decode(data)
 }
 
+// All retrieves all models.Requirements records from blockchain ledger.
 func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return rc.iterate(iterator)
+	return rc.drain(iter), nil
 }
 
-func (rc *RequirementsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) ([]*models.Requirements, error) {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string { shared.Hash(assetID) })
+// ForAsset retrieves all models.Requirements records from blockchain ledger for specific asset by given `assetID`.
+func (rc *RequirementsContract) ForAsset(
+	ctx contractapi.TransactionContextInterface,
+	assetID string,
+) ([]*models.Requirements, error) {
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{utils.Hash(assetID)})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return rc.iterate(iterator)
+	return rc.drain(iter), nil
 }
 
-func (rc *RequirementsContract) ForAssets(ctx contractapi.TransactionContextInterface, assetIDs []string) ([]*models.Requirements, error) {
+// ForAssets retrieves all models.Requirements records from blockchain ledger for multiply assets by given `assetIDs`.
+func (rc *RequirementsContract) ForAssets(
+	ctx contractapi.TransactionContextInterface,
+	assetIDs []string,
+) ([]*models.Requirements, error) {
 	var (
-		results = make([]*models.Requirements, 0)
+		qMap = map[string]interface{}{
+			"asset_id": map[string]interface{}{
+				"$in": assetIDs,
+			},
+			"record_type": model.RequirementsRecordType,
+		}
 	)
 
-	for i := range assetIDs {
-		reqs, err := rc.ForAsset(ctx, assetIDs[i]); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		results = append(results, reqs...)
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
+	if err != nil {
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return results, nil
+	return rc.drain(iter), nil
 }
 
+// Assign assigns models.Requirements to an asset and stores it in the blockchain ledger.
 func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		requirements = &models.Requirements{}
@@ -84,18 +93,14 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 	)
 
 	if requirements, err = requirements.Decode([]byte(data)); err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return "", err
+		return "", shared.LoggedError(err, "failed to deserialize input")
 	}
 
 	if len(requirements.ID) == 0 {
 		event = "inserted"
 
 		if requirements.ID, err = generateCompositeKey(ctx, requirements); err != nil {
-			err = errors.Wrap(err, "failed to generate composite key")
-			shared.Logger.Error(err)
-			return "", err
+			return "", shared.LoggedError(err, "failed to generate composite key")
 		}
 	}
 
@@ -103,84 +108,100 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 		return "", errors.Wrap(err, "requirements are not valid")
 	}
 
-	return requirements.ID, rc.save(ctx, requirements, event)
+	if err = rc.save(ctx, requirements, event); err != nil {
+		return "", shared.LoggedError(err, "failed saving requirements record")
+	}
+
+	return requirements.ID, nil
 }
 
+// Exists determines whether the models.Requirements exists in the blockchain ledger.
 func (rc *RequirementsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return false, err
+		return false, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
 }
 
+// Revoke revokes assignment of the models.Requirements from asset and removes it from the blockchain ledger.
 func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
+
 	if !exists {
-		return fmt.Errorf("the requirement with ID %q does not exist", id)
-	}
-	return ctx.GetStub().DelState(id)
-}
-
-func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("requirements", []string{})
-	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return err
+		return errors.Errorf("the requirements with ID %q does not exist", id)
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: result.Key}.Encode())
+	if err = ctx.GetStub().DelState(id); err != nil {
+		return shared.LoggedErrorf(err, "failed to remove requirements record with id: %s", id)
 	}
+
 	return nil
 }
 
-func (rc *RequirementsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.Requirements, error) {
-	var requirements []*models.Requirements
-
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-
-		requirement, err := models.Requirements{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		requirements = append(requirements, requirement)
+// RemoveAll removes all registered models.Requirements records from the blockchain ledger.
+// !! This method is for development use only and it must be removed when all dev phases will be completed.
+func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.RequirementsRecordType, []string{})
+	if err != nil {
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	return requirements, nil
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove requirements record")
+		}
+
+		if err = ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: key}.Encode()); err != nil {
+			return errors.Wrap(err, "failed to emit event on requirements remove")
+		}
+
+		return nil
+	})
+
+	return nil
 }
 
-func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface, requirement *models.Requirements, events ...string) error {
+func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) []*models.Requirements {
+	requirements := make([]*models.Requirements, 0)
+
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		requirement, err := models.Requirements{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize requirements record")
+		}
+
+		requirements = append(requirements, requirement)
+
+		return nil
+	})
+
+	return requirements
+}
+
+func (rc *RequirementsContract) save(
+	ctx contractapi.TransactionContextInterface,
+	requirement *models.Requirements,
+	events ...string,
+) error {
 	if len(requirement.ID) == 0 {
 		return errors.New("the unique id must be defined for requirement")
 	}
 
-	if err := ctx.GetStub().PutState(requirement.ID, requirement.Encode()); err != nil {
+	if err := ctx.GetStub().PutState(requirement.ID, model.NewRequirementsRecord(requirement).Encode()); err != nil {
 		return err
 	}
 
 	if len(events) != 0 {
 		for _, event := range events {
-			ctx.GetStub().SetEvent(fmt.Sprintf("requirements.%s", event), requirement.Encode())
+			event = fmt.Sprintf("requirements.%s", event)
+			if err := ctx.GetStub().SetEvent(
+				event,
+				requirement.Encode(),
+			); err != nil {
+				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
+			}
 		}
 	}
 
@@ -188,8 +209,8 @@ func (rc *RequirementsContract) save(ctx contractapi.TransactionContextInterface
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.Requirements) (string, error) {
-	return ctx.GetStub().CreateCompositeKey("requirements", []string{
-		shared.Hash(req.AssetID),
+	return ctx.GetStub().CreateCompositeKey(model.RequirementsRecordType, []string{
+		utils.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }

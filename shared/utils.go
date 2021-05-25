@@ -1,37 +1,35 @@
 package shared
 
 import (
-	"encoding/json"
-	"hash/fnv"
-	"strconv"
-
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 )
 
-func Hash(value string) string {
-	h := fnv.New32a()
-	h.Write([]byte(value))
-	return strconv.Itoa(int(h.Sum32()))
-}
+// Iterate performs iteration over state query results calling `fn` for each record.
+func Iterate(
+	iter shim.StateQueryIteratorInterface,
+	fn func(key string, value []byte) error,
+) {
+	defer func() {
+		if err := iter.Close(); err != nil {
+			Logger.Error(errors.Wrap(err, "failed to close state query iterator"))
+		}
+	}()
 
-func ContainsString(value string, values []string) bool {
-	contains := false
+	for iter.HasNext() {
+		result, err := iter.Next(); if err != nil {
+			Logger.Error(errors.Wrap(err, "failed to iterate over records"))
+			continue
+		}
 
-	if values == nil {
-		return false
-	}
-
-	for i := range values {
-		if values[i] == value {
-			contains = true
-			break
+		if err := fn(result.Key, result.Value); err != nil {
+			Logger.Error(err)
 		}
 	}
-
-	return contains
 }
 
+// InvokeChaincodeParams builds chaincode invoke params object.
 func InvokeChaincodeParams(tx string, args ...string) [][]byte {
 	var (
 		res = make([][]byte, len(args) + 1)
@@ -46,6 +44,7 @@ func InvokeChaincodeParams(tx string, args ...string) [][]byte {
 	return res
 }
 
+// CrossChaincodeCall performs cross-chaincode call.
 func CrossChaincodeCall(ctx contractapi.TransactionContextInterface, chaincode, tx string, args ...string) ([]byte, error) {
 	resp := ctx.GetStub().InvokeChaincode(chaincode, InvokeChaincodeParams(tx, args...), "")
 
@@ -54,15 +53,6 @@ func CrossChaincodeCall(ctx contractapi.TransactionContextInterface, chaincode, 
 	}
 
 	return resp.GetPayload(), nil
-}
-
-func MustEncode(v interface{}) string {
-	data, err := json.Marshal(v); if err != nil {
-		Logger.Error(err)
-		return ""
-	}
-
-	return string(data)
 }
 
 // LoggedError wraps `err` error with `msg` message and logs it.

@@ -7,6 +7,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
+// BootstrapContract performs start sequence of the Smart Contract handler.
 func BootstrapContract(contract contractapi.ContractInterface) {
 	chaincode, err := contractapi.NewChaincode(contract)
 	if err != nil {

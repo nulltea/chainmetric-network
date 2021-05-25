@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,6 +8,8 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/timoth-y/chainmetric-contracts/model"
+	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -19,36 +20,23 @@ import (
 // ReadingsContract provides functions for managing an models.MetricReadings from models.Device sensors
 type ReadingsContract struct {
 	contractapi.Contract
-	emitterRequests map[string]EventEmittingRequest
+	socketTickets map[string]EventSocketSubscriptionTicket
 }
 
-type EventEmittingRequest struct {
-	assetID string
-	metric models.Metric
-	expiry time.Time
-}
 
+// NewReadingsContract constructs new ReadingsContract instance.
 func NewReadingsContract() *ReadingsContract {
 	return &ReadingsContract{
-		emitterRequests: map[string]EventEmittingRequest{},
+		socketTickets: make(map[string]EventSocketSubscriptionTicket),
 	}
 }
 
-func (rc *ReadingsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.MetricReadings, error) {
-	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
-	}
-
-	if data == nil {
-		return nil, fmt.Errorf("the readings with ID %q does not exist", id)
-	}
-
-	return models.MetricReadings{}.Decode(data)
-}
-
-func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface, assetID string) (*response.MetricReadingsResponse, error) {
+// ForAsset retrieves all models.MetricReadings records from blockchain ledger for specific asset by given `assetID`,
+// aggregating them into the response.MetricReadingsStream.
+func (rc *ReadingsContract) ForAsset(
+	ctx contractapi.TransactionContextInterface,
+	assetID string,
+) (*response.MetricReadingsResponse, error) {
 	var (
 		resp = &response.MetricReadingsResponse{
 			AssetID: assetID,
@@ -56,18 +44,12 @@ func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface
 		}
 	)
 
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string{utils.Hash(assetID)})
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	readings, err := rc.iterate(iterator); if err != nil {
-		err = errors.Wrap(err, "failed to iterate through readings data")
-		shared.Logger.Error(err)
-		return nil, err
-	}
+	readings := rc.drain(iter)
 
 	for _, reading := range readings {
 		for metric, value := range reading.Values {
@@ -83,28 +65,30 @@ func (rc *ReadingsContract) ForAsset(ctx contractapi.TransactionContextInterface
 	return resp, nil
 }
 
-
+// ForMetric retrieves all models.MetricReadings records from blockchain ledger for specific asset by given `assetID`,
+// aggregating them into the response.MetricReadingsStream containing only values for given `metricID`.
 func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterface, assetID string, metricID string) (response.MetricReadingsStream, error) {
 	var (
 		stream = response.MetricReadingsStream{}
 		metric = models.Metric(metricID)
+		qMap = map[string]interface{}{
+			"asset_id": assetID,
+			fmt.Sprintf("values.%s", metricID): map[string]interface{}{
+				"$exists": true,
+			},
+			"record_type": model.ReadingsRecordType,
+		}
 	)
 
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { shared.Hash(assetID) })
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return nil, err
+		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
-	readings, err := rc.iterate(iterator); if err != nil {
-		err = errors.Wrap(err, "failed to iterate through readings data")
-		shared.Logger.Error(err)
-		return nil, err
-	}
+	readings := rc.drain(iter)
 
 	for _, reading := range readings {
-		if value, ok := reading.Values[metric];  ok {
+		if value, ok := reading.Values[metric]; ok {
 			stream = append(stream, response.MetricReadingsPoint {
 				DeviceID: reading.DeviceID,
 				Location: reading.Location,
@@ -117,145 +101,84 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 	return stream, nil
 }
 
-func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, data string) (string, error) {
+// Post inserts new models.MetricReadings record into the blockchain ledger.
+func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, payload string) (string, error) {
 	var (
 		readings = &models.MetricReadings{}
 		err error
 	)
 
-	if readings, err = readings.Decode([]byte(data)); err != nil {
-		err = errors.Wrap(err, "failed to deserialize input")
-		shared.Logger.Error(err)
-		return "", err
+	if readings, err = readings.Decode([]byte(payload)); err != nil {
+		return "", shared.LoggedError(err, "failed to deserialize input")
 	}
 
 	if readings.ID, err = generateCompositeKey(ctx, readings); err != nil {
-		err = errors.Wrap(err, "failed to generate composite key")
-		shared.Logger.Error(err)
-		return "", err
+		return "", shared.LoggedError(err, "failed to generate composite key")
 	}
 
-	// Emitting requested events
-	go func() {
-		var (
-			now = time.Now()
-		)
-
-		for token, request := range rc.emitterRequests {
-			if now.After(request.expiry) {
-				delete(rc.emitterRequests, token)
-				shared.Logger.Debug(fmt.Sprintf("event emitter '%s' expired, currently registered: %d",
-					token, len(rc.emitterRequests)),
-				)
-
-				continue
-			}
-
-			if request.assetID == readings.AssetID {
-				if value, ok := readings.Values[request.metric];  ok {
-					artifact := response.MetricReadingsPoint {
-						DeviceID: readings.DeviceID,
-						Location: readings.Location,
-						Timestamp: readings.Timestamp,
-						Value: value,
-					}
-
-					if payload, err := json.Marshal(artifact); err == nil {
-						ctx.GetStub().SetEvent(token, payload)
-					}
-				}
-			}
-		}
-	}()
+	go rc.sendToSocketListeners(ctx, readings)
 
 	return readings.ID, rc.save(ctx, readings)
 }
 
+// Exists determines whether the models.MetricReadings record exists in the blockchain ledger.
 func (rc *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return false, err
+		return false, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
 }
 
+// Remove removes models.MetricReadings record from the blockchain ledger.
 func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
 	}
+
 	if !exists {
-		return fmt.Errorf("the readings with ID %q does not exist", id)
+		return errors.Errorf("the readings with ID %q does not exist", id)
 	}
-	return ctx.GetStub().DelState(id)
+
+	return shared.LoggedError(
+		ctx.GetStub().DelState(id),
+		"failed removing metric readings record",
+	)
 }
 
+// RemoveAll removes all models.MetricReadings records from the blockchain ledger.
+// !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iterator, err := ctx.GetStub().GetStateByPartialCompositeKey("readings", []string { })
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string { })
 	if err != nil {
-		err = errors.Wrap(err, "failed to read from world state")
-		shared.Logger.Error(err)
-		return err
+		return shared.LoggedError(err, "failed to read from world state")
 	}
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(key string, _ []byte) error {
+		if err = ctx.GetStub().DelState(key); err != nil {
+			return errors.Wrap(err, "failed to remove readings record")
 		}
 
-		if err = ctx.GetStub().DelState(result.Key); err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-	}
+		return nil
+	})
+
 	return nil
 }
 
-func (rc *ReadingsContract) RequestEventEmittingFor(ctx contractapi.TransactionContextInterface, assetID, metric string) string {
-	var (
-		timestamp = time.Now()
-		clientID, _ = ctx.GetClientIdentity().GetID()
-		clientHash = shared.Hash(clientID)
-		eventToken = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
-		request = EventEmittingRequest{
-			assetID: assetID,
-			metric: models.Metric(metric),
-			expiry: timestamp.Add(time.Hour * 1),
-		}
-	)
-
-	rc.emitterRequests[eventToken] = request
-
-	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' added, currently registered: %d", eventToken, len(rc.emitterRequests)))
-
-	return eventToken
-}
-
-func (rc *ReadingsContract) CancelEventEmitting(ctx contractapi.TransactionContextInterface, eventToken string) {
-	delete(rc.emitterRequests, eventToken)
-
-	shared.Logger.Debug(fmt.Sprintf("event emitter '%s' canceled, currently registered: %d", eventToken, len(rc.emitterRequests)))
-}
-
-func (rc *ReadingsContract) iterate(iterator shim.StateQueryIteratorInterface) ([]*models.MetricReadings, error) {
+func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {
 	var readings []*models.MetricReadings
 
-	for iterator.HasNext() {
-		result, err := iterator.Next(); if err != nil {
-			shared.Logger.Error(err)
-			continue
+	shared.Iterate(iter, func(_ string, value []byte) error {
+		record, err := models.MetricReadings{}.Decode(value); if err != nil {
+			return errors.Wrap(err, "failed to deserialize readings record")
 		}
 
-		requirement, err := models.MetricReadings{}.Decode(result.Value); if err != nil {
-			shared.Logger.Error(err)
-			continue
-		}
-		readings = append(readings, requirement)
-	}
+		readings = append(readings, record)
 
-	return readings, nil
+		return nil
+	})
+
+	return readings
 }
 
 func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, readings *models.MetricReadings) error {
@@ -263,12 +186,12 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 		return errors.New("the unique id must be defined for readings")
 	}
 
-	return ctx.GetStub().PutState(readings.ID, readings.Encode())
+	return ctx.GetStub().PutState(readings.ID, model.NewMetricReadingsRecord(readings).Encode())
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
-	return ctx.GetStub().CreateCompositeKey("readings", []string{
-		shared.Hash(req.AssetID),
+	return ctx.GetStub().CreateCompositeKey(model.ReadingsRecordType, []string{
+		utils.Hash(req.AssetID),
 		xid.NewWithTime(time.Now()).String(),
 	})
 }
