@@ -165,7 +165,7 @@ func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInte
 }
 
 func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) []*models.Requirements {
-	var requirements []*models.Requirements
+	requirements := make([]*models.Requirements, 0)
 
 	shared.Iterate(iter, func(_ string, value []byte) error {
 		requirement, err := models.Requirements{}.Decode(value); if err != nil {

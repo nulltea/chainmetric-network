@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -94,7 +93,7 @@ func (ac *AssetsContract) Query(
 		return nil, shared.LoggedError(err, "failed to deserialize input")
 	}
 
-	if query.Limit != 0 {
+	if query.Limit > 0 {
 		var md *peer.QueryResponseMetadata
 
 		if iter, md, err = ctx.GetStub().GetQueryResultWithPagination(
@@ -105,7 +104,9 @@ func (ac *AssetsContract) Query(
 			return nil, shared.LoggedError(err, "failed to read from world state")
 		}
 
-		resp.ScrollID = md.GetBookmark()
+		if md.GetFetchedRecordsCount() == query.Limit {
+			resp.ScrollID = md.GetBookmark()
+		}
 	} else {
 		if iter, err = ctx.GetStub().GetQueryResult(buildDBQuery(query)); err != nil {
 			return nil, shared.LoggedError(err, "failed to read from world state")
@@ -288,13 +289,38 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 }
 
 func buildDBQuery(req *requests.AssetsQuery) string {
-	// LocationQuery field of `req` does not fit as a selector query,
-	// thus it must be removed from request query object
-	if req.Location != nil {
-		req.Location = nil
+	var (
+		qMap = make(map[string]interface{})
+	)
+
+	if len(req.IDs) > 1 {
+		qMap["asset_id"] = map[string]interface{}{
+			"$in": req.IDs,
+		}
+	} else if len(req.IDs) == 1 {
+		qMap["asset_id"] = req.IDs[0]
 	}
 
-	qMap := structs.Map(req)
+	if req.Type != nil {
+		qMap["type"] = *req.Type
+	}
+
+	if req.Holder != nil {
+		qMap["holder"] = *req.Holder
+	}
+
+	if req.State != nil {
+		qMap["state"] = *req.State
+	}
+
+	if len(req.Tags) > 0 {
+		qMap["tags"] = map[string]interface{}{
+			"$elemMatch": map[string]interface{}{
+				"$in": req.Tags,
+			},
+		}
+	}
+
 	qMap["record_type"] = model.AssetRecordType
 
 	return shared.BuildQuery(qMap, nil, nil)

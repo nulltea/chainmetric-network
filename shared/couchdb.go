@@ -16,11 +16,11 @@ func BuildQuery(selector map[string]interface{}, sort map[string]interface{}, fi
 		"selector": selector,
 	}
 
-	if len(fields) == 0 {
+	if len(fields) > 0 {
 		query["sort"] = sort
 	}
 
-	if len(fields) == 0 {
+	if len(fields) > 0 {
 		query["fields"] = fields
 	}
 
