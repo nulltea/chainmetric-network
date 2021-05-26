@@ -26,9 +26,12 @@ type ReadingsContract struct {
 
 // NewReadingsContract constructs new ReadingsContract instance.
 func NewReadingsContract() *ReadingsContract {
-	return &ReadingsContract{
+	rc := &ReadingsContract{
 		socketTickets: make(map[string]EventSocketSubscriptionTicket),
 	}
+	rc.recoverEventTicketsFromBackup()
+
+	return rc
 }
 
 // ForAsset retrieves all models.MetricReadings records from blockchain ledger for specific asset by given `assetID`,

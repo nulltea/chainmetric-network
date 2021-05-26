@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb/util"
 	"github.com/timoth-y/chainmetric-contracts/model/response"
 	"github.com/timoth-y/chainmetric-contracts/shared"
 	"github.com/timoth-y/chainmetric-core/models"
@@ -24,18 +26,19 @@ type EventSocketSubscriptionTicket struct {
 // would be send directly to it via event streaming subscription.
 func (rc *ReadingsContract) BindToEventSocket(ctx contractapi.TransactionContextInterface, assetID, metric string) string {
 	var (
-		timestamp = time.Now()
+		timestamp   = time.Now()
 		clientID, _ = ctx.GetClientIdentity().GetID()
-		clientHash = utils.Hash(clientID)
-		eventToken = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
-		request = EventSocketSubscriptionTicket{
+		clientHash  = utils.Hash(clientID)
+		eventToken  = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
+		ticket      = EventSocketSubscriptionTicket{
 			assetID: assetID,
 			metric: models.Metric(metric),
 			expiry: timestamp.Add(time.Hour * 1),
 		}
 	)
 
-	rc.socketTickets[eventToken] = request
+	rc.socketTickets[eventToken] = ticket
+	backupTicket(eventToken, ticket)
 
 	shared.Logger.Debug(fmt.Sprintf(
 		"event emitter '%s' added, currently registered: %d",
@@ -49,6 +52,7 @@ func (rc *ReadingsContract) BindToEventSocket(ctx contractapi.TransactionContext
 // aka close event streaming subscription for newly posted models.MetricReadings records.
 func (rc *ReadingsContract) CloseEventSocket(_ contractapi.TransactionContextInterface, eventToken string) {
 	delete(rc.socketTickets, eventToken)
+	dropTicketBackup(eventToken)
 
 	shared.Logger.Debug(fmt.Sprintf(
 		"event emitter '%s' canceled, currently registered: %d",
@@ -62,13 +66,11 @@ func (rc *ReadingsContract) sendToSocketListeners(
 	ctx contractapi.TransactionContextInterface,
 	readings *models.MetricReadings,
 ) {
-	var (
-		now = time.Now()
-	)
+	var now = time.Now()
 
-	for token, request := range rc.socketTickets {
-		if now.After(request.expiry) {
-			delete(rc.socketTickets, token)
+	for token, ticket := range rc.socketTickets {
+		if now.After(ticket.expiry) {
+			dropTicketBackup(token)
 			shared.Logger.Debug(fmt.Sprintf("event emitter '%s' expired, currently registered: %d",
 				token, len(rc.socketTickets),
 			))
@@ -76,8 +78,8 @@ func (rc *ReadingsContract) sendToSocketListeners(
 			continue
 		}
 
-		if request.assetID == readings.AssetID {
-			if value, ok := readings.Values[request.metric];  ok {
+		if ticket.assetID == readings.AssetID {
+			if value, ok := readings.Values[ticket.metric];  ok {
 				point := response.MetricReadingsPoint {
 					DeviceID: readings.DeviceID,
 					Location: readings.Location,
@@ -94,3 +96,59 @@ func (rc *ReadingsContract) sendToSocketListeners(
 		}
 	}
 }
+
+func (rc *ReadingsContract) recoverEventTicketsFromBackup() {
+	var (
+		now = time.Now()
+		prefix = []byte(utils.FormCompositeKey("ticket"))
+		iter = shared.LevelDB.NewIterator(util.BytesPrefix(prefix), nil)
+	)
+
+	for iter.Next() {
+		var (
+			ticket   EventSocketSubscriptionTicket
+			key      = string(iter.Key())
+			_, attrs = utils.SplitCompositeKey(key)
+		)
+
+		if len(attrs) < 1 {
+			shared.Logger.Warningf("Invalid composite key '%s': event token missing", key)
+			continue
+		}
+
+		token := attrs[0]
+
+		if err := json.Unmarshal(iter.Value(), &ticket); err != nil {
+			shared.Logger.Error(errors.Wrapf(err, "failed to decerialize ticket with key '%s'", key))
+			continue
+		}
+
+		if now.After(ticket.expiry) {
+			dropTicketBackup(token)
+			continue
+		}
+
+		rc.socketTickets[token] = ticket
+	}
+}
+
+func backupTicket(token string, ticket EventSocketSubscriptionTicket) {
+	if err := shared.LevelDB.Put(
+		[]byte(utils.FormCompositeKey("ticket", token)),
+		[]byte(utils.MustEncode(ticket)),
+		nil,
+	); err != nil {
+		shared.Logger.Error(errors.Wrapf(err, "failed to put event ticket '%s' into LevelDB", token))
+	}
+}
+
+func dropTicketBackup(token string) {
+	if err := shared.LevelDB.Delete(
+		[]byte(utils.FormCompositeKey("ticket", token)),
+		nil,
+	); err != nil {
+		shared.Logger.Error(errors.Wrapf(err, "failed to delete event tocket from LevelDB"))
+	}
+}
+
+
