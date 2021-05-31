@@ -75,11 +75,11 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 		stream = response.MetricReadingsStream{}
 		metric = models.Metric(metricID)
 		qMap = map[string]interface{}{
+			"record_type": model.ReadingsRecordType,
 			"asset_id": assetID,
 			fmt.Sprintf("values.%s", metricID): map[string]interface{}{
 				"$exists": true,
 			},
-			"record_type": model.ReadingsRecordType,
 		}
 	)
 
@@ -152,7 +152,7 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 // RemoveAll removes all models.MetricReadings records from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string { })
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string {})
 	if err != nil {
 		return shared.LoggedError(err, "failed to read from world state")
 	}

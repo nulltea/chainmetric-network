@@ -138,6 +138,10 @@ func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterfa
 		return shared.LoggedErrorf(err, "failed to remove requirements record with id: %s", id)
 	}
 
+	if err = ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: id}.Encode()); err != nil {
+		return shared.LoggedErrorf(err, "failed to emit event on requirements remove")
+	}
+
 	return nil
 }
 

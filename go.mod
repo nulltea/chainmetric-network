@@ -11,6 +11,6 @@ require (
 	github.com/rs/xid v1.2.1
 	github.com/spf13/viper v1.3.2
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/timoth-y/chainmetric-core v0.0.0-20210526004210-62cde276904b
+	github.com/timoth-y/chainmetric-core v0.0.0-20210531011854-b6d190056d3e
 	github.com/ztrue/shutdown v0.1.1
 )

@@ -15,5 +15,5 @@ func initEnv() {
 
 	viper.SetDefault("logging", "info")
 
-	viper.SetDefault("persistence_path", "./storage/")
+	viper.SetDefault("persistence_path", "app/storage")
 }

@@ -16,9 +16,9 @@ import (
 
 // EventSocketSubscriptionTicket defines subscription ticket of event socket for metric readings.
 type EventSocketSubscriptionTicket struct {
-	assetID string
-	metric models.Metric
-	expiry time.Time
+	AssetID string        `json:"asset_id"`
+	Metric  models.Metric `json:"metric"`
+	Expiry  time.Time     `json:"expiry"`
 }
 
 // BindToEventSocket creates EventSocketSubscriptionTicket for connected party,
@@ -31,9 +31,9 @@ func (rc *ReadingsContract) BindToEventSocket(ctx contractapi.TransactionContext
 		clientHash  = utils.Hash(clientID)
 		eventToken  = fmt.Sprintf("%s.%s.%s", assetID, metric, clientHash)
 		ticket      = EventSocketSubscriptionTicket{
-			assetID: assetID,
-			metric: models.Metric(metric),
-			expiry: timestamp.Add(time.Hour * 1),
+			AssetID: assetID,
+			Metric:  models.Metric(metric),
+			Expiry:  timestamp.Add(time.Hour * 1),
 		}
 	)
 
@@ -69,7 +69,7 @@ func (rc *ReadingsContract) sendToSocketListeners(
 	var now = time.Now()
 
 	for token, ticket := range rc.socketTickets {
-		if now.After(ticket.expiry) {
+		if now.After(ticket.Expiry) {
 			dropTicketBackup(token)
 			shared.Logger.Debug(fmt.Sprintf("event emitter '%s' expired, currently registered: %d",
 				token, len(rc.socketTickets),
@@ -78,8 +78,8 @@ func (rc *ReadingsContract) sendToSocketListeners(
 			continue
 		}
 
-		if ticket.assetID == readings.AssetID {
-			if value, ok := readings.Values[ticket.metric];  ok {
+		if ticket.AssetID == readings.AssetID {
+			if value, ok := readings.Values[ticket.Metric];  ok {
 				point := response.MetricReadingsPoint {
 					DeviceID: readings.DeviceID,
 					Location: readings.Location,
@@ -123,12 +123,18 @@ func (rc *ReadingsContract) recoverEventTicketsFromBackup() {
 			continue
 		}
 
-		if now.After(ticket.expiry) {
+		if now.After(ticket.Expiry) {
 			dropTicketBackup(token)
 			continue
 		}
 
 		rc.socketTickets[token] = ticket
+	}
+
+	if len(rc.socketTickets) != 0 {
+		shared.Logger.Debugf("Recovered %d event socket subscription tickets from persistence cache",
+			len(rc.socketTickets),
+		)
 	}
 }
 
