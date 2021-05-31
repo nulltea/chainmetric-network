@@ -1,10 +1,9 @@
 package shared
 
 import (
-	"os"
-
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/spf13/viper"
 )
 
 // BootstrapContract performs start sequence of the Smart Contract handler.
@@ -15,8 +14,8 @@ func BootstrapContract(contract contractapi.ContractInterface) {
 	}
 
 	server := &shim.ChaincodeServer{
-		CCID: ChaincodeID,
-		Address: ChaincodeAddress,
+		CCID: viper.GetString("ccid"),
+		Address: viper.GetString("address"),
 		CC: chaincode,
 		TLSProps: shim.TLSProperties{
 			Disabled: true,
@@ -26,6 +25,6 @@ func BootstrapContract(contract contractapi.ContractInterface) {
 	Logger.Info("Contract is up and running...")
 
 	if err = server.Start(); err != nil {
-		Logger.Fatalf("Error starting %s chaincode: %s", os.Getenv("CHAINCODE_NAME"), err)
+		Logger.Fatalf("Error starting %s chaincode: %s", viper.GetString("name"), err)
 	}
 }

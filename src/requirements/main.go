@@ -1,7 +1,10 @@
 package main
 
 import (
+	"syscall"
+
 	"github.com/timoth-y/chainmetric-contracts/shared"
+	"github.com/ztrue/shutdown"
 )
 
 func init() {
@@ -9,5 +12,8 @@ func init() {
 }
 
 func main() {
-	shared.BootstrapContract(NewRequirementsContract())
+	go shared.BootstrapContract(NewRequirementsContract())
+
+	shutdown.Add(shared.CloseCore)
+	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)
 }
