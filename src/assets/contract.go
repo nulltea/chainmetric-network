@@ -3,13 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/utils"
 
@@ -329,7 +327,8 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(model.AssetRecordType, []string{
 		utils.Hash(asset.SKU),
-		xid.NewWithTime(time.Now()).String(),
+		utils.Hash(asset.Type),
+		utils.Hash(asset.Holder),
 	})
 }
 

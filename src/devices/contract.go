@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/utils"
 
@@ -212,6 +210,6 @@ func (c *DevicesContract) save(
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(model.DeviceRecordType, []string{
 		utils.Hash(dev.Hostname),
-		xid.NewWithTime(time.Now()).String(),
+		utils.Hash(dev.Holder),
 	})
 }
