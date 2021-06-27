@@ -29,6 +29,8 @@ func NewReadingsContract() *ReadingsContract {
 	}
 	rc.recoverEventTicketsFromBackup()
 
+
+
 	return rc
 }
 
@@ -43,9 +45,13 @@ func (rc *ReadingsContract) ForAsset(
 			AssetID: assetID,
 			Streams: map[models.Metric]response.MetricReadingsStream{},
 		}
+		qMap = map[string]interface{}{
+			"record_type": model.ReadingsRecordType,
+			"asset_id": assetID,
+		}
 	)
 
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string{utils.Hash(assetID)})
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
@@ -78,15 +84,22 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 			fmt.Sprintf("values.%s", metricID): map[string]interface{}{
 				"$exists": true,
 			},
+			"timestamp": map[string]interface{}{
+				"$ne": nil,
+			},
 		}
 	)
 
-	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
 
 	readings := rc.drain(iter)
+
+	// sort.Slice(readings, func(i, j int) bool {
+	// 	return readings[i].Timestamp.Nanosecond() < readings[j].Timestamp.Nanosecond()
+	// })
 
 	for _, reading := range readings {
 		if value, ok := reading.Values[metric]; ok {
@@ -193,7 +206,6 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(model.ReadingsRecordType, []string{
 		utils.Hash(req.AssetID),
-		utils.Hash(req.DeviceID),
-		utils.Hash(req.Timestamp.String()),
+		utils.Hash(string(req.Encode())),
 	})
 }

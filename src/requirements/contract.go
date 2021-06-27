@@ -74,7 +74,7 @@ func (rc *RequirementsContract) ForAssets(
 		}
 	)
 
-	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
@@ -214,5 +214,6 @@ func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *mode
 	return ctx.GetStub().CreateCompositeKey(model.RequirementsRecordType, []string{
 		utils.Hash(req.AssetID),
 		utils.Hash(utils.MustEncode(req.Metrics.Metrics())),
+		utils.Hash(req.FromOrg),
 	})
 }

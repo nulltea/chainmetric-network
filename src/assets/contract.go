@@ -321,7 +321,7 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 
 	qMap["record_type"] = model.AssetRecordType
 
-	return shared.BuildQuery(qMap, nil, nil)
+	return shared.BuildQuery(qMap)
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
