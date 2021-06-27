@@ -10,6 +10,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.3.2
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/timoth-y/chainmetric-core v0.0.0-20210626165952-ce568d5110df
+	github.com/timoth-y/chainmetric-core v0.0.0-20210627221658-07365c2edb0d
 	github.com/ztrue/shutdown v0.1.1
 )

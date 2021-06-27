@@ -84,9 +84,6 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 			fmt.Sprintf("values.%s", metricID): map[string]interface{}{
 				"$exists": true,
 			},
-			"timestamp": map[string]interface{}{
-				"$ne": nil,
-			},
 		}
 	)
 
@@ -96,10 +93,6 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 	}
 
 	readings := rc.drain(iter)
-
-	// sort.Slice(readings, func(i, j int) bool {
-	// 	return readings[i].Timestamp.Nanosecond() < readings[j].Timestamp.Nanosecond()
-	// })
 
 	for _, reading := range readings {
 		if value, ok := reading.Values[metric]; ok {
