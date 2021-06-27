@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"fmt"
+
 	"github.com/timoth-y/chainmetric-core/utils"
 )
 
@@ -11,19 +13,37 @@ import (
 // `fields`: specifying which fields to be returned
 //
 // `sort`: expression containing how to sort selected records.
-func BuildQuery(selector map[string]interface{}, sort map[string]interface{}, fields []string) string {
+func BuildQuery(selector map[string]interface{}, sort ...string) string {
 	query := map[string]interface{}{
 		"selector": selector,
 	}
 
-	if len(fields) > 0 {
-		query["sort"] = sort
+	if len(sort) > 0 {
+		query["sort"] = bindSortingPairs("asc", sort...)
 	}
 
-	if len(fields) > 0 {
-		query["fields"] = fields
-	}
+	fmt.Println(utils.MustEncode(query))
 
 	return utils.MustEncode(query)
 }
 
+func bindSortingPairs(defaultValue string, kvs ...string) (res []map[string]string) {
+	res = make([]map[string]string, 0)
+	if len(kvs) % 2 != 0 {
+		kvs = append(kvs, defaultValue)
+	}
+
+	for i := 1; i < len(kvs); i += 2 {
+		sortMode := kvs[i]
+
+		if sortMode != "asc" && sortMode != "desc" {
+			sortMode = defaultValue
+		}
+
+		res = append(res, map[string]string{
+			kvs[i - 1]: sortMode,
+		})
+	}
+
+	return res
+}

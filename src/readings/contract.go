@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/utils"
 
@@ -31,6 +29,8 @@ func NewReadingsContract() *ReadingsContract {
 	}
 	rc.recoverEventTicketsFromBackup()
 
+
+
 	return rc
 }
 
@@ -45,9 +45,13 @@ func (rc *ReadingsContract) ForAsset(
 			AssetID: assetID,
 			Streams: map[models.Metric]response.MetricReadingsStream{},
 		}
+		qMap = map[string]interface{}{
+			"record_type": model.ReadingsRecordType,
+			"asset_id": assetID,
+		}
 	)
 
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string{utils.Hash(assetID)})
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
@@ -83,7 +87,7 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 		}
 	)
 
-	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, nil, nil))
+	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
 		return nil, shared.LoggedError(err, "failed to read from world state")
 	}
@@ -195,6 +199,6 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(model.ReadingsRecordType, []string{
 		utils.Hash(req.AssetID),
-		xid.NewWithTime(time.Now()).String(),
+		utils.Hash(string(req.Encode())),
 	})
 }

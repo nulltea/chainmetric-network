@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/timoth-y/chainmetric-contracts/model"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/models/requests"
@@ -35,7 +33,8 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 	var key string
 	if key, err = ctx.GetStub().CreateCompositeKey(model.CommandLogEntryRecordType, []string{
 		utils.Hash(req.DeviceID),
-		xid.NewWithTime(time.Now()).String(),
+		utils.Hash(string(req.Command)),
+		utils.Hash(req.IssuedAt.UTC().String()),
 	}); err != nil {
 		return shared.LoggedError(err, "failed to generate device command composite key")
 	}
@@ -45,7 +44,7 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 		Command: req.Command,
 		Args: req.Args,
 		Status: models.DeviceCmdProcessing,
-		Timestamp: time.Now().UTC(),
+		Timestamp: req.IssuedAt.UTC(),
 	}).Encode()); err != nil {
 		return shared.LoggedError(err, "failed to log device command in blockchain ledger")
 	}
