@@ -23,168 +23,100 @@ such Contracts are written in Go and configured to be deployed as Kubernetes ser
 
 ### Assets contract
 
-#### Retrieve single asset by ID
+#### Transactions
 
-**`Retrieve`** retrieves single `models.Asset` record from blockchain ledger by a given `id`.
+| Transaction  | Arguments                    | Response                           | Description                                                      |
+| :----------- | :--------------------------- | :--------------------------------- | :--------------------------------------------------------------- |
+| **Retrieve** | `id`                         | [`Asset`][asset model]             | Retrieves single record from ledger by a given ID                |
+| **All**      | -                            | `[]Asset`                          | Retrieves all records from ledger                                |
+| **Query**    | [`AssetsQuery`][asset query] | [`AssetsResponse`][asset response] | Performs rich query against ledger in search of specific records |
+| **Upsert**   | `Asset`                      | `id`                               | Inserts new  record into the ledger or updates existing one      |
+| **Transfer** | `id`, `holder`               | -                                  | Changes holder of the specific asset                             |
+| **Remove**   | `Asset`                      | -                                  | Removes record from the ledger by given ID                       |
+
+#### Example
 
 ```go
 asset, err := network.GetContract("assets").EvaluateTransaction("Retrieve", id)
 ```
-Response model:
 
-```json
-{
-  "id": "string",
-  "sku": "string",
-  "name": "string",
-  "type": "string",
-  "info": "string",
-  "holder": "string",
-  "state": "string",
-  "location": {
-    "name": "string",
-    "latitude": 0,
-    "longitude": 0
-  },
-  "tags": [
-    "string"
-  ]
-}
-```
-
-#### Get all assets
-
-**`All`** retrieves all `models.Asset` records from blockchain ledger.
-
-```go
-assets, err := network.GetContract("assets").EvaluateTransaction("All")
-```
-
-#### Query assets
-
-**`Query`** performs rich query against blockchain ledger in search of specific `models.Asset` records.
-
-To support pagination it returns results wrapped in `response.AssetsResponse`,
-where 'scroll_id' will contain special key for continuing from where the previous request ended.
-
-Request model:
-
-```json
-{
-  "holder": "string",
-  "state": "string",
-  "location": {
-    "location": {
-      "name": "",
-      "latitude": 0,
-      "longitude": 0
-    },
-    "distance": 0
-  },
-  "tag": [
-    "string"
-  ],
-  "scroll_id": "string"
-}
-```
-
-```go
-assets, err := network.GetContract("assets").EvaluateTransaction("Query", query)
-```
-
-Response model is same as `[]models.Asset` but with addition of `scroll_id` string value.
-
-#### Insert or update asset
-
-**`Upsert`** inserts new `models.Asset` record into the blockchain ledger or updates existing one.
-
-```go
-id, err := network.GetContract("assets").EvaluateTransaction("Update", asset)
-```
-
-#### Transfer asset ownership
-
-**`Transfer`** changes holder of the specific `models.Asset`.
-
-```go
-err := network.GetContract("assets").EvaluateTransaction("Transfer", id, newHolder)
-```
-
-#### Delete assets from ledger
-
-**`Remove`** removes `models.Asset` from the blockchain ledger.
-
-
-```go
-err := network.GetContract("assets").EvaluateTransaction("Remove", id)
-```
+[asset model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/asset.go#L6
+[asset query]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requests/assets.go#L11
+[asset response]: https://github.com/timoth-y/chainmetric-contracts/blob/main/model/response/assets.go#L12
 
 ### Devices contract
 
-#### Retrieve single device by ID
+#### Transactions
 
-**`Retrieve`** retrieves single `models.Device` record from blockchain ledger  by a given `id`.
+| Transaction              | Arguments                                                        | Response                                     | Description                                               |
+| :----------------------- | :--------------------------------------------------------------- | :------------------------------------------- | :-------------------------------------------------------- |
+| **Retrieve**             | `id`                                                             | [`Device`][device model]                     | Retrieves single record from ledger by a given ID         |
+| **All**                  | -                                                                | `[]Device`                                   | Retrieves all records from ledger                         |
+| **Register**             | `[]Device`                                                       | `id`                                         | Creates and registers new device in the blockchain ledger |
+| **Update**               | `id`, `Device`                                                   | `Device`                                     | Updates device state in ledger with requested properties  |
+| **Unbind**               | `id`                                                             | -                                            | Removes record from the ledger by given ID                |
+| **Command**              | [`DeviceCommandRequest`][command request]                        | -                                            | Handles execution requests for devices                    |
+| **SubmitCommandResults** | `entryID`, [`DeviceCommandResultsSubmitRequest`][command result] | -                                            | Updates command log entry in the ledger                   |
+| **CommandsLog**          | `deviceID`                                                       | [`DeviceCommandLogEntry`][command log entry] | Retrieves entire commands log from the blockchain ledger  | 
 
-```go
-device, err := network.GetContract("devices").EvaluateTransaction("Retrieve", id)
-```
-Response model:
+[device model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/device.go
+[command request]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requests/commands.go#L13
+[command result]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requests/commands.go#L74
+[command log entry]: https://github.com/timoth-y/chainmetric-core/blob/main/models/command.go#L21
 
-```json
-{
-  "id": "string",
-  "ip": "string",
-  "mac": "string",
-  "name": "string",
-  "hostname": "string",
-  "profile": "string",
-  "supports": [
-    "string"
-  ],
-  "holder": "string",
-  "state": "string",
-  "battery": {
-    "level": 0,
-    "plugged": true
-  },
-  "location": {
-    "name": "string",
-    "latitude": 0,
-    "longitude": 0
-  }
-}
-```
-
-#### Retrieve all devices
-
-**`All`** retrieves all `models.Device` records from blockchain ledger.
-
-```go
-devices, err := network.GetContract("devices").EvaluateTransaction("All")
-```
-
-#### Register device on network
-
-**`Register`** creates and registers new device in the blockchain ledger.
+#### Example
 
 ```go
 id, err := network.GetContract("devices").EvaluateTransaction("Register", device)
 ```
-#### Update device
 
-**`Update`** updates `models.Device` state in blockchain ledger with requested properties.
+### Requirements contact
+
+#### Transactions
+
+| Transaction   | Arguments     | Response                             | Description                                                         |
+| :------------ | :------------ | :----------------------------------- | :------------------------------------------------------------------ |
+| **Retrieve**  | `id`          | [`Requirements`][requirements model] | Retrieves single record from ledger by a given ID                   |
+| **ForAsset**  | `assetID`     | `[]Requirements`                     | Retrieves all requirements from ledger for specific asset           |
+| **ForAssets** | `Requiremnts` | `[]Requirements`                     | Retrieves all requirements from ledger for specific multiply assets |
+| **Assign**    | `Asset`       | `id`                                 | Assigns requirements to an asset and stores it on the ledger        |
+| **Revoke**    | `id`          | -                                    | Revokes requirements from an asset and removes it from the ledger   |
+
+[requirements model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requirements.go#L18
+
+#### Example
 
 ```go
-id, err := network.GetContract("devices").EvaluateTransaction("Update", id, device)
+requirements, err := network.GetContract("requirements").EvaluateTransaction("ForAssets", assetsIDs)
 ```
 
-#### Unbind device
-
-**`Unbind`** removes `models.Device` from the blockchain ledger.
+#### Example
 
 ```go
-id, err := network.GetContract("devices").EvaluateTransaction("Unbind", id)
+requirements, err := network.GetContract("requirements").EvaluateTransaction("ForAssets", assetsIDs)
 ```
+
+### Readings contact
+
+#### Transactions
+
+| Transaction           | Arguments                          | Response                                      | Description                                                             |
+| :-------------------- | :--------------------------------- | :-------------------------------------------- | :---------------------------------------------------------------------- |
+| **ForAsset**          | `assetID`                          | [`MetricReadingsResponse`][readings response] | Retrieves all records records from ledger for specific asset            |
+| **ForMetric**         | `assetID`, `metricID`              | `MetricReadingsResponse`                      | Retrieves all records records from ledger for specific asset and metric |
+| **Post**              | [`MetricReadings`][readings model] | `id`                                          | Inserts new metric readings record into the ledger                      |
+| **BindToEventSocket** | `assetID`, `metricID`              | `eventToken`                                  | Creates event socket subscription ticket for connected party, so that each posted readings record, which satisfies client request for given asset ID and metric, would be send directly to it via event streaming |
+| **CloseEventSocket**  | `eventToken`                       | -                                             | Revokes event socket subscription ticket for connected party            |
+
+#### Example
+
+```go
+readings, err := network.GetContract("readings").EvaluateTransaction("ForMetric", assetsID, metricID)
+```
+
+[readings model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requirements.go#L18
+[readings response]: https://github.com/timoth-y/chainmetric-core/blob/main/models/readings.go#L9
+
 
 ## Deployment
 
