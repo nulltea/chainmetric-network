@@ -1,4 +1,4 @@
-# ChainMetric: Smart Contracts
+# Chainmetric: Smart Contracts
 
 [![golang badge]][golang]&nbsp;
 [![commit activity badge]][repo commit activity]&nbsp;
@@ -48,16 +48,16 @@ asset, err := network.GetContract("assets").EvaluateTransaction("Retrieve", id)
 
 #### Transactions
 
-| Transaction              | Arguments                                                        | Response                                     | Description                                               |
-| :----------------------- | :--------------------------------------------------------------- | :------------------------------------------- | :-------------------------------------------------------- |
-| **Retrieve**             | `id`                                                             | [`Device`][device model]                     | Retrieves single record from ledger by a given ID         |
-| **All**                  | -                                                                | `[]Device`                                   | Retrieves all records from ledger                         |
-| **Register**             | `[]Device`                                                       | `id`                                         | Creates and registers new device in the blockchain ledger |
-| **Update**               | `id`, `Device`                                                   | `Device`                                     | Updates device state in ledger with requested properties  |
-| **Unbind**               | `id`                                                             | -                                            | Removes record from the ledger by given ID                |
-| **Command**              | [`DeviceCommandRequest`][command request]                        | -                                            | Handles execution requests for devices                    |
-| **SubmitCommandResults** | `entryID`, [`DeviceCommandResultsSubmitRequest`][command result] | -                                            | Updates command log entry in the ledger                   |
-| **CommandsLog**          | `deviceID`                                                       | [`DeviceCommandLogEntry`][command log entry] | Retrieves entire commands log from the blockchain ledger  | 
+| Transaction              | Arguments                                           | Response                                     | Description                                               |
+| :----------------------- | :-------------------------------------------------- | :------------------------------------------- | :-------------------------------------------------------- |
+| **Retrieve**             | `id`                                                | [`Device`][device model]                     | Retrieves single record from ledger by a given ID         |
+| **All**                  | -                                                   | `[]Device`                                   | Retrieves all records from ledger                         |
+| **Register**             | `[]Device`                                          | `id`                                         | Creates and registers new device in the blockchain ledger |
+| **Update**               | `id`, `Device`                                      | `Device`                                     | Updates device state in ledger with requested properties  |
+| **Unbind**               | `id`                                                | -                                            | Removes record from the ledger by given ID                |
+| **Command**              | [`DeviceCommandRequest`][command request]           | -                                            | Handles execution requests for devices                    |
+| **SubmitCommandResults** | `entryID`, [`CommandResultsSubmit`][command result] | -                                            | Updates command log entry in the ledger                   |
+| **CommandsLog**          | `deviceID`                                          | [`DeviceCommandLogEntry`][command log entry] | Retrieves entire commands log from the blockchain ledger  | 
 
 [device model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/device.go
 [command request]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requests/commands.go#L13
@@ -78,8 +78,8 @@ id, err := network.GetContract("devices").EvaluateTransaction("Register", device
 | :------------ | :------------ | :----------------------------------- | :------------------------------------------------------------------ |
 | **Retrieve**  | `id`          | [`Requirements`][requirements model] | Retrieves single record from ledger by a given ID                   |
 | **ForAsset**  | `assetID`     | `[]Requirements`                     | Retrieves all requirements from ledger for specific asset           |
-| **ForAssets** | `Requiremnts` | `[]Requirements`                     | Retrieves all requirements from ledger for specific multiply assets |
-| **Assign**    | `Asset`       | `id`                                 | Assigns requirements to an asset and stores it on the ledger        |
+| **ForAssets** | `assetIDs`    | `[]Requirements`                     | Retrieves all requirements from ledger for specific multiply assets |
+| **Assign**    | `Requiremnts` | `id`                                 | Assigns requirements to an asset and stores it on the ledger        |
 | **Revoke**    | `id`          | -                                    | Revokes requirements from an asset and removes it from the ledger   |
 
 [requirements model]: https://github.com/timoth-y/chainmetric-core/blob/main/models/requirements.go#L18
@@ -122,7 +122,7 @@ readings, err := network.GetContract("readings").EvaluateTransaction("ForMetric"
 
 [Chaincodes][chaincode] (alternative to Smart Contracts) in Hyperledger Fabric infrastructure can be deployed both by embedding their source code into the blockchain peers and by deploying them [as external services][chaincode as external service], which is a way more versatile option especially for Kubernetes cluster environment where such Chaincodes can be deployed as a pods.
 
-To deploy Smart Contract for the first time it is required to [pack its configuration][packing chaincode] in an archive and then use it with `peer lifecycle commands`. All required steps are conveniently aggregated in a single command of `network.sh` [script][network.sh script] from the [network repository][chainmetric network repo]. To perform Chaincode's initial deployment use `deploy` command with `cc` action as following:
+For chaincodes initial deployment or further updates use `deploy cc` command as following: 
 
 ```shell
 fabnctl deploy cc --arch=arm64 --domain=example.network --chaincode=example -C=example-channel \
@@ -132,7 +132,7 @@ fabnctl deploy cc --arch=arm64 --domain=example.network --chaincode=example -C=e
    --registry=dockerhubuser ./chaincodes/example
 ```
 
-After this whenever an upgrade must be performed simply add `--upgrade` flag to the previously executed command. That will rebuild the docker image, send it to the dedicated registry and redeploy the Helm chart.
+For more detailed instructions please refer to `fabnctl` [documentation](https://github.com/timoth-y/fabnctl#deploy-chaincodes).
 
 ## Roadmap
 
@@ -171,6 +171,8 @@ Licensed under the [Apache 2.0][license file].
 [hyperledger fabric url]: https://www.hyperledger.org/use/fabric
 [kubernetes url]: https://kubernetes.io
 [license url]: https://www.apache.org/licenses/LICENSE-2.0
+
+[fabnctl]: https://github.com/timoth-y/fabnctl
 
 [network deployment section]: https://github.com/timoth-y/chainmetric-network#Deployment
 [network.sh script]: https://github.com/timoth-y/chainmetric-network/blob/main/network.sh
