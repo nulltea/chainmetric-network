@@ -82,7 +82,7 @@ func (rc *RequirementsContract) ForAssets(
 	return rc.drain(iter), nil
 }
 
-// Assign assigns models.Requirements to an asset and stores it in the blockchain ledger.
+// Assign assigns models.Requirements to an asset and stores it on the blockchain ledger.
 func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterface, data string) (string, error) {
 	var (
 		requirements = &models.Requirements{}
@@ -122,7 +122,7 @@ func (rc *RequirementsContract) Exists(ctx contractapi.TransactionContextInterfa
 	return data != nil, nil
 }
 
-// Revoke revokes assignment of the models.Requirements from asset and removes it from the blockchain ledger.
+// Revoke revokes assignment of the models.Requirements from an asset and removes it from the blockchain ledger.
 func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := rc.Exists(ctx, id); if err != nil {
 		return err
