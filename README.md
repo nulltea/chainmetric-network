@@ -90,12 +90,6 @@ id, err := network.GetContract("devices").EvaluateTransaction("Register", device
 requirements, err := network.GetContract("requirements").EvaluateTransaction("ForAssets", assetsIDs)
 ```
 
-#### Example
-
-```go
-requirements, err := network.GetContract("requirements").EvaluateTransaction("ForAssets", assetsIDs)
-```
-
 ### Readings contact
 
 #### Transactions
