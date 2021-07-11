@@ -125,11 +125,11 @@ readings, err := network.GetContract("readings").EvaluateTransaction("ForMetric"
 For chaincodes initial deployment or further updates use `deploy cc` command as following: 
 
 ```shell
-fabnctl deploy cc --arch=arm64 --domain=example.network --chaincode=example -C=example-channel \
+fabnctl deploy cc --arch=arm64 --domain=chainmetric.network --chaincode=assets -C=supply-channel \
    -o=org1 -p=peer0 \
    -o=org2 -p=peer0 \
    -o=org3 -p=peer0 \
-   --registry=dockerhubuser ./chaincodes/example
+   --registry=dockerhubuser ./chaincodes
 ```
 
 For more detailed instructions please refer to `fabnctl` [documentation](https://github.com/timoth-y/fabnctl#deploy-chaincodes).
