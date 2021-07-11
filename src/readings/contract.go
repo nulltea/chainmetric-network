@@ -29,8 +29,6 @@ func NewReadingsContract() *ReadingsContract {
 	}
 	rc.recoverEventTicketsFromBackup()
 
-
-
 	return rc
 }
 
