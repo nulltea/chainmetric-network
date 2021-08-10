@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.7.3
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20200424173110-d7076418f212
 	github.com/hyperledger/fabric-contract-api-go v1.1.1
 	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23

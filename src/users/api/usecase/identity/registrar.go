@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
 	model "github.com/timoth-y/chainmetric-contracts/model/user"
@@ -12,6 +13,7 @@ import (
 func Register(request model.RegistrationRequest) (*model.User, error) {
 	var (
 		user = &model.User{
+			ID:        uuid.NewString(),
 			Firstname: request.Firstname,
 			Lastname:  request.Lastname,
 			Email:     request.Email,
@@ -31,4 +33,9 @@ func Register(request model.RegistrationRequest) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func Enroll(req model.EnrollmentRequest) error {
+
+	return nil
 }
