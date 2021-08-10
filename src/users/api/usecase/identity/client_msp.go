@@ -13,18 +13,18 @@ var (
 	client *msp.Client
 )
 
+// Init performs initialization of the identity package.
 func Init() error {
 	var err error
-
-	if err = initWallet(); err != nil {
-		return err
-	}
 
 	if sdk, err = fabsdk.New(config.FromFile(viper.GetString("api.connection_config_path"))); err != nil {
 		return errors.Wrap(err, "failed to connect to the blockchain network")
 	}
 
-	if client, err = msp.New(sdk.Context()); err != nil {
+	if client, err = msp.New(sdk.Context(
+		fabsdk.WithUser("Admin"),
+		fabsdk.WithOrg(viper.GetString("api.organization")),
+	)); err != nil {
 		return err
 	}
 

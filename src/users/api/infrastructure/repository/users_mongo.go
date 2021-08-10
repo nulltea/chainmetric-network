@@ -7,6 +7,7 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/model/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // UsersMongo defines users repository for MongoDB database.
@@ -23,12 +24,12 @@ func NewUserMongo(client *mongo.Client) *UsersMongo {
 	}
 }
 
-// Store stores user in the database.
-func (r *UsersMongo) Store(u user.User) error {
+// Upsert stores user in the database.
+func (r *UsersMongo) Upsert(u user.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	defer cancel()
 
-	_, err := r.collection.InsertOne(ctx, u)
+	_, err := r.collection.UpdateOne(ctx, u, options.Update().SetUpsert(true))
 
 	return err
 }

@@ -34,7 +34,7 @@ type User struct {
 	// Role of the user
 	//
 	// example: admin
-	Role string `json:"role" bson:"role"`
+	Role string `json:"role,omitempty" bson:"role,omitempty"`
 	// User initial registration date and time
 	//
 	// example: 2021-01-02T15:04:05Z07:00
@@ -44,7 +44,7 @@ type User struct {
 	// Date of user's contract expiration if defined
 	//
 	// example: 2021-05-02T15:04:05Z07:00
-	ExpireAt *time.Time `json:"expire_at" validate:"datetime"`
+	ExpireAt *time.Time `json:"expire_at,omitempty" bson:"expire_at,omitempty"`
 }
 
 // IdentityName forms the unique name of user's identity.
