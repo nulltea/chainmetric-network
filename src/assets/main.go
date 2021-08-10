@@ -14,6 +14,5 @@ func init() {
 func main() {
 	go shared.BootstrapContract(NewAssetsContact())
 
-	shutdown.Add(shared.CloseCore)
 	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)
 }

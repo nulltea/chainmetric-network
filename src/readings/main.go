@@ -9,11 +9,12 @@ import (
 
 func init() {
 	shared.InitCore()
+	shared.InitLevelDB()
 }
 
 func main() {
 	go shared.BootstrapContract(NewReadingsContract())
 
-	shutdown.Add(shared.CloseCore)
+	shutdown.Add(shared.CloseLevelDB)
 	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)
 }
