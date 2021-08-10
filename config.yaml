@@ -1,0 +1,4 @@
+api:
+  wallet_path: data/wallet
+  organization: chipa-inu
+  admin_cert_path: data/
