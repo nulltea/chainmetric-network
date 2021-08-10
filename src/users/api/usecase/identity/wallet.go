@@ -1,4 +1,4 @@
-package crypto
+package identity
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ var (
 	wallet *gateway.Wallet
 )
 
-func Init() error {
+func initWallet() error {
 	var (
 		path = viper.GetString("api.wallet_path")
 		err  error
