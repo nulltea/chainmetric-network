@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	_ "github.com/timoth-y/chainmetric-contracts/src/users/api/docs"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/routes/auth"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/routes/users"
+	"github.com/timoth-y/chainmetric-contracts/src/users/api/auth"
+	"github.com/timoth-y/chainmetric-contracts/src/users/api/users"
+	_ "github.com/timoth-y/chainmetric-contracts/src/users/docs"
 )
 
 func Setup(engine *gin.Engine) {

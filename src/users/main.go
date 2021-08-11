@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/timoth-y/chainmetric-contracts/shared"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/routes"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/usecase/identity"
+	"github.com/timoth-y/chainmetric-contracts/src/users/api"
+	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
 )
 
 func init() {
@@ -28,7 +28,7 @@ func init() {
 // @BasePath /
 func main() {
 	engine := gin.Default()
-	routes.Setup(engine)
+	api.Setup(engine)
 
 	engine.Run(":8080")
 }

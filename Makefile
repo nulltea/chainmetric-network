@@ -1,2 +1,2 @@
 swagger:
-	swag init -g ./src/users/api/main.go -o ./src/users/api/docs
+	swag init -g ./src/users/main.go -o ./src/users/docs

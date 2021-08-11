@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	model "github.com/timoth-y/chainmetric-contracts/model/user"
 	"github.com/timoth-y/chainmetric-contracts/shared"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-contracts/src/users/infrastructure/repository"
 )
 
 // Register performs users initial registration.
