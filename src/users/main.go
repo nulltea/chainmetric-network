@@ -10,12 +10,12 @@ import (
 func init() {
 	shared.InitCore()
 	shared.InitMongoDB()
-	identity.Init()
+	shared.MustExecute(identity.Init, "failed to initialize identity package")
 }
 
 func main() {
 	engine := gin.Default()
 	api.Setup(engine)
 
-	engine.Run(":8080")
+	_ = engine.Run(":8080")
 }

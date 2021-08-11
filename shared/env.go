@@ -22,7 +22,7 @@ func initEnv() {
 	viper.SetDefault("api.domain", "chainmetric.network")
 	viper.SetDefault("api.wallet_path", "data/wallet")
 	viper.SetDefault("api.crypto_path", "data/crypto")
-	viper.SetDefault("api.connection_config_path", "data/connection.yaml")
+	viper.SetDefault("api.connection_config_path", "connection.yaml")
 
 	viper.SetDefault("mongo_enabled", true)
 	viper.SetDefault("mongo_address", "mongodb://localhost:27017")
@@ -34,4 +34,11 @@ func initEnv() {
 	viper.SetDefault("mongo_tls", false)
 	viper.SetDefault("mongo_ca_cert_path", "/data/certs/mongodb-ca-cert.pem")
 	viper.SetDefault("mongo_database", "chainmetric_identity")
+
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("../")
+
+	_ = viper.ReadInConfig()
 }
