@@ -7,23 +7,23 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	model "github.com/timoth-y/chainmetric-contracts/model/user"
-	"github.com/timoth-y/chainmetric-contracts/src/users/presenter"
+	"github.com/timoth-y/chainmetric-contracts/src/users/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
 )
 
-// handleEnroll ...
-// @Summary Enroll new user
-// @Description Generates signing cryptographic identity for user and confirms one.
+// handleRegister ...
+// @Summary User registration
+// @Description Request user initial registration.
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param register body user.EnrollmentRequest true "Request to enroll new user"
-// @Success 200
+// @Param register body user.RegistrationRequest true "Request to register new user"
+// @Success 200 {object} user.User
 // @Failure 400 {object} presenter.HTTPError
 // @Failure 500 {object} presenter.HTTPError
-// @Router /users/enroll [get]
-func handleEnroll(ctx *gin.Context) {
-	var req model.EnrollmentRequest
+// @Router /users/register [get]
+func handleRegister(ctx *gin.Context) {
+	var req model.RegistrationRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		presenter.AbortWithError(ctx, http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
@@ -33,9 +33,10 @@ func handleEnroll(ctx *gin.Context) {
 		presenter.PresentValidation(ctx, err)
 	}
 
-	if err := identity.Enroll(req); err != nil {
+	user, err := identity.Register(req)
+	if err != nil {
 		presenter.AbortWithError(ctx, http.StatusInternalServerError, err)
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.JSON(http.StatusOK, user)
 }

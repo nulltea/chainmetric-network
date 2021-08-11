@@ -11,4 +11,4 @@
 
 // @host identity.chainmetric.network
 // @BasePath /
-package main
+package api
