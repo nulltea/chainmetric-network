@@ -11,11 +11,22 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/src/users/api/usecase/identity"
 )
 
+// handleEnroll ...
+// @Summary Enroll new user
+// @Description Generates signing cryptographic identity for user and confirms one.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param register body user.EnrollmentRequest true "Request to enroll new user"
+// @Success 200
+// @Failure 400 {object} presenter.HTTPError
+// @Failure 500 {object} presenter.HTTPError
+// @Router /users/enroll [get]
 func handleEnroll(ctx *gin.Context) {
 	var req model.EnrollmentRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
+		presenter.AbortWithError(ctx, http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
 	}
 
 	if err := validator.New().Struct(req); err != nil {
@@ -23,7 +34,7 @@ func handleEnroll(ctx *gin.Context) {
 	}
 
 	if err := identity.Enroll(req); err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		presenter.AbortWithError(ctx, http.StatusInternalServerError, err)
 	}
 
 	ctx.Status(http.StatusOK)

@@ -31,7 +31,7 @@ func initEnv() {
 	viper.SetDefault("mongo_auth", false)
 	viper.SetDefault("mongo_username", "")
 	viper.SetDefault("mongo_password", "")
-	viper.SetDefault("mongo_tls", true)
+	viper.SetDefault("mongo_tls", false)
 	viper.SetDefault("mongo_ca_cert_path", "/data/certs/mongodb-ca-cert.pem")
 	viper.SetDefault("mongo_database", "chainmetric_identity")
 }

@@ -25,7 +25,7 @@ func InitMongoDB() {
 		return
 	}
 
-	opts.ApplyURI(viper.GetString("mongo_endpoint"))
+	opts.ApplyURI(viper.GetString("mongo_address"))
 	opts.SetConnectTimeout(viper.GetDuration("mongo_connection_timeout"))
 
 	if viper.GetBool("mongo_auth") {

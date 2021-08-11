@@ -11,11 +11,22 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/src/users/api/usecase/identity"
 )
 
+// handleRegister ...
+// @Summary User registration
+// @Description Request user initial registration.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param register body user.RegistrationRequest true "Request to register new user"
+// @Success 200 {object} user.User
+// @Failure 400 {object} presenter.HTTPError
+// @Failure 500 {object} presenter.HTTPError
+// @Router /users/register [get]
 func handleRegister(ctx *gin.Context) {
 	var req model.RegistrationRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
+		presenter.AbortWithError(ctx, http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
 	}
 
 	if err := validator.New().Struct(req); err != nil {
@@ -24,7 +35,7 @@ func handleRegister(ctx *gin.Context) {
 
 	user, err := identity.Register(req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		presenter.AbortWithError(ctx, http.StatusInternalServerError, err)
 	}
 
 	ctx.JSON(http.StatusOK, user)
