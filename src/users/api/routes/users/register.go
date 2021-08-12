@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
-	model "github.com/timoth-y/chainmetric-contracts/model/user"
+	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 	"github.com/timoth-y/chainmetric-contracts/src/users/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
 )

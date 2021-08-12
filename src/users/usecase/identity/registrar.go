@@ -6,15 +6,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
-	model "github.com/timoth-y/chainmetric-contracts/model/user"
-	"github.com/timoth-y/chainmetric-contracts/shared"
-	"github.com/timoth-y/chainmetric-contracts/src/users/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-contracts/shared/model/user"
 )
 
 // Register performs users initial registration.
-func Register(request model.RegistrationRequest) (*model.User, error) {
+func Register(request user.RegistrationRequest) (*user.User, error) {
 	var (
-		user = &model.User{
+		user = &user.User{
 			ID:        uuid.NewString(),
 			Firstname: request.Firstname,
 			Lastname:  request.Lastname,
@@ -30,7 +30,7 @@ func Register(request model.RegistrationRequest) (*model.User, error) {
 		return nil, errors.Wrap(err, "failed to register user")
 	}
 
-	if err := repository.NewUserMongo(shared.MongoDB).Upsert(*user); err != nil {
+	if err := repository.NewUserMongo(core.MongoDB).Upsert(*user); err != nil {
 		return nil, errors.Wrap(err, "failed to store user")
 	}
 
@@ -38,9 +38,9 @@ func Register(request model.RegistrationRequest) (*model.User, error) {
 }
 
 // Enroll generates msp.SigningIdentity for user and confirms one.
-func Enroll(req model.EnrollmentRequest) error {
+func Enroll(req user.EnrollmentRequest) error {
 	var (
-		repo = repository.NewUserMongo(shared.MongoDB)
+		repo = repository.NewUserMongo(core.MongoDB)
 	)
 
 	user, err := repo.GetByID(req.UserID)

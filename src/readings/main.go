@@ -3,18 +3,18 @@ package main
 import (
 	"syscall"
 
-	"github.com/timoth-y/chainmetric-contracts/shared"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/ztrue/shutdown"
 )
 
 func init() {
-	shared.InitCore()
-	shared.InitLevelDB()
+	core.InitCore()
+	core.InitLevelDB()
 }
 
 func main() {
-	go shared.BootstrapContract(NewReadingsContract())
+	go core.BootstrapContract(NewReadingsContract())
 
-	shutdown.Add(shared.CloseLevelDB)
+	shutdown.Add(core.CloseLevelDB)
 	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)
 }

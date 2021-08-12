@@ -1,9 +1,10 @@
-package shared
+package utils
 
 import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
 )
 
 // Iterate performs iteration over state query results calling `fn` for each record.
@@ -13,18 +14,18 @@ func Iterate(
 ) {
 	defer func() {
 		if err := iter.Close(); err != nil {
-			Logger.Error(errors.Wrap(err, "failed to close state query iterator"))
+			core.Logger.Error(errors.Wrap(err, "failed to close state query iterator"))
 		}
 	}()
 
 	for iter.HasNext() {
 		result, err := iter.Next(); if err != nil {
-			Logger.Error(errors.Wrap(err, "failed to iterate over records"))
+			core.Logger.Error(errors.Wrap(err, "failed to iterate over records"))
 			continue
 		}
 
 		if err := fn(result.Key, result.Value); err != nil {
-			Logger.Error(err)
+			core.Logger.Error(err)
 		}
 	}
 }
@@ -62,7 +63,7 @@ func LoggedError(err error, msg string) error {
 	}
 
 	err = errors.Wrap(err, msg)
-	defer Logger.Error(err)
+	defer core.Logger.Error(err)
 
 	return err
 }
@@ -74,7 +75,7 @@ func LoggedErrorf(err error, format string, args ...interface{}) error {
 	}
 
 	err = errors.Wrapf(err, format, args)
-	defer Logger.Error(err)
+	defer core.Logger.Error(err)
 
 	return err
 }
@@ -83,7 +84,7 @@ func LoggedErrorf(err error, format string, args ...interface{}) error {
 // Use `msg` to specify details of error to wrap by.
 func MustExecute(fn func() error, msg string) {
 	if err := fn(); err != nil {
-		Logger.Fatal(errors.Wrap(err, msg))
+		core.Logger.Fatal(errors.Wrap(err, msg))
 	}
 }
 
@@ -91,6 +92,6 @@ func MustExecute(fn func() error, msg string) {
 // Use `msg` to specify details of error to wrap by.
 func Execute(fn func() error, msg string) {
 	if err := fn(); err != nil {
-		Logger.Error(errors.Wrap(err, msg))
+		core.Logger.Error(errors.Wrap(err, msg))
 	}
 }

@@ -8,15 +8,15 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/pkg/errors"
-	"github.com/timoth-y/chainmetric-contracts/model"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-contracts/shared/model/couchdb"
+	"github.com/timoth-y/chainmetric-contracts/shared/model/response"
+	utils2 "github.com/timoth-y/chainmetric-contracts/shared/utils"
 	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
 	"github.com/timoth-y/chainmetric-core/models/requests"
-
-	"github.com/timoth-y/chainmetric-contracts/model/response"
-	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 // AssetsContract implements assets-managing Smart Contract transaction handlers.
@@ -32,7 +32,7 @@ func NewAssetsContact() *AssetsContract {
 // Retrieve retrieves single models.Asset record from blockchain ledger by a given `id`.
 func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Asset, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return nil, shared.LoggedError(err, "failed to read from world state")
+		return nil, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
@@ -44,9 +44,9 @@ func (ac *AssetsContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 
 // All retrieves all models.Asset records from blockchain ledger.
 func (ac *AssetsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Asset, error) {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.AssetRecordType, []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.AssetRecordType, []string {})
 	if err != nil {
-		return nil, shared.LoggedError(err, "failed to read from world state")
+		return nil, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	return ac.drain(iter, nil), nil
@@ -60,11 +60,11 @@ func (ac *AssetsContract) QueryRaw(
 	queryPayload string,
 ) ([]*models.Asset, error) {
 	query, err := requests.AssetsQuery{}.Decode([]byte(queryPayload)); if err != nil {
-		return nil, shared.LoggedError(err, "failed to deserialize input")
+		return nil, utils2.LoggedError(err, "failed to deserialize input")
 	}
 
 	iter, err := ctx.GetStub().GetQueryResult(buildDBQuery(query)); if err != nil {
-		return nil, shared.LoggedError(err, "failed to read from world state")
+		return nil, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	return ac.drain(iter, func(a *models.Asset) bool {
@@ -88,7 +88,7 @@ func (ac *AssetsContract) Query(
 	)
 
 	query, err := requests.AssetsQuery{}.Decode([]byte(queryPayload)); if err != nil {
-		return nil, shared.LoggedError(err, "failed to deserialize input")
+		return nil, utils2.LoggedError(err, "failed to deserialize input")
 	}
 
 	if query.Limit > 0 {
@@ -99,7 +99,7 @@ func (ac *AssetsContract) Query(
 			query.Limit,
 			query.ScrollID,
 		); err != nil {
-			return nil, shared.LoggedError(err, "failed to read from world state")
+			return nil, utils2.LoggedError(err, "failed to read from world state")
 		}
 
 		if md.GetFetchedRecordsCount() == query.Limit {
@@ -107,7 +107,7 @@ func (ac *AssetsContract) Query(
 		}
 	} else {
 		if iter, err = ctx.GetStub().GetQueryResult(buildDBQuery(query)); err != nil {
-			return nil, shared.LoggedError(err, "failed to read from world state")
+			return nil, utils2.LoggedError(err, "failed to read from world state")
 		}
 	}
 
@@ -127,13 +127,13 @@ func (ac *AssetsContract) Query(
 		ids[i] = results[i].ID
 	}
 
-	reqResp, err := shared.CrossChaincodeCall(ctx, "requirements", "ForAssets", utils.MustEncode(ids))
+	reqResp, err := utils2.CrossChaincodeCall(ctx, "requirements", "ForAssets", utils.MustEncode(ids))
 	if err != nil {
-		return nil, shared.LoggedError(err, "failed requesting requirements for assets")
+		return nil, utils2.LoggedError(err, "failed requesting requirements for assets")
 	}
 
 	if err = json.Unmarshal(reqResp, &reqs); err != nil {
-		return nil, shared.LoggedError(err, "failed decoding requirements for assets")
+		return nil, utils2.LoggedError(err, "failed decoding requirements for assets")
 	}
 
 	for _, req := range reqs {
@@ -167,14 +167,14 @@ func (ac *AssetsContract) Upsert(ctx contractapi.TransactionContextInterface, da
 	)
 
 	if asset, err = asset.Decode([]byte(data)); err != nil {
-		return "", shared.LoggedError(err, "failed to deserialize input")
+		return "", utils2.LoggedError(err, "failed to deserialize input")
 	}
 
 	if len(asset.ID) == 0 {
 		event = "inserted"
 
 		if asset.ID, err = generateCompositeKey(ctx, asset); err != nil {
-			return "", shared.LoggedError(err, "failed to generate composite key")
+			return "", utils2.LoggedError(err, "failed to generate composite key")
 		}
 	}
 
@@ -195,7 +195,7 @@ func (ac *AssetsContract) Transfer(ctx contractapi.TransactionContextInterface, 
 // Exists determines whether the models.Asset exists in the blockchain ledger.
 func (ac *AssetsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return false, shared.LoggedError(err, "failed to read from world state")
+		return false, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
@@ -212,10 +212,10 @@ func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id
 	}
 
 	if err := ctx.GetStub().DelState(id); err != nil {
-		return shared.LoggedErrorf(err, "failed to remove asset record for id: %s", id)
+		return utils2.LoggedErrorf(err, "failed to remove asset record for id: %s", id)
 	}
 
-	return shared.LoggedError(
+	return utils2.LoggedError(
 		ctx.GetStub().SetEvent("assets.removed", models.Asset{ID: id}.Encode()),
 		"failed to emit event on asset remove",
 	)
@@ -224,12 +224,12 @@ func (ac *AssetsContract) Remove(ctx contractapi.TransactionContextInterface, id
 // RemoveAll removes all assets from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (ac *AssetsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.AssetRecordType, []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.AssetRecordType, []string {})
 	if err != nil {
-		return shared.LoggedError(err, "failed to read from world state")
+		return utils2.LoggedError(err, "failed to read from world state")
 	}
 
-	shared.Iterate(iter, func(key string, _ []byte) error {
+	utils2.Iterate(iter, func(key string, _ []byte) error {
 		if err = ctx.GetStub().DelState(key); err != nil {
 			return errors.Wrap(err, "failed to remove asset record")
 		}
@@ -250,7 +250,7 @@ func (ac *AssetsContract) drain(
 ) []*models.Asset {
 	var assets []*models.Asset
 
-	shared.Iterate(iter, func(_ string, value []byte) error {
+	utils2.Iterate(iter, func(_ string, value []byte) error {
 		asset, err := models.Asset{}.Decode(value); if err != nil {
 			return errors.Wrap(err, "failed to deserialize asset record")
 		}
@@ -270,15 +270,15 @@ func (ac *AssetsContract) save(ctx contractapi.TransactionContextInterface, asse
 		return errors.New("the unique id must be defined for asset")
 	}
 
-	if err := ctx.GetStub().PutState(asset.ID, model.NewAssetRecord(asset).Encode()); err != nil {
-		return shared.LoggedError(err, "failed to save asset record to blockchain ledger")
+	if err := ctx.GetStub().PutState(asset.ID, couchdb.NewAssetRecord(asset).Encode()); err != nil {
+		return utils2.LoggedError(err, "failed to save asset record to blockchain ledger")
 	}
 
 	if len(events) != 0 {
 		for _, event := range events {
 			event = fmt.Sprintf("assets.%s", event)
 			if err := ctx.GetStub().SetEvent(event, asset.Encode()); err != nil {
-				shared.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
+				core.Logger.Error(errors.Wrapf(err , "failed to emit event %s", event))
 			}
 		}
 	}
@@ -319,13 +319,13 @@ func buildDBQuery(req *requests.AssetsQuery) string {
 		}
 	}
 
-	qMap["record_type"] = model.AssetRecordType
+	qMap["record_type"] = couchdb.AssetRecordType
 
-	return shared.BuildQuery(qMap)
+	return core.BuildQuery(qMap)
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, asset *models.Asset) (string, error) {
-	return ctx.GetStub().CreateCompositeKey(model.AssetRecordType, []string{
+	return ctx.GetStub().CreateCompositeKey(couchdb.AssetRecordType, []string{
 		utils.Hash(asset.SKU),
 		utils.Hash(asset.Type),
 		utils.Hash(asset.Holder),
