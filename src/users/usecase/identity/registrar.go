@@ -1,6 +1,8 @@
 package identity
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
@@ -21,9 +23,9 @@ func Register(request model.RegistrationRequest) (*model.User, error) {
 		err error
 	)
 
-	if user.EnrollmentID, err = client.Register(&msp.RegistrationRequest{
+	if user.EnrollmentSecret, err = client.Register(&msp.RegistrationRequest{
 		Name: user.IdentityName(),
-		Type: "user",
+		Type: "client",
 	}); err != nil {
 		return nil, errors.Wrap(err, "failed to register user")
 	}
@@ -46,7 +48,7 @@ func Enroll(req model.EnrollmentRequest) error {
 		return errors.Wrap(err, "failed to found user registration")
 	}
 
-	if err = client.Enroll(user.EnrollmentID); err != nil {
+	if err = client.Enroll(user.IdentityName(), msp.WithSecret(user.EnrollmentSecret)); err != nil {
 		return errors.Wrap(err, "failed to enroll user")
 	}
 
@@ -55,10 +57,15 @@ func Enroll(req model.EnrollmentRequest) error {
 		return errors.Wrap(err, "failed to get signing identity for new user")
 	}
 
-	_ = si
 	user.Confirmed = true
 	user.Role = req.Role
 	user.ExpireAt = req.ExpireAt
+
+	pk, _ := si.PrivateKey().Bytes()
+	cert := si.PublicVersion().EnrollmentCertificate()
+
+	fmt.Println(string(cert))
+	fmt.Println(string(pk))
 
 	if err = repo.Upsert(*user); err != nil {
 		return errors.Wrap(err, "failed to update user")

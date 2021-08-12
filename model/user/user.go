@@ -12,7 +12,7 @@ type User struct {
 	// User's unique identifier
 	ID string `json:"id" bson:"id" example:"f4bc94f1-3af4-4ae0-9330-19d86ca42b30"`
 	// User's enrollment identifier
-	EnrollmentID string `json:"enrollment_id" bson:"enrollment_id" example:"e9f437b4-2622-47c3-8d91-921e710c7354"`
+	EnrollmentSecret string `json:"-" bson:"enrollment_id"`
 	// First name of the user
 	Firstname string `json:"firstname" bson:"firstname" example:"John"`
 	// Last name of the user

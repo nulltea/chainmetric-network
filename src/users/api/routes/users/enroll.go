@@ -27,14 +27,17 @@ func handleEnroll(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		presenter.AbortWithError(ctx, http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
+		return
 	}
 
 	if err := validator.New().Struct(req); err != nil {
 		presenter.PresentValidation(ctx, err)
+		return
 	}
 
 	if err := identity.Enroll(req); err != nil {
 		presenter.AbortWithError(ctx, http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.Status(http.StatusOK)

@@ -27,15 +27,18 @@ func handleRegister(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		presenter.AbortWithError(ctx, http.StatusBadRequest, errors.Wrap(err, "invalid request structure"))
+		return
 	}
 
 	if err := validator.New().Struct(req); err != nil {
 		presenter.PresentValidation(ctx, err)
+		return
 	}
 
 	user, err := identity.Register(req)
 	if err != nil {
 		presenter.AbortWithError(ctx, http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, user)

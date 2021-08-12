@@ -29,7 +29,12 @@ func (r *UsersMongo) Upsert(u user.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	defer cancel()
 
-	_, err := r.collection.UpdateOne(ctx, u, options.Update().SetUpsert(true))
+	var (
+		filter = bson.D{{"id", u.ID}}
+		update = bson.D{{ "$set", u }}
+	)
+
+	_, err := r.collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
 
 	return err
 }

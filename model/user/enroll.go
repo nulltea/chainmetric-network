@@ -19,5 +19,5 @@ type EnrollmentRequest struct {
 	// Role of the user
 	Role   string `json:"role" validate:"required" example:"admin"`
 	// Date of user's contract expiration if defined
-	ExpireAt *time.Time `json:"expire_at" validate:"datetime" example:"2006-01-02T15:04:05Z07:00"`
+	ExpireAt *time.Time `json:"expire_at,omitempty" example:"2006-01-02T15:04:05Z07:00"`
 }
