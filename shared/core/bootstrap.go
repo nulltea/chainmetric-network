@@ -1,4 +1,4 @@
-package shared
+package core
 
 import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -14,8 +14,8 @@ func BootstrapContract(contract contractapi.ContractInterface) {
 	}
 
 	server := &shim.ChaincodeServer{
-		CCID: viper.GetString("ccid"),
-		Address: viper.GetString("address"),
+		CCID: viper.GetString("chaincode.ccid"),
+		Address: viper.GetString("chaincode.address"),
 		CC: chaincode,
 		TLSProps: shim.TLSProperties{
 			Disabled: true,
@@ -25,6 +25,6 @@ func BootstrapContract(contract contractapi.ContractInterface) {
 	Logger.Info("Contract is up and running...")
 
 	if err = server.Start(); err != nil {
-		Logger.Fatalf("Error starting %s chaincode: %s", viper.GetString("name"), err)
+		Logger.Fatalf("Error starting %s chaincode: %s", viper.GetString("chaincode.name"), err)
 	}
 }

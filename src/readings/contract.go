@@ -6,13 +6,13 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/timoth-y/chainmetric-contracts/model"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-contracts/shared/model/couchdb"
+	"github.com/timoth-y/chainmetric-contracts/shared/model/response"
+	utils2 "github.com/timoth-y/chainmetric-contracts/shared/utils"
 	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
-
-	"github.com/timoth-y/chainmetric-contracts/model/response"
-	"github.com/timoth-y/chainmetric-contracts/shared"
 )
 
 // ReadingsContract provides functions for managing an models.MetricReadings from models.Device sensors
@@ -44,21 +44,21 @@ func (rc *ReadingsContract) ForAsset(
 			Streams: map[models.Metric]response.MetricReadingsStream{},
 		}
 		qMap = map[string]interface{}{
-			"record_type": model.ReadingsRecordType,
-			"asset_id": assetID,
+			"record_type": couchdb.ReadingsRecordType,
+			"asset_id":    assetID,
 		}
 	)
 
-	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
+	iter, err := ctx.GetStub().GetQueryResult(core.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
-		return nil, shared.LoggedError(err, "failed to read from world state")
+		return nil, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	readings := rc.drain(iter)
 
 	for _, reading := range readings {
 		for metric, value := range reading.Values {
-			resp.Streams[metric] = append(resp.Streams[metric], response.MetricReadingsPoint {
+			resp.Streams[metric] = append(resp.Streams[metric], response.MetricReadingsPoint{
 				DeviceID: reading.DeviceID,
 				Location: reading.Location,
 				Timestamp: reading.Timestamp,
@@ -77,24 +77,24 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 		stream = response.MetricReadingsStream{}
 		metric = models.Metric(metricID)
 		qMap = map[string]interface{}{
-			"record_type": model.ReadingsRecordType,
-			"asset_id": assetID,
+			"record_type": couchdb.ReadingsRecordType,
+			"asset_id":    assetID,
 			fmt.Sprintf("values.%s", metricID): map[string]interface{}{
 				"$exists": true,
 			},
 		}
 	)
 
-	iter, err := ctx.GetStub().GetQueryResult(shared.BuildQuery(qMap, "timestamp", "asc"))
+	iter, err := ctx.GetStub().GetQueryResult(core.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
-		return nil, shared.LoggedError(err, "failed to read from world state")
+		return nil, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	readings := rc.drain(iter)
 
 	for _, reading := range readings {
 		if value, ok := reading.Values[metric]; ok {
-			stream = append(stream, response.MetricReadingsPoint {
+			stream = append(stream, response.MetricReadingsPoint{
 				DeviceID: reading.DeviceID,
 				Location: reading.Location,
 				Timestamp: reading.Timestamp,
@@ -114,11 +114,11 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 	)
 
 	if readings, err = readings.Decode([]byte(payload)); err != nil {
-		return "", shared.LoggedError(err, "failed to deserialize input")
+		return "", utils2.LoggedError(err, "failed to deserialize input")
 	}
 
 	if readings.ID, err = generateCompositeKey(ctx, readings); err != nil {
-		return "", shared.LoggedError(err, "failed to generate composite key")
+		return "", utils2.LoggedError(err, "failed to generate composite key")
 	}
 
 	go rc.sendToSocketListeners(ctx, readings)
@@ -129,7 +129,7 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 // Exists determines whether the models.MetricReadings record exists in the blockchain ledger.
 func (rc *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return false, shared.LoggedError(err, "failed to read from world state")
+		return false, utils2.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
@@ -145,7 +145,7 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 		return errors.Errorf("the readings with ID %q does not exist", id)
 	}
 
-	return shared.LoggedError(
+	return utils2.LoggedError(
 		ctx.GetStub().DelState(id),
 		"failed removing metric readings record",
 	)
@@ -154,12 +154,12 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 // RemoveAll removes all models.MetricReadings records from the blockchain ledger.
 // !! This method is for development use only and it must be removed when all dev phases will be completed.
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
-	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(model.ReadingsRecordType, []string {})
+	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.ReadingsRecordType, []string {})
 	if err != nil {
-		return shared.LoggedError(err, "failed to read from world state")
+		return utils2.LoggedError(err, "failed to read from world state")
 	}
 
-	shared.Iterate(iter, func(key string, _ []byte) error {
+	utils2.Iterate(iter, func(key string, _ []byte) error {
 		if err = ctx.GetStub().DelState(key); err != nil {
 			return errors.Wrap(err, "failed to remove readings record")
 		}
@@ -173,7 +173,7 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {
 	var readings []*models.MetricReadings
 
-	shared.Iterate(iter, func(_ string, value []byte) error {
+	utils2.Iterate(iter, func(_ string, value []byte) error {
 		record, err := models.MetricReadings{}.Decode(value); if err != nil {
 			return errors.Wrap(err, "failed to deserialize readings record")
 		}
@@ -191,11 +191,11 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 		return errors.New("the unique id must be defined for readings")
 	}
 
-	return ctx.GetStub().PutState(readings.ID, model.NewMetricReadingsRecord(readings).Encode())
+	return ctx.GetStub().PutState(readings.ID, couchdb.NewMetricReadingsRecord(readings).Encode())
 }
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
-	return ctx.GetStub().CreateCompositeKey(model.ReadingsRecordType, []string{
+	return ctx.GetStub().CreateCompositeKey(couchdb.ReadingsRecordType, []string{
 		utils.Hash(req.AssetID),
 		utils.Hash(string(req.Encode())),
 	})

@@ -1,4 +1,4 @@
-package shared
+package core
 
 import (
 	"github.com/pkg/errors"
@@ -9,11 +9,15 @@ import (
 // LevelDB is an instance of the LevelDB client for managing persistent cache.
 var LevelDB *leveldb.DB
 
-func initLevelDB() {
+func InitLevelDB() {
 	var (
-		path = viper.GetString("persistence_path")
+		path = viper.GetString("chaincode.persistence_path")
 		err error
 	)
+
+	if !viper.GetBool("chaincode.leveldb_enabled") {
+		return
+	}
 
 	if len(path) == 0 {
 		Logger.Fatal("failed to initialise LevelDB: local path not provided")
@@ -24,7 +28,7 @@ func initLevelDB() {
 	}
 }
 
-func closeLevelDB() {
+func CloseLevelDB() {
 	if err := LevelDB.Close(); err != nil {
 		Logger.Error(errors.Wrap(err, "failed to close connection to LevelDB"))
 	}
