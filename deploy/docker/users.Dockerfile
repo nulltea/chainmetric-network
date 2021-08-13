@@ -2,17 +2,17 @@
 FROM golang:1.16-alpine AS build
 
 WORKDIR /go/src/github.com/timoth-y/chainmetric-contracts/
-COPY .. .
+COPY ../../.. .
 
 # Build application
-RUN go build -o chaincode -v ./src/assets
+RUN go build -o service -v ./src/users
 
 # Production ready image
 FROM alpine:3.11 as prod
 
-COPY --from=build /go/src/github.com/timoth-y/chainmetric-contracts/chaincode /app/chaincode
+COPY --from=build /go/src/github.com/timoth-y/chainmetric-contracts/chaincode /app/service
 
 USER 1000
 
 WORKDIR /app
-CMD ./chaincode
+CMD ./service

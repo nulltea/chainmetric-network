@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.hosting.service }}.{{ .Values.hosting.organization }}.{{ .Values.hosting.domain }}"
+  labels:
+    app: "{{ .Values.hosting.service }}.{{ .Values.hosting.organization }}.{{ .Values.hosting.domain }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.hosting.service }}.{{ .Values.hosting.organization }}.{{ .Values.hosting.domain }}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: "{{ .Values.hosting.service }}.{{ .Values.hosting.organization }}.{{ .Values.hosting.domain }}"
+    {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: service
+          image: "{{.Values.image.repository }}:{{.Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          volumeMounts:
+            {{- if .Values.persistance.enabled }}
+            - name: data
+              mountPath: {{ .Values.persistance.path }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- if .Values.persistance.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}.pvc
+  {{- end }}

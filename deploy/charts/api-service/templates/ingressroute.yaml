@@ -1,0 +1,41 @@
+{{- if .Values.ingress.enabled -}}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  {{- toYaml .Values.ingress.entrypoints | nindent 4 }}
+  routes:
+    - match: Host(`{{ .Values.config.hostname }}.{{ .Values.config.domain }}`)
+      kind: Rule
+      services:
+        - name: {{ .Release.Name }}
+          port: {{ .Values.service.port }}
+          scheme: https
+          {{- if .Values.config.tls }}
+          serversTransport: {{ .Release.Name }}-transport
+          {{- end }}
+      middlewares:
+  {{- if .Values.config.tls }}
+  tls:
+    secretName: {{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+  {{- end }}
+---
+  {{- if .Values.config.tls }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: {{ .Release.Name }}-transport
+spec:
+  serverName: {{ .Release.Name }}
+  rootCAsSecrets:
+    - {{ .Values.config.hostname }}.{{ .Values.config.domain }}-ca
+  certificatesSecrets:
+    - {{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+  {{- end }}
+---
+{{- end }}

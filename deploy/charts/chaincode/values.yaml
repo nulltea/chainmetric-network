@@ -1,0 +1,25 @@
+project: iot-blockchain
+component: chaincode
+
+logging: DEBUG
+
+replicaCount: 1
+
+image:
+  repository: iotchainnetwork/cc.requirements
+  pullPolicy: Always
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 7052
+
+storage:
+  enabled: true
+  storageClass: local-path
+  path: /app/storage
+
+org:
+peer:
+chaincode:
+ccid:

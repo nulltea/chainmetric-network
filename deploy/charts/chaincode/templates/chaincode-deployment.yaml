@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"
+  labels:
+    app: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"
+    {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: chaincode
+          image: "{{.Values.image.repository }}:{{.Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CHAINCODE_LOGGING
+              value: {{ .Values.logging }}
+            - name: CHAINCODE_CCID
+              value: {{ .Values.ccid }}
+            - name: CHAINCODE_ADDRESS
+              value: "0.0.0.0:{{ .Values.service.port }}"
+            - name: CHAINCODE_NAME
+              value: {{ .Values.chaincode }}
+            - name: CHAINCODE_PERSISTENCE_PATH
+              value: {{ .Values.storage.path }}
+          volumeMounts:
+          {{- if .Values.storage.enabled }}
+            - name: storage
+              mountPath: {{ .Values.storage.path }}
+          {{- end }}
+      restartPolicy: Always
+      volumes:
+      {{- if .Values.storage.enabled }}
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}.pvc
+      {{- end }}
