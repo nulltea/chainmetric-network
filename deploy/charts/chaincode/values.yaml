@@ -1,4 +1,4 @@
-project: iot-blockchain
+project: chainmetric
 component: chaincode
 
 logging: DEBUG
@@ -14,7 +14,7 @@ service:
   type: ClusterIP
   port: 7052
 
-storage:
+persistence:
   enabled: true
   storageClass: local-path
   path: /app/storage

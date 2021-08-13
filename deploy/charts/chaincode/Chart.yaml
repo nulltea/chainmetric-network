@@ -1,5 +1,5 @@
 apiVersion: v2
-name: artifacts
+name: chaincode
 description: IoT enabled blockhain smart contract
 type: application
 version: 0.1.0

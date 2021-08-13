@@ -33,15 +33,15 @@ spec:
             - name: CHAINCODE_NAME
               value: {{ .Values.chaincode }}
             - name: CHAINCODE_PERSISTENCE_PATH
-              value: {{ .Values.storage.path }}
+              value: {{ .Values.persistence.path }}
           volumeMounts:
-          {{- if .Values.storage.enabled }}
+          {{- if .Values.persistence.enabled }}
             - name: storage
-              mountPath: {{ .Values.storage.path }}
+              mountPath: {{ .Values.persistence.path }}
           {{- end }}
       restartPolicy: Always
       volumes:
-      {{- if .Values.storage.enabled }}
+      {{- if .Values.persistence.enabled }}
         - name: storage
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}.pvc

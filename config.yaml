@@ -3,5 +3,5 @@ api:
   organization: chipa-inu
 
 mongo_auth: true
-mongo_username: root
+mongo_username: chainmetric_admin
 mongo_password: example

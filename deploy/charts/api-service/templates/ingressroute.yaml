@@ -10,32 +10,14 @@ spec:
   entryPoints:
   {{- toYaml .Values.ingress.entrypoints | nindent 4 }}
   routes:
-    - match: Host(`{{ .Values.config.hostname }}.{{ .Values.config.domain }}`)
+    - match: Host(`{{ .Values.hosting.service }}.{{ .Values.hosting.organization}}.{{ .Values.hosting.domain }}`)
       kind: Rule
       services:
-        - name: {{ .Release.Name }}
+        - name: {{ .Values.hosting.service }}-{{ .Values.hosting.organization | replace "." "-" }}
           port: {{ .Values.service.port }}
           scheme: https
-          {{- if .Values.config.tls }}
-          serversTransport: {{ .Release.Name }}-transport
-          {{- end }}
-      middlewares:
-  {{- if .Values.config.tls }}
+  {{- if .Values.ingress.tls.enabled }}
   tls:
-    secretName: {{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+    certResolver: {{ .Values.ingress.tls.certResolver }}
   {{- end }}
----
-  {{- if .Values.config.tls }}
-apiVersion: traefik.containo.us/v1alpha1
-kind: ServersTransport
-metadata:
-  name: {{ .Release.Name }}-transport
-spec:
-  serverName: {{ .Release.Name }}
-  rootCAsSecrets:
-    - {{ .Values.config.hostname }}.{{ .Values.config.domain }}-ca
-  certificatesSecrets:
-    - {{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
-  {{- end }}
----
 {{- end }}
