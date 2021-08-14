@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp }}"
+  labels:
+    app: "{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp }}"
+spec:
+  replicas: {{ .Values.deployement.replicaCount }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp }}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: "{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp }}"
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: service
+          image: "{{.Values.image.repository }}:{{.Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+          env:
+            - name: MONGO_ADDRESS
+              value: mongodb://{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}-mongodb:27017
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-auth
+                  key: username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-auth
+                  key: password
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.path }}
+            {{- range .Values.volumes }}
+            - name: {{ .name | replace "." "-" }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+      restartPolicy: Always
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}.pvc
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: config
+          secret:
+            secretName: identity-{{ .Values.externalAccess.ownershipMsp }}-hlf-connection
+        {{- range .Values.volumes }}
+        - name: {{ .name | replace "." "-" }}
+          {{- if eq .type "claim" }}
+          persistentVolumeClaim:
+            claimName: {{ .name }}
+          {{- else if eq .type "configMap" }}
+          configMap:
+            name: {{ .name }}
+          {{ else if eq .type "secret" }}
+          secret:
+            secretName: {{ .name }}
+          {{- end }}
+        {{- end }}

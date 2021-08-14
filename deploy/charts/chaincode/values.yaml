@@ -3,8 +3,6 @@ component: chaincode
 
 logging: DEBUG
 
-replicaCount: 1
-
 image:
   repository: iotchainnetwork/cc.requirements
   pullPolicy: Always

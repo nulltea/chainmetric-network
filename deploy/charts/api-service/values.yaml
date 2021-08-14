@@ -3,7 +3,8 @@ component: api-service
 
 logging: DEBUG
 
-replicaCount: 1
+deployement:
+  replicaCount: 1
 
 image:
   repository: chainmetric/api.identity
@@ -14,29 +15,34 @@ service:
   type: ClusterIP
   port: 8080
 
-hosting:
-  domain: chainmtric.network
-  organization: chipa-inu-org
-  service: identity
-
-ingress:
+externalAccess:
   enabled: true
-  entrypoints:
-    - web
-    - websecure
-  tls:
-    enabled: true
-    certResolver: le
+  domain: chainmetric.network
+  ownershipMsp: chipa-inu.org
+  serviceHostname: identity
+  taefik:
+    entrypoints:
+      - web
+      - websecure
+    tls:
+      enabled: true
+      certResolver: le
 
 persistence:
   enabled: true
   storageClass: local-path
-  path: app/data
+  path: /app/data
 
 serviceAccount:
   create: true
-  annotations: {}
   name: ""
+  annotations: {}
 
-config:
-  path: app/config
+volumes:
+  - type: secret
+    name: identity-chipa-inu-org-hlf-connection
+    mountPath: /app/config
+  - type: claim
+    name: artifacts.pvc
+    mountPath: /app/crypto
+

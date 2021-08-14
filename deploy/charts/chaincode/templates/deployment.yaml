@@ -5,7 +5,7 @@ metadata:
   labels:
     app: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployement.replicaCount }}
   selector:
     matchLabels:
       app: "{{ .Values.chaincode }}-chaincode.{{ .Values.peer }}.{{ .Values.org }}"

@@ -1,4 +1,4 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.externalAccess.enabled -}}
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -8,16 +8,16 @@ metadata:
   {{- include "chart.labels" . | nindent 4 }}
 spec:
   entryPoints:
-  {{- toYaml .Values.ingress.entrypoints | nindent 4 }}
+  {{- toYaml .Values.externalAccess.taefik.entrypoints | nindent 4 }}
   routes:
-    - match: Host(`{{ .Values.hosting.service }}.{{ .Values.hosting.organization}}.{{ .Values.hosting.domain }}`)
+    - match: Host(`{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}`)
       kind: Rule
       services:
-        - name: {{ .Values.hosting.service }}-{{ .Values.hosting.organization | replace "." "-" }}
+        - name: {{ .Values.externalAccess.serviceHostname }}-{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}
           port: {{ .Values.service.port }}
-          scheme: https
-  {{- if .Values.ingress.tls.enabled }}
+          scheme: http
+  {{- if .Values.externalAccess.taefik.tls.enabled }}
   tls:
-    certResolver: {{ .Values.ingress.tls.certResolver }}
+    certResolver: {{ .Values.externalAccess.taefik.tls.certResolver }}
   {{- end }}
 {{- end }}
