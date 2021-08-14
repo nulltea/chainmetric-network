@@ -1,0 +1,23 @@
+{{- if .Values.externalAccess.enabled -}}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  {{- toYaml .Values.externalAccess.taefik.entrypoints | nindent 4 }}
+  routes:
+    - match: Host(`{{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}`)
+      kind: Rule
+      services:
+        - name: {{ .Values.externalAccess.serviceHostname }}-{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}
+          port: {{ .Values.service.port }}
+          scheme: http
+  {{- if .Values.externalAccess.taefik.tls.enabled }}
+  tls:
+    certResolver: {{ .Values.externalAccess.taefik.tls.certResolver }}
+  {{- end }}
+{{- end }}

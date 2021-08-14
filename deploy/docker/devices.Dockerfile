@@ -2,10 +2,10 @@
 FROM golang:1.16-alpine AS build
 
 WORKDIR /go/src/github.com/timoth-y/chainmetric-contracts/
-COPY .. .
+COPY ../../.. .
 
 # Build application
-RUN go build -o chaincode -v ./src/requirements
+RUN go build -o chaincode -v ./src/devices
 
 # Production ready image
 FROM alpine:3.11 as prod

@@ -1,0 +1,23 @@
+project: chainmetric
+component: chaincode
+
+logging: DEBUG
+
+image:
+  repository: iotchainnetwork/cc.requirements
+  pullPolicy: Always
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 7052
+
+persistence:
+  enabled: true
+  storageClass: local-path
+  path: /app/storage
+
+org:
+peer:
+chaincode:
+ccid:
