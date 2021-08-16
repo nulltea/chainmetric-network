@@ -2,8 +2,9 @@ package identity
 
 import (
 	"time"
-)
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
 type (
 	// EnrollmentOption allows passing parameters for Enroll method.
@@ -35,8 +36,17 @@ func WithRole(role string) EnrollmentOption {
 }
 
 // WithExpiration creates user with given `expireAt`.
-func WithExpiration(expireAt *time.Time) EnrollmentOption {
+func WithExpiration(expireAt time.Time) EnrollmentOption {
 	return EnrollOptionFunc(func(args *enrollArgs) {
-		args.ExpireAt = expireAt
+		args.ExpireAt = &expireAt
+	})
+}
+
+// WithExpirationPb creates user with given `expireAt`.
+func WithExpirationPb(expireAt *timestamppb.Timestamp) EnrollmentOption {
+	return EnrollOptionFunc(func(args *enrollArgs) {
+		if args.ExpireAt != nil {
+			*args.ExpireAt = expireAt.AsTime()
+		}
 	})
 }
