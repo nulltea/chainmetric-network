@@ -18,8 +18,9 @@ docker-build:
 grpc-gen:
 	protoc \
 		-I=./src/users/api/presenter \
+		-I=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-	    --gogofast_out=plugins=grpc,paths=source_relative:./src/users/api/presenter \
+	    --go_out=paths=source_relative:./src/users/api/presenter \
 	    --validate_out=lang=go,paths=source_relative:./src/users/api/presenter \
 		./src/users/api/presenter/*.proto
 
@@ -27,5 +28,14 @@ grpc-gen:
 		-I=./src/users/api/rpc \
 		-I=./src/users/api/presenter \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-		--gogofast_out=plugins=grpc,paths=source_relative:./src/users/api/rpc \
+		--go-grpc_out=paths=source_relative:./src/users/api/rpc \
 		./src/users/api/rpc/*.proto
+
+grpcui:
+	grpcui \
+ 		-plaintext --open-browser \
+ 		-import-path ./src/users/api/presenter \
+ 		-import-path ./src/users/api/rpc \
+ 		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
+ 		-proto ./src/users/api/rpc/identity.proto \
+ 		localhost:8080

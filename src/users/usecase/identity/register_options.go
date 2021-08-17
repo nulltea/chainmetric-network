@@ -2,8 +2,8 @@ package identity
 
 import model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 
-// RegistrationOption allows passing parameters for Register method.
 type (
+	// RegistrationOption allows passing parameters for Register method.
 	RegistrationOption interface {
 		Apply(*model.User)
 	}
@@ -11,7 +11,6 @@ type (
 	// RegisterOptionFunc is a function that mutates model during Register execution.
 	RegisterOptionFunc func(*model.User)
 )
-
 
 // Apply calls RegisterOptionFunc on model.
 func (f RegisterOptionFunc) Apply(user *model.User) {

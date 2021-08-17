@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package chainmetric.identity.proto.presenter;
+package chainmetric.identity.presenter;
 
 option go_package = "github.com/timoth-y/chainmetric-contracts/src/users/api/presenter";
 
@@ -19,8 +19,8 @@ message User {
 }
 
 message RegistrationRequest {
-  string firstname = 1 [(validate.rules).string.pattern = "/^[a-z ,.'-]+$/i"];
-  string lastname = 2 [(validate.rules).string.pattern = "/^[a-z ,.'-]+$/i"];
+  string firstname = 1;
+  string lastname = 2;
   string email = 3 [(validate.rules).string.email = true];
 }
 

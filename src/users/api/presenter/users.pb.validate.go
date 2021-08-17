@@ -140,19 +140,9 @@ func (m *RegistrationRequest) Validate() error {
 		return nil
 	}
 
-	if !_RegistrationRequest_Firstname_Pattern.MatchString(m.GetFirstname()) {
-		return RegistrationRequestValidationError{
-			field:  "Firstname",
-			reason: "value does not match regex pattern \"/^[a-z ,.'-]+$/i\"",
-		}
-	}
+	// no validation rules for Firstname
 
-	if !_RegistrationRequest_Lastname_Pattern.MatchString(m.GetLastname()) {
-		return RegistrationRequestValidationError{
-			field:  "Lastname",
-			reason: "value does not match regex pattern \"/^[a-z ,.'-]+$/i\"",
-		}
-	}
+	// no validation rules for Lastname
 
 	if err := m._validateEmail(m.GetEmail()); err != nil {
 		return RegistrationRequestValidationError{
@@ -270,10 +260,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RegistrationRequestValidationError{}
-
-var _RegistrationRequest_Firstname_Pattern = regexp.MustCompile("/^[a-z ,.'-]+$/i")
-
-var _RegistrationRequest_Lastname_Pattern = regexp.MustCompile("/^[a-z ,.'-]+$/i")
 
 // Validate checks the field values on EnrollmentRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an

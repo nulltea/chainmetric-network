@@ -11,10 +11,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type identityService struct{}
+type identityService struct{
+	UnimplementedIdentityServiceServer
+}
 
-
-func IdentityServiceGRPC(server *grpc.Server) {
+func WithIdentityService(server *grpc.Server) {
 	RegisterIdentityServiceServer(server, &identityService{})
 }
 
