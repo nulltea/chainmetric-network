@@ -8,8 +8,9 @@ import (
 	tags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 	server *grpc.Server
 )
 
-func Init(options ...Option) {
+func Init(options ...Option) error {
 	var (
 		unaryInterceptors = []grpc.UnaryServerInterceptor{
 			tags.UnaryServerInterceptor(),
@@ -30,18 +31,27 @@ func Init(options ...Option) {
 			recovery.StreamServerInterceptor(),
 			grpclogrus.StreamServerInterceptor(initLogger()),
 		}
+
+		certPath = viper.GetString("api.grpc_tls_cert")
+		keyPath  = viper.GetString("api.grpc_tls_key")
 	)
+
+	tls, err := credentials.NewServerTLSFromFile(certPath, keyPath)
+	if err != nil {
+		return err
+	}
 
 	server = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(unaryInterceptors...),
 		grpc.ChainStreamInterceptor(streamInterceptors...),
+		grpc.Creds(tls),
 	)
 
 	for i := range options {
 		options[i](server)
 	}
 
-	reflection.Register(server)
+	return nil
 }
 
 func Serve(addr string) error {

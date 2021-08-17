@@ -12,9 +12,11 @@ func init() {
 	core.InitCore()
 	core.InitMongoDB()
 	utils.MustExecute(identity.Init, "failed to initialize identity package")
-	server.Init(
-		rpc.WithIdentityService,
-	)
+	utils.MustExecute(func() error {
+		return server.Init(
+			rpc.WithIdentityService,
+		)
+	}, "failed to initialize server")
 }
 
 func main() {
