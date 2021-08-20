@@ -1,9 +1,10 @@
 syntax = "proto3";
 
 package chainmetric.identity.service;
-option go_package = "github.com/timoth-y/chainmetric-contracts/rpc";
+option go_package = "github.com/timoth-y/chainmetric-contracts/src/identity/api/rpc";
 
-import "user.proto";
+import "identity/api/presenter/user.proto";
+import "identity/api/presenter/enrollment.proto";
 import "google/protobuf/empty.proto";
 
 service IdentityService {

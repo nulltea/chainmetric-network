@@ -15,22 +15,23 @@ type identityService struct{
 	UnimplementedIdentityServiceServer
 }
 
+// WithIdentityService registers IdentityServiceServer fir given gRPC `server` instance.
 func WithIdentityService(server *grpc.Server) {
 	RegisterIdentityServiceServer(server, &identityService{})
 }
 
-// Register implements IdentityServiceClient gRPC service.
+// Register implements IdentityServiceServer gRPC service.
 func (identityService) Register(
-	ctx context.Context,
-	req *presenter.RegistrationRequest,
+	_ context.Context,
+	request *presenter.RegistrationRequest,
 ) (*presenter.User, error) {
-	if err := req.Validate(); err != nil {
+	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	user, err := identity.Register(
-		identity.WithName(req.Firstname, req.Lastname),
-		identity.WithEmail(req.Email),
+		identity.WithName(request.Firstname, request.Lastname),
+		identity.WithEmail(request.Email),
 	)
 
 	if err != nil {
@@ -41,14 +42,17 @@ func (identityService) Register(
 }
 
 // Enroll implements IdentityServiceClient gRPC service.
-func (identityService) Enroll(ctx context.Context, req *presenter.EnrollmentRequest) (*emptypb.Empty, error) {
-	if err := req.Validate(); err != nil {
+func (identityService) Enroll(
+	_ context.Context,
+	request *presenter.EnrollmentRequest,
+) (*emptypb.Empty, error) {
+	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if err := identity.Enroll(req.UserID,
-		identity.WithRole(req.Role),
-		identity.WithExpirationPb(req.ExpireAt),
+	if err := identity.Enroll(request.UserID,
+		identity.WithRole(request.Role),
+		identity.WithExpirationPb(request.ExpireAt),
 	); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

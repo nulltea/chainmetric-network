@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package chainmetric.identity.service;
+option go_package = "github.com/timoth-y/chainmetric-contracts/src/identity/api/rpc";
+
+import "identity/api/presenter/auth.proto";
+
+service AuthService {
+  rpc authenticate(presenter.AuthRequest) returns (presenter.AuthResponse);
+}

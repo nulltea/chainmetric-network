@@ -31,27 +31,25 @@ deploy-build: docker-build deploy-identity
 
 grpc-gen:
 	protoc \
-		-I=./src/users/api/presenter \
+		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-	    --go_out=paths=source_relative:./src/users/api/presenter \
-	    --validate_out=lang=go,paths=source_relative:./src/users/api/presenter \
-		./src/users/api/presenter/*.proto
+	    --go_out=paths=source_relative:src \
+	    --validate_out=lang=go,paths=source_relative:src \
+		./src/identity/api/presenter/*.proto
 
 	protoc \
-		-I=./src/users/api/rpc \
-		-I=./src/users/api/presenter \
+		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-		--go-grpc_out=paths=source_relative:./src/users/api/rpc \
-		./src/users/api/rpc/*.proto
+		--go-grpc_out=paths=source_relative:./src \
+		./src/identity/api/rpc/*.proto
 
 grpcui:
 	grpcui \
  		-plaintext --open-browser \
- 		-import-path ./src/users/api/presenter \
- 		-import-path ./src/users/api/rpc \
+ 		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
- 		-proto ./src/users/api/rpc/identity.proto \
+ 		-proto ./src/identity/api/rpc/identity.proto \
  		localhost:8080
 
 grpc-tls-gen:
