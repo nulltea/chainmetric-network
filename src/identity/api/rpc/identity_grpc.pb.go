@@ -4,7 +4,7 @@ package rpc
 
 import (
 	context "context"
-	presenter "github.com/timoth-y/chainmetric-contracts/src/users/api/presenter"
+	presenter "github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

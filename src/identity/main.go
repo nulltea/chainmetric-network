@@ -4,8 +4,8 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/server"
 	"github.com/timoth-y/chainmetric-contracts/shared/utils"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/rpc"
-	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/api/rpc"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
 )
 
 func init() {

@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 
-	"github.com/timoth-y/chainmetric-contracts/src/users/api/presenter"
-	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
