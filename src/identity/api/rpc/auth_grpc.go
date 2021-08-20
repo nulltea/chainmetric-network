@@ -3,11 +3,14 @@ package rpc
 import (
 	"context"
 
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type authService struct{
@@ -29,6 +32,26 @@ func (a authService) Authenticate(
 	}
 
 	token, err := auth.Authenticate(request.Email, request.PasswordHash)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return presenter.NewAuthResponse(token), nil
+}
+
+func (a authService) SetPassword(ctx context.Context, request *presenter.SetPasswordRequest) (*emptypb.Empty, error) {
+	var (
+		repo = repository.NewUserMongo(core.MongoDB)
+	)
+
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := repo.GetByID(request.UserID)
+	if err != nil {
+
+	}
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

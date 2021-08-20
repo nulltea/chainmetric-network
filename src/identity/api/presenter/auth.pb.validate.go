@@ -33,6 +33,9 @@ var (
 	_ = anypb.Any{}
 )
 
+// define the regex for a UUID once up-front
+var _auth_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
 // Validate checks the field values on AuthRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
 // is returned.
@@ -162,6 +165,96 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AuthRequestValidationError{}
+
+// Validate checks the field values on SetPasswordRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *SetPasswordRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if err := m._validateUuid(m.GetUserID()); err != nil {
+		return SetPasswordRequestValidationError{
+			field:  "UserID",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+	}
+
+	if len(m.GetPasswordHash()) < 8 {
+		return SetPasswordRequestValidationError{
+			field:  "PasswordHash",
+			reason: "value length must be at least 8 bytes",
+		}
+	}
+
+	return nil
+}
+
+func (m *SetPasswordRequest) _validateUuid(uuid string) error {
+	if matched := _auth_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// SetPasswordRequestValidationError is the validation error returned by
+// SetPasswordRequest.Validate if the designated constraints aren't met.
+type SetPasswordRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SetPasswordRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SetPasswordRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SetPasswordRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SetPasswordRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SetPasswordRequestValidationError) ErrorName() string {
+	return "SetPasswordRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SetPasswordRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSetPasswordRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SetPasswordRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SetPasswordRequestValidationError{}
 
 // Validate checks the field values on AuthResponse with the rules defined in
 // the proto definition for this message. If any rules are violated, an error

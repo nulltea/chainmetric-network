@@ -11,6 +11,7 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
+	viper.SetDefault("organization", "chipa-inu")
 	viper.SetDefault("logging", "info")
 
 	viper.SetDefault("chaincode.ccid", "")
@@ -25,6 +26,9 @@ func initConfig() {
 	viper.SetDefault("api.connection_config_path", "config/connection.yaml")
 	viper.SetDefault("api.grpc_tls_cert", "./certs/tls.crt")
 	viper.SetDefault("api.grpc_tls_key", "./certs/tls.key")
+	viper.SetDefault("api.jwt_expiration", 0)
+	viper.SetDefault("api.jwt_signing_key", "./certs/jwt-key.pem")
+	viper.SetDefault("api.jwt_signing_cert", "./certs/jwt-cert.pem")
 
 	viper.SetDefault("mongo_enabled", true)
 	viper.SetDefault("mongo_address", "mongodb://localhost:27017")

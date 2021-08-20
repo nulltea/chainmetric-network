@@ -8,6 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
 	Authenticate(ctx context.Context, in *presenter.AuthRequest, opts ...grpc.CallOption) (*presenter.AuthResponse, error)
+	SetPassword(ctx context.Context, in *presenter.SetPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type authServiceClient struct {
@@ -39,11 +41,21 @@ func (c *authServiceClient) Authenticate(ctx context.Context, in *presenter.Auth
 	return out, nil
 }
 
+func (c *authServiceClient) SetPassword(ctx context.Context, in *presenter.SetPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.AuthService/setPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
 	Authenticate(context.Context, *presenter.AuthRequest) (*presenter.AuthResponse, error)
+	SetPassword(context.Context, *presenter.SetPasswordRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -53,6 +65,9 @@ type UnimplementedAuthServiceServer struct {
 
 func (UnimplementedAuthServiceServer) Authenticate(context.Context, *presenter.AuthRequest) (*presenter.AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
+}
+func (UnimplementedAuthServiceServer) SetPassword(context.Context, *presenter.SetPasswordRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetPassword not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -85,6 +100,24 @@ func _AuthService_Authenticate_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_SetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(presenter.SetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).SetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chainmetric.identity.service.AuthService/setPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).SetPassword(ctx, req.(*presenter.SetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -95,6 +128,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "authenticate",
 			Handler:    _AuthService_Authenticate_Handler,
+		},
+		{
+			MethodName: "setPassword",
+			Handler:    _AuthService_SetPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
