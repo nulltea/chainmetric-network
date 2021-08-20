@@ -9,14 +9,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-var (
-	logger *logrus.Logger
-	server *grpc.Server
-)
+var server *grpc.Server
 
 func Init(options ...Option) error {
 	var (
@@ -68,8 +66,7 @@ func Serve(addr string) error {
 }
 
 func initLogger() *logrus.Entry {
-	logger = logrus.New()
-	loggerEntry := logrus.NewEntry(logger)
+	loggerEntry := logrus.NewEntry(core.Logrus)
 	grpclogrus.ReplaceGrpcLogger(loggerEntry)
 
 	return loggerEntry

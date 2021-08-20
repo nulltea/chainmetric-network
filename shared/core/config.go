@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// initEnv configures viper from environment variables.
-func initEnv() {
+// initConfig configures viper from environment variables and yaml files.
+func initConfig() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
@@ -36,6 +36,9 @@ func initEnv() {
 	viper.SetDefault("mongo_tls", false)
 	viper.SetDefault("mongo_ca_cert_path", "certs/mongodb-ca-cert.pem")
 	viper.SetDefault("mongo_database", "chainmetric_db")
+
+	viper.SetDefault("vault_address", "https://vault.infra.chainmetric.network:443")
+	viper.SetDefault("vault_token", "")
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")

@@ -70,7 +70,7 @@ grpc-tls-gen:
 	openssl x509 -req \
 		-in data/certs/server.csr \
 		-CA data/certs/ca.crt -CAkey data/certs/ca.key -CAcreateserial -days 365 \
-		-extfile <(printf "subjectAltName=DNS:localhost,DNS:identity-${ORG}-org") \
+		-extfile <(printf "subjectAltName=DNS:identity.${ORG}.org.${DOMAIN},DNS:localhost,DNS:identity-${ORG}-org") \
 		-out data/certs/server.crt
 
 

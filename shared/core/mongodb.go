@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MongoDB is an instance of the MongoDB client for managing persistent cache.
+// MongoDB is an instance of the MongoDB client for managing off-chain persistent data.
 var MongoDB *mongo.Client
 
 func InitMongoDB() {

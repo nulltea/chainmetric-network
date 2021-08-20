@@ -4,11 +4,15 @@ import (
 	"os"
 
 	"github.com/op/go-logging"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // Logger is an instance of the shared logger tool.
-var Logger *logging.Logger
+var (
+	Logger *logging.Logger
+	Logrus *logrus.Logger
+)
 
 const (
 	format = "%{color}%{time:2006.01.02 15:04:05} " +
@@ -23,6 +27,7 @@ func initLogger() {
 	)
 
 	Logger = logging.MustGetLogger(chaincodeName)
+	Logrus = logrus.New()
 
 	backend := logging.NewBackendFormatter(
 		logging.NewLogBackend(os.Stderr, "", 0),
