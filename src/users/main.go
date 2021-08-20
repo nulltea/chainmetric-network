@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-contracts/shared/server"
 	"github.com/timoth-y/chainmetric-contracts/shared/utils"
-	"github.com/timoth-y/chainmetric-contracts/src/users/api"
+	"github.com/timoth-y/chainmetric-contracts/src/users/api/rpc"
 	"github.com/timoth-y/chainmetric-contracts/src/users/usecase/identity"
 )
 
@@ -12,11 +12,15 @@ func init() {
 	core.InitCore()
 	core.InitMongoDB()
 	utils.MustExecute(identity.Init, "failed to initialize identity package")
+	utils.MustExecute(func() error {
+		return server.Init(
+			rpc.WithIdentityService,
+		)
+	}, "failed to initialize server")
 }
 
 func main() {
-	engine := gin.Default()
-	api.Setup(engine)
-
-	_ = engine.Run(":8080")
+	if err := server.Serve(":8080"); err != nil {
+		core.Logger.Fatal(err)
+	}
 }

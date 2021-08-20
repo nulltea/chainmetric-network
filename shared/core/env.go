@@ -23,6 +23,8 @@ func initEnv() {
 	viper.SetDefault("api.wallet_path", "./data")
 	viper.SetDefault("api.crypto_path", "./crypto")
 	viper.SetDefault("api.connection_config_path", "config/connection.yaml")
+	viper.SetDefault("api.grpc_tls_cert", "./certs/tls.crt")
+	viper.SetDefault("api.grpc_tls_key", "./certs/tls.key")
 
 	viper.SetDefault("mongo_enabled", true)
 	viper.SetDefault("mongo_address", "mongodb://localhost:27017")

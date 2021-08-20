@@ -20,4 +20,5 @@
 
 connection.yaml
 
-.wallet
+data/wallet
+data/certs

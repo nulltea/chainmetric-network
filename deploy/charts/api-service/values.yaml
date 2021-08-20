@@ -42,6 +42,9 @@ volumes:
   - type: secret
     name: identity-chipa-inu-org-hlf-connection
     mountPath: /app/config
+  - type: secret
+    name: identity.chipa-inu.org.chainmetric.network-tls
+    mountPath: /app/certs
   - type: claim
     name: artifacts.pvc
     mountPath: /app/crypto

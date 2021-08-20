@@ -12,16 +12,17 @@ import (
 )
 
 // Register performs users initial registration.
-func Register(request user.RegistrationRequest) (*user.User, error) {
+func Register(options ...RegistrationOption) (*user.User, error) {
 	var (
 		user = &user.User{
-			ID:        uuid.NewString(),
-			Firstname: request.Firstname,
-			Lastname:  request.Lastname,
-			Email:     request.Email,
+			ID: uuid.NewString(),
 		}
 		err error
 	)
+
+	for i := range options {
+		options[i].Apply(user)
+	}
 
 	if user.EnrollmentSecret, err = client.Register(&msp.RegistrationRequest{
 		Name: user.IdentityName(),
@@ -38,12 +39,19 @@ func Register(request user.RegistrationRequest) (*user.User, error) {
 }
 
 // Enroll generates msp.SigningIdentity for user and confirms one.
-func Enroll(req user.EnrollmentRequest) error {
+func Enroll(userID string, options ...EnrollmentOption) error {
 	var (
 		repo = repository.NewUserMongo(core.MongoDB)
+		args = &enrollArgs{
+			UserID: userID,
+		}
 	)
 
-	user, err := repo.GetByID(req.UserID)
+	for i := range options {
+		options[i].Apply(args)
+	}
+
+	user, err := repo.GetByID(args.UserID)
 	if err != nil {
 		return errors.Wrap(err, "failed to found user registration")
 	}
@@ -58,8 +66,8 @@ func Enroll(req user.EnrollmentRequest) error {
 	}
 
 	user.Confirmed = true
-	user.Role = req.Role
-	user.ExpireAt = req.ExpireAt
+	user.Role = args.Role
+	user.ExpireAt = args.ExpireAt
 
 	pk, _ := si.PrivateKey().Bytes()
 	cert := si.PublicVersion().EnrollmentCertificate()

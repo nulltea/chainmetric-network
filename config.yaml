@@ -1,7 +1,11 @@
 api:
   wallet_path: data/wallet
   organization: chipa-inu
+  connection_config_path: ./connection.yaml
+  grpc_tls_cert: data/certs/server.crt
+  grpc_tls_key: data/certs/server.key
 
 mongo_auth: true
-mongo_username: chainmetric_admin
+mongo_username: root
 mongo_password: example
+

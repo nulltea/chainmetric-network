@@ -15,9 +15,26 @@ spec:
       services:
         - name: {{ .Values.externalAccess.serviceHostname }}-{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}
           port: {{ .Values.service.port }}
-          scheme: http
+          scheme: https
+          {{- if .Values.externalAccess.taefik.tls.enabled }}
+          serversTransport: {{ .Release.Name }}-transport
+          {{- end }}
   {{- if .Values.externalAccess.taefik.tls.enabled }}
   tls:
-    certResolver: {{ .Values.externalAccess.taefik.tls.certResolver }}
+    secretName: {{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}-tls
   {{- end }}
+---
+  {{- if .Values.externalAccess.taefik.tls.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: {{ .Release.Name }}-transport
+spec:
+  serverName: {{ .Release.Name }}
+  rootCAsSecrets:
+    - {{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}-ca
+  certificatesSecrets:
+    - {{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}-tls
+  {{- end }}
+---
 {{- end }}
