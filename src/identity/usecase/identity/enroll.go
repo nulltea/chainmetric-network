@@ -38,7 +38,7 @@ func Enroll(userID string, options ...EnrollmentOption) error {
 
 	user.Confirmed = true
 	user.Role = args.Role
-	user.ExpireAt = args.ExpireAt
+	user.ExpiresAt = args.ExpireAt
 
 	pk, _ := si.PrivateKey().Bytes()
 	cert := si.PublicVersion().EnrollmentCertificate()

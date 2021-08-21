@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IdentityServiceClient interface {
-	Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.User, error)
+	Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.RegistrationResponse, error)
 	Enroll(ctx context.Context, in *presenter.EnrollmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -32,8 +32,8 @@ func NewIdentityServiceClient(cc grpc.ClientConnInterface) IdentityServiceClient
 	return &identityServiceClient{cc}
 }
 
-func (c *identityServiceClient) Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.User, error) {
-	out := new(presenter.User)
+func (c *identityServiceClient) Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.RegistrationResponse, error) {
+	out := new(presenter.RegistrationResponse)
 	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.IdentityService/register", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (c *identityServiceClient) Enroll(ctx context.Context, in *presenter.Enroll
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility
 type IdentityServiceServer interface {
-	Register(context.Context, *presenter.RegistrationRequest) (*presenter.User, error)
+	Register(context.Context, *presenter.RegistrationRequest) (*presenter.RegistrationResponse, error)
 	Enroll(context.Context, *presenter.EnrollmentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedIdentityServiceServer()
 }
@@ -63,7 +63,7 @@ type IdentityServiceServer interface {
 type UnimplementedIdentityServiceServer struct {
 }
 
-func (UnimplementedIdentityServiceServer) Register(context.Context, *presenter.RegistrationRequest) (*presenter.User, error) {
+func (UnimplementedIdentityServiceServer) Register(context.Context, *presenter.RegistrationRequest) (*presenter.RegistrationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedIdentityServiceServer) Enroll(context.Context, *presenter.EnrollmentRequest) (*emptypb.Empty, error) {

@@ -12,10 +12,10 @@ message AuthRequest {
 }
 
 message SetPasswordRequest {
-  string userID = 1 [(validate.rules).string = {uuid: true}];
   string passwordHash = 2 [(validate.rules).string = {min_bytes: 8 }];
 }
 
 message AuthResponse {
   string secretToken = 1;
+  string accessToken = 2;
 }

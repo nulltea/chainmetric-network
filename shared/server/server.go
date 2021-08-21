@@ -18,21 +18,27 @@ var server *grpc.Server
 
 func Init(options ...Option) error {
 	var (
-		unaryInterceptors = []grpc.UnaryServerInterceptor{
-			tags.UnaryServerInterceptor(),
-			recovery.UnaryServerInterceptor(),
-			grpclogrus.UnaryServerInterceptor(initLogger()),
-		}
+		args = &gRPCArgsStub{
+			UnaryInterceptors: []grpc.UnaryServerInterceptor{
+				tags.UnaryServerInterceptor(),
+				recovery.UnaryServerInterceptor(),
+				grpclogrus.UnaryServerInterceptor(initLogger()),
+			},
 
-		streamInterceptors = []grpc.StreamServerInterceptor{
-			tags.StreamServerInterceptor(),
-			recovery.StreamServerInterceptor(),
-			grpclogrus.StreamServerInterceptor(initLogger()),
+			StreamInterceptors: []grpc.StreamServerInterceptor{
+				tags.StreamServerInterceptor(),
+				recovery.StreamServerInterceptor(),
+				grpclogrus.StreamServerInterceptor(initLogger()),
+			},
 		}
 
 		certPath = viper.GetString("api.grpc_tls_cert")
 		keyPath  = viper.GetString("api.grpc_tls_key")
 	)
+
+	for i := range options {
+		options[i](args)
+	}
 
 	tls, err := credentials.NewServerTLSFromFile(certPath, keyPath)
 	if err != nil {
@@ -40,13 +46,13 @@ func Init(options ...Option) error {
 	}
 
 	server = grpc.NewServer(
-		grpc.ChainUnaryInterceptor(unaryInterceptors...),
-		grpc.ChainStreamInterceptor(streamInterceptors...),
+		grpc.ChainUnaryInterceptor(args.UnaryInterceptors...),
+		grpc.ChainStreamInterceptor(args.StreamInterceptors...),
 		grpc.Creds(tls),
 	)
 
-	for i := range options {
-		options[i](server)
+	for i := range args.ServicesRegistrars {
+		args.ServicesRegistrars[i](server)
 	}
 
 	return nil

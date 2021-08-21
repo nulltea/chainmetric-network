@@ -16,12 +16,11 @@ import (
 )
 
 // GenerateJWT generates JWT token for given `user`.
-func GenerateJWT(user *model.User) (string, *time.Time, error) {
+func GenerateJWT(user *model.User) (string, error) {
 	var (
 		token        = jwt.New(jwt.SigningMethodRS512)
 		org          = viper.GetString("organization")
 		expiresAfter = viper.GetDuration("api.jwt_expiration")
-		expiresAt    *time.Time
 
 		claims = &jwt.StandardClaims{
 			Id:       user.ID,
@@ -31,19 +30,18 @@ func GenerateJWT(user *model.User) (string, *time.Time, error) {
 	)
 
 	if expiresAfter != 0 {
-		*expiresAt = time.Now().Add(expiresAfter)
-		claims.ExpiresAt = expiresAt.Unix()
+		claims.ExpiresAt = time.Now().Add(expiresAfter).Unix()
 	}
 
 	token.Claims = claims
 
 	jwtToken, err := token.SignedString(jwtSigningPrivateKey())
 
-	return jwtToken, expiresAt, err
+	return jwtToken, err
 }
 
 // VerifyJWT performs verification of a given JWT `token`.
-func VerifyJWT(token string) (string, error) {
+func VerifyJWT(token string) (*jwt.StandardClaims, error) {
 	jwtToken, err := jwt.ParseWithClaims(
 		token,
 		&jwt.StandardClaims{},
@@ -54,14 +52,16 @@ func VerifyJWT(token string) (string, error) {
 			return nil, errors.Errorf("unexpected signing method: %q", token.Header["alg"])
 		},
 	); if err != nil {
-		return "", fmt.Errorf("access token is invalid: %w", err)
+		return nil, fmt.Errorf("access token is invalid: %w", err)
 	}
 
-	if claims, ok := jwtToken.Claims.(*jwt.StandardClaims); ok {
-		return claims.Id, nil
+	if claims, ok := jwtToken.Claims.(*jwt.StandardClaims); !ok {
+		return nil, errors.New("invalid token claims")
+	} else if err = claims.Valid(); err != nil {
+		return nil, err
+	} else {
+		return claims, nil
 	}
-
-	return "", errors.New("invalid token claims")
 }
 
 func jwtSigningPrivateKey() *rsa.PrivateKey {

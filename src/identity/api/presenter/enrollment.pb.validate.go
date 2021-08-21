@@ -249,3 +249,82 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = EnrollmentRequestValidationError{}
+
+// Validate checks the field values on RegistrationResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *RegistrationResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return RegistrationResponseValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for AccessToken
+
+	return nil
+}
+
+// RegistrationResponseValidationError is the validation error returned by
+// RegistrationResponse.Validate if the designated constraints aren't met.
+type RegistrationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RegistrationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RegistrationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RegistrationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RegistrationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RegistrationResponseValidationError) ErrorName() string {
+	return "RegistrationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RegistrationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRegistrationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RegistrationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RegistrationResponseValidationError{}

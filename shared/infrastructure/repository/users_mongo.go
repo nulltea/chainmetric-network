@@ -39,6 +39,21 @@ func (r *UsersMongo) Upsert(u user.User) error {
 	return err
 }
 
+// UpdateByID partially updates user in the database by given `id`.
+func (r *UsersMongo) UpdateByID(id string, set map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+	defer cancel()
+
+	var (
+		filter = bson.D{{"id", id}}
+		update = bson.D{{ "$set", set}}
+	)
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+
+	return err
+}
+
 // GetByID retrieves user from the collection by given `userID`.
 func (r *UsersMongo) GetByID(userID string) (*user.User, error) {
 	var (
@@ -50,6 +65,20 @@ func (r *UsersMongo) GetByID(userID string) (*user.User, error) {
 	defer cancel()
 
 	err := r.collection.FindOne(ctx, filter).Decode(&user)
+
+	return user, err
+}
+
+// GetByQuery retrieves user from the collection by given `query`.
+func (r *UsersMongo) GetByQuery(query map[string]interface{}) (*user.User, error) {
+	var (
+		user *user.User
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+	defer cancel()
+
+	err := r.collection.FindOne(ctx, query).Decode(&user)
 
 	return user, err
 }

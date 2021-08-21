@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -11,8 +12,6 @@ import (
 type User struct {
 	// User's unique identifier
 	ID string `json:"id" bson:"id" example:"f4bc94f1-3af4-4ae0-9330-19d86ca42b30"`
-	// User's enrollment identifier
-	EnrollmentSecret string `json:"-" bson:"enrollment_id"`
 	// First name of the user
 	Firstname string `json:"firstname" bson:"firstname" example:"John"`
 	// Last name of the user
@@ -26,10 +25,22 @@ type User struct {
 	// User is confirmed by admin.
 	Confirmed bool `json:"confirmed" bson:"confirmed"`
 	// Date of user's contract expiration if defined
-	ExpireAt *time.Time `json:"expire_at,omitempty" bson:"expire_at,omitempty" example:"2021-05-02T15:04:05Z07:00"`
+	ExpiresAt *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty" example:"2021-05-02T15:04:05Z07:00"`
+
+	EnrollmentSecret string `json:"-" bson:"enrollment_id"`
+	PasswordHash string `json:"-" bson:"password_hash"`
 }
 
 // IdentityName forms the unique name of user's identity.
 func (u *User) IdentityName() string {
 	return fmt.Sprintf("user.%s", utils.Hash(u.Firstname + u.Lastname + u.ID))
+}
+
+func (u *User) Encode() string {
+	return utils.MustEncode(u)
+}
+
+func (u User) Decode(payload string) *User {
+	json.Unmarshal([]byte(payload), &u)
+	return &u
 }
