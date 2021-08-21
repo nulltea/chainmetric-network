@@ -8,10 +8,9 @@ import (
 	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 )
 
-var (
-	config *viper.Viper
-)
+var config *viper.Viper
 
+// Init performs initialization of the `privileges` package.
 func Init() {
 	config = viper.New()
 
@@ -25,6 +24,7 @@ func Init() {
 	}
 }
 
+// Has determines whether the user has certain privilege for given `path.
 func Has(user *model.User, path string) bool {
 	return config.GetBool(fmt.Sprintf("%s.%s", user.Role, path))
 }

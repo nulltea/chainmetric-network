@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// JWTAuthUnaryInterceptor returns grpc.UnaryServerInterceptor func for JWT access control.
 func JWTAuthUnaryInterceptor(skipMethods ...string) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
@@ -41,6 +42,7 @@ func JWTAuthUnaryInterceptor(skipMethods ...string) grpc.UnaryServerInterceptor 
 	}
 }
 
+// JWTAuthStreamInterceptor returns grpc.StreamServerInterceptor func for JWT access control.
 func JWTAuthStreamInterceptor(skipMethods ...string) grpc.StreamServerInterceptor {
 	return func(
 		srv interface{},

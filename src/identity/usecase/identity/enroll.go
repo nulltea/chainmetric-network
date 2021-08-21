@@ -1,8 +1,6 @@
 package identity
 
 import (
-	"fmt"
-
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
@@ -31,22 +29,21 @@ func Enroll(userID string, options ...EnrollmentOption) error {
 		return errors.Wrap(err, "failed to enroll user")
 	}
 
-	si, err := client.GetSigningIdentity(user.IdentityName())
+	cert, key, err := GetSigningCredentials(user)
 	if err != nil {
 		return errors.Wrap(err, "failed to get signing identity for new user")
 	}
 
-	user.Confirmed = true
-	user.Role = args.Role
-	user.ExpiresAt = args.ExpireAt
+	if err = repository.NewIdentitiesVault(core.Vault).
+		WriteStaticSecret(user.IdentityName(), cert, key); err != nil {
+		return err
+	}
 
-	pk, _ := si.PrivateKey().Bytes()
-	cert := si.PublicVersion().EnrollmentCertificate()
-
-	fmt.Println(string(cert))
-	fmt.Println(string(pk))
-
-	if err = repo.Upsert(*user); err != nil {
+	if err = repo.UpdateByID(user.ID, map[string]interface{}{
+		"confirmed": true,
+		"role": args.Role,
+		"expire_at": args.ExpireAt,
+	}); err != nil {
 		return errors.Wrap(err, "failed to update user")
 	}
 

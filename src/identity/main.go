@@ -7,11 +7,13 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/rpc"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/privileges"
 )
 
 func init() {
 	core.InitCore()
 	core.InitMongoDB()
+	privileges.Init()
 	utils.MustExecute(identity.Init, "failed to initialize identity package")
 	utils.MustExecute(func() error {
 		return server.Init(
