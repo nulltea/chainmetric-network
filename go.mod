@@ -3,13 +3,11 @@ module github.com/timoth-y/chainmetric-contracts
 go 1.16
 
 require (
-	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
-	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
-	github.com/hashicorp/vault/api v1.1.1 // indirect
+	github.com/hashicorp/vault/api v1.1.1
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20200424173110-d7076418f212
 	github.com/hyperledger/fabric-contract-api-go v1.1.1
 	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23
@@ -17,7 +15,6 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.3.2
