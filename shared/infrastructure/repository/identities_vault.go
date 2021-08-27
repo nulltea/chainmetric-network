@@ -21,7 +21,7 @@ func NewIdentitiesVault(client *vault.Client) *IdentitiesVault {
 }
 
 // WriteStaticSecret writes signing credentials to Vault as static secret.
-func (r *IdentitiesVault) WriteStaticSecret(id string, certificate, key []byte) error {
+func (r *IdentitiesVault) WriteStaticSecret(id string, certificate, key []byte) (string, error) {
 	var (
 		path = fmt.Sprintf("identity/%s/crypto", id)
 		data = map[string]interface{}{
@@ -32,14 +32,14 @@ func (r *IdentitiesVault) WriteStaticSecret(id string, certificate, key []byte) 
 
 	_, err := r.client.Logical().Write(path, data)
 	if err != nil {
-		return errors.Wrap(err, "failed to write identity secret to Vault")
+		return "", errors.Wrap(err, "failed to write identity secret to Vault")
 	}
 
-	return nil
+	return path, nil
 }
 
 // WriteDynamicSecret writes signing credentials to Vault for one-time use.
-func (r *IdentitiesVault) WriteDynamicSecret(id string, certificate, key []byte) (string, error) {
+func (r *IdentitiesVault) WriteDynamicSecret(id string, certificate, key []byte) (string, string, error) {
 	var (
 		path = fmt.Sprintf("auth/%s/login", id)
 		data = map[string]interface{}{
@@ -50,8 +50,10 @@ func (r *IdentitiesVault) WriteDynamicSecret(id string, certificate, key []byte)
 
 	secret, err := r.client.Logical().Write(path, data)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to write identity secret to Vault")
+		return "", "", errors.Wrap(err, "failed to write identity secret to Vault")
 	}
 
-	return secret.TokenID()
+	token, err := secret.TokenID()
+
+	return path, token, err
 }

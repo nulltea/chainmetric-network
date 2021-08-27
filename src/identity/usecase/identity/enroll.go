@@ -34,7 +34,7 @@ func Enroll(userID string, options ...EnrollmentOption) error {
 		return errors.Wrap(err, "failed to get signing identity for new user")
 	}
 
-	if err = repository.NewIdentitiesVault(core.Vault).
+	if _, err = repository.NewIdentitiesVault(core.Vault).
 		WriteStaticSecret(user.IdentityName(), cert, key); err != nil {
 		return err
 	}

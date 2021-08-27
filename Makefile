@@ -25,7 +25,7 @@ deploy-identity:
 docker-build:
 	sudo docker buildx build \
 		--platform linux/arm64 -t chainmetric/api.identity \
-		-f ./deploy/docker/users.Dockerfile --push .
+		-f ./deploy/docker/identity.Dockerfile --push .
 
 deploy-build: docker-build deploy-identity
 
@@ -46,11 +46,13 @@ grpc-gen:
 
 grpcui:
 	grpcui \
- 		-plaintext --open-browser \
+ 		--open-browser \
+ 		-cert ./data/certs/server.crt \
+ 		-key ./data/certs/server.key \
  		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
  		-proto ./src/identity/api/rpc/identity.proto \
- 		localhost:8080
+ 		identity.chipa-inu.org.chainmetric.network:443
 
 grpc-tls-gen:
 	openssl genrsa \

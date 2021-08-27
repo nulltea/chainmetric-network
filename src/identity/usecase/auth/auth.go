@@ -8,10 +8,10 @@ import (
 )
 
 // RequestVaultSecret writes singing certificate and key to Vault for one-time use.
-func RequestVaultSecret(user *model.User) (string, error) {
+func RequestVaultSecret(user *model.User) (string, string, error) {
 	cert, key, err := identity.GetSigningCredentials(user)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	return repository.NewIdentitiesVault(core.Vault).

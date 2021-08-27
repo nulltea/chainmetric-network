@@ -43,7 +43,7 @@ func (a authService) Authenticate(
 		return nil, status.Error(codes.Internal, "failed to find user in database")
 	}
 
-	secretToken, err := auth.RequestVaultSecret(user)
+	secretPath, secretToken, err := auth.RequestVaultSecret(user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -53,7 +53,7 @@ func (a authService) Authenticate(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return presenter.NewAuthResponse(secretToken, accessToken), nil
+	return presenter.NewAuthResponse(user, secretToken, secretPath, accessToken), nil
 }
 
 // SetPassword implements AuthServiceServer gRPC service RPC.

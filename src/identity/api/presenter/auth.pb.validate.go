@@ -237,6 +237,75 @@ var _ interface {
 	ErrorName() string
 } = SetPasswordRequestValidationError{}
 
+// Validate checks the field values on VaultSecret with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *VaultSecret) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Token
+
+	// no validation rules for Path
+
+	return nil
+}
+
+// VaultSecretValidationError is the validation error returned by
+// VaultSecret.Validate if the designated constraints aren't met.
+type VaultSecretValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VaultSecretValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VaultSecretValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VaultSecretValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VaultSecretValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VaultSecretValidationError) ErrorName() string { return "VaultSecretValidationError" }
+
+// Error satisfies the builtin error interface
+func (e VaultSecretValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVaultSecret.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VaultSecretValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VaultSecretValidationError{}
+
 // Validate checks the field values on AuthResponse with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
 // is returned.
@@ -245,7 +314,25 @@ func (m *AuthResponse) Validate() error {
 		return nil
 	}
 
-	// no validation rules for SecretToken
+	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AuthResponseValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetSecret()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AuthResponseValidationError{
+				field:  "Secret",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	// no validation rules for AccessToken
 
