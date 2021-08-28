@@ -8,7 +8,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IdentityServiceClient interface {
 	Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.RegistrationResponse, error)
-	Enroll(ctx context.Context, in *presenter.EnrollmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Enroll(ctx context.Context, in *presenter.EnrollmentRequest, opts ...grpc.CallOption) (*presenter.EnrollmentResponse, error)
 }
 
 type identityServiceClient struct {
@@ -41,8 +40,8 @@ func (c *identityServiceClient) Register(ctx context.Context, in *presenter.Regi
 	return out, nil
 }
 
-func (c *identityServiceClient) Enroll(ctx context.Context, in *presenter.EnrollmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *identityServiceClient) Enroll(ctx context.Context, in *presenter.EnrollmentRequest, opts ...grpc.CallOption) (*presenter.EnrollmentResponse, error) {
+	out := new(presenter.EnrollmentResponse)
 	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.IdentityService/enroll", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,7 +54,7 @@ func (c *identityServiceClient) Enroll(ctx context.Context, in *presenter.Enroll
 // for forward compatibility
 type IdentityServiceServer interface {
 	Register(context.Context, *presenter.RegistrationRequest) (*presenter.RegistrationResponse, error)
-	Enroll(context.Context, *presenter.EnrollmentRequest) (*emptypb.Empty, error)
+	Enroll(context.Context, *presenter.EnrollmentRequest) (*presenter.EnrollmentResponse, error)
 	mustEmbedUnimplementedIdentityServiceServer()
 }
 
@@ -66,7 +65,7 @@ type UnimplementedIdentityServiceServer struct {
 func (UnimplementedIdentityServiceServer) Register(context.Context, *presenter.RegistrationRequest) (*presenter.RegistrationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedIdentityServiceServer) Enroll(context.Context, *presenter.EnrollmentRequest) (*emptypb.Empty, error) {
+func (UnimplementedIdentityServiceServer) Enroll(context.Context, *presenter.EnrollmentRequest) (*presenter.EnrollmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Enroll not implemented")
 }
 func (UnimplementedIdentityServiceServer) mustEmbedUnimplementedIdentityServiceServer() {}

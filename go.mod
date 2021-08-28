@@ -13,6 +13,7 @@ require (
 	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23
 	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20210603143513-14047c6d88f0
 	github.com/kr/pretty v0.3.0 // indirect
+	github.com/m1/go-generate-password v0.1.1 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/rogpeppe/go-internal v1.8.0 // indirect

@@ -15,6 +15,7 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 		user = &user.User{
 			ID: uuid.NewString(),
 		}
+		usersRepo = repository.NewUserMongo(core.MongoDB)
 		err error
 	)
 
@@ -29,7 +30,7 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 		return nil, errors.Wrap(err, "failed to register user")
 	}
 
-	if err = repository.NewUserMongo(core.MongoDB).Upsert(*user); err != nil {
+	if err = usersRepo.Upsert(*user); err != nil {
 		return nil, errors.Wrap(err, "failed to store user")
 	}
 

@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/timoth-y/chainmetric-core/utils"
@@ -33,7 +34,7 @@ type User struct {
 
 // IdentityName forms the unique name of user's identity.
 func (u *User) IdentityName() string {
-	return fmt.Sprintf("user.%s", utils.Hash(u.Firstname + u.Lastname + u.ID))
+	return fmt.Sprintf("%s.%s", strings.ToLower(u.Firstname), strings.ToLower(u.Lastname))
 }
 
 func (u *User) Encode() string {

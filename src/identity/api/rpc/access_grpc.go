@@ -2,32 +2,32 @@ package rpc
 
 import (
 	"context"
+	"time"
 
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
-	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/auth"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type authService struct{
-	UnimplementedAuthServiceServer
+type accessService struct{
+	UnimplementedAccessServiceServer
 }
 
-// RegisterAuthService registers AuthServiceServer fir given gRPC `server` instance.
-func RegisterAuthService(server *grpc.Server) {
-	RegisterAuthServiceServer(server, &authService{})
+// RegisterAccessService registers AuthServiceServer fir given gRPC `server` instance.
+func RegisterAccessService(server *grpc.Server) {
+	RegisterAccessServiceServer(server, &accessService{})
 }
 
-// Authenticate implements AuthServiceServer gRPC service RPC.
-func (a authService) Authenticate(
-	ctx context.Context,
-	request *presenter.AuthRequest,
-) (*presenter.AuthResponse, error) {
+// RequestFabricCredentials implements AuthServiceServer gRPC service RPC.
+func (accessService) RequestFabricCredentials(
+	_ context.Context,
+	request *presenter.FabricCredentialsRequest,
+) (*presenter.FabricCredentialsResponse, error) {
 	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -43,21 +43,32 @@ func (a authService) Authenticate(
 		return nil, status.Error(codes.Internal, "failed to find user in database")
 	}
 
-	secretPath, secretToken, err := auth.RequestVaultSecret(user)
+	if !user.Confirmed {
+		return nil, status.Error(codes.Unavailable, "user in not confirmed by admin yet")
+	}
+
+	if user.ExpiresAt != nil && user.ExpiresAt.After(time.Now()) {
+		return nil, status.Error(codes.Unavailable, "user account is expired")
+	}
+
+	secretPath, secretToken, err := access.RequestFabricCredentialsSecret(user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	accessToken, err := auth.GenerateJWT(user)
+	accessToken, err := access.GenerateJWT(user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return presenter.NewAuthResponse(user, secretToken, secretPath, accessToken), nil
+	return presenter.NewFabricCredentialsResponse(user, secretToken, secretPath, accessToken), nil
 }
 
-// SetPassword implements AuthServiceServer gRPC service RPC.
-func (a authService) SetPassword(ctx context.Context, request *presenter.SetPasswordRequest) (*emptypb.Empty, error) {
+// UpdatePassword implements AuthServiceServer gRPC service RPC.
+func (accessService) UpdatePassword(
+	ctx context.Context,
+	request *presenter.UpdatePasswordRequest,
+) (*presenter.StatusResponse, error) {
 	var user = presenter.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
@@ -74,5 +85,10 @@ func (a authService) SetPassword(ctx context.Context, request *presenter.SetPass
 		return nil, status.Error(codes.Internal, "failed to update user in database")
 	}
 
-	return &emptypb.Empty{}, nil
+	if err := repository.NewIdentitiesVault(core.Vault).
+		UpdateUserpassAccess(user.IdentityName(), request.NewPasscode); err != nil {
+		return nil, status.Error(codes.Internal, "failed to update user pass on Vault")
+	}
+
+	return presenter.NewStatusResponse(presenter.Status_OK), nil
 }

@@ -57,7 +57,9 @@ func (r *IdentitiesVault) WriteDynamicSecret(id string, certificate, key []byte)
 	return path, err
 }
 
-func (r *IdentitiesVault) WriteUserpassAuth(username, password string) error {
+// GrantAccessWithUserpass creates user in Vault,
+// with given `username` and `password` credentials for userpass auth.
+func (r *IdentitiesVault) GrantAccessWithUserpass(username, password string) error {
 	var (
 		path = fmt.Sprintf("auth/userpass/users/%s", username)
 		data = map[string]interface{}{
@@ -65,15 +67,31 @@ func (r *IdentitiesVault) WriteUserpassAuth(username, password string) error {
 		}
 	)
 
-	_, err := r.client.Logical().Write(path, data)
-	if err != nil {
-		return errors.Wrap(err, "failed to write identity secret to Vault")
+	if _, err := r.client.Logical().Write(path, data); err != nil {
+		return errors.Wrap(err, "failed to create access for Vault")
 	}
 
-	return err
+	return nil
 }
 
-func (r *IdentitiesVault) LoginUserpassAuth(username, password string) (string, error) {
+// UpdateUserpassAccess updates `password` for exciting Vault user account.
+func (r *IdentitiesVault) UpdateUserpassAccess(username, password string) error {
+	var (
+		path = fmt.Sprintf("auth/userpass/users/%s/password", username)
+		data = map[string]interface{}{
+			"password": password,
+		}
+	)
+
+	if _, err := r.client.Logical().Write(path, data); err != nil {
+		return errors.Wrap(err, "failed to update access for Vault")
+	}
+
+	return nil
+}
+
+// LoginWithUserpass requests access token for user with given `username` and `password` credentials.
+func (r *IdentitiesVault) LoginWithUserpass(username, password string) (string, error) {
 	var (
 		path = fmt.Sprintf("auth/userpass/login/%s", username)
 		data = map[string]interface{}{
@@ -83,7 +101,7 @@ func (r *IdentitiesVault) LoginUserpassAuth(username, password string) (string, 
 
 	secret, err := r.client.Logical().Write(path, data)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to write identity secret to Vault")
+		return "", errors.Wrap(err, "failed to authenticate user in Vault")
 	}
 
 	token, err := secret.TokenID()

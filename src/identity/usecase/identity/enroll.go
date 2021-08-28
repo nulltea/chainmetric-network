@@ -1,51 +1,69 @@
 package identity
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	"github.com/m1/go-generate-password/generator"
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 )
 
 // Enroll generates msp.SigningIdentity for user and confirms one.
-func Enroll(userID string, options ...EnrollmentOption) error {
+func Enroll(userID string, options ...EnrollmentOption) (string, error) {
 	var (
-		repo = repository.NewUserMongo(core.MongoDB)
-		args = &enrollArgs{
+		usersRepo = repository.NewUserMongo(core.MongoDB)
+		vaultRepo = repository.NewIdentitiesVault(core.Vault)
+		argsStub = &enrollArgs{
 			UserID: userID,
 		}
 	)
 
 	for i := range options {
-		options[i].Apply(args)
+		options[i].Apply(argsStub)
 	}
 
-	user, err := repo.GetByID(args.UserID)
+	user, err := usersRepo.GetByID(argsStub.UserID)
 	if err != nil {
-		return errors.Wrap(err, "failed to found user registration")
+		return "", errors.Wrap(err, "failed to found user registration")
 	}
 
 	if err = client.Enroll(user.IdentityName(), msp.WithSecret(user.EnrollmentSecret)); err != nil {
-		return errors.Wrap(err, "failed to enroll user")
+		return "", errors.Wrap(err, "failed to enroll user")
 	}
 
 	cert, key, err := GetSigningCredentials(user)
 	if err != nil {
-		return errors.Wrap(err, "failed to get signing identity for new user")
+		return "", errors.Wrap(err, "failed to get signing identity for new user")
 	}
 
-	if _, err = repository.NewIdentitiesVault(core.Vault).
-		WriteStaticSecret(user.IdentityName(), cert, key); err != nil {
-		return err
+	if _, err = vaultRepo.WriteStaticSecret(user.IdentityName(), cert, key); err != nil {
+		return "", err
 	}
 
-	if err = repo.UpdateByID(user.ID, map[string]interface{}{
+	initialPassword, passwordHash := generatePasscode()
+
+	if err = usersRepo.UpdateByID(user.ID, map[string]interface{}{
 		"confirmed": true,
-		"role": args.Role,
-		"expire_at": args.ExpireAt,
+		"role":      argsStub.Role,
+		"expire_at": argsStub.ExpireAt,
+		"passcode":  passwordHash,
 	}); err != nil {
-		return errors.Wrap(err, "failed to update user")
+		return "", errors.Wrap(err, "failed to update user")
 	}
 
-	return nil
+	if err = vaultRepo.GrantAccessWithUserpass(user.IdentityName(), passwordHash); err != nil {
+		return "", err
+	}
+
+	return initialPassword, nil
+}
+
+func generatePasscode() (string, string) {
+	gen, _ := generator.NewWithDefault()
+	password, _ := gen.Generate()
+	hash := md5.Sum([]byte(*password))
+	return *password, hex.EncodeToString(hash[:])
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-contracts/shared/model/user"
+	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -24,8 +24,8 @@ func NewUserMongo(client *mongo.Client) *UsersMongo {
 	}
 }
 
-// Upsert stores user in the database.
-func (r *UsersMongo) Upsert(u user.User) error {
+// Upsert stores model in the database.
+func (r *UsersMongo) Upsert(u model.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	defer cancel()
 
@@ -39,7 +39,7 @@ func (r *UsersMongo) Upsert(u user.User) error {
 	return err
 }
 
-// UpdateByID partially updates user in the database by given `id`.
+// UpdateByID partially updates model in the database by given `id`.
 func (r *UsersMongo) UpdateByID(id string, set map[string]interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	defer cancel()
@@ -54,10 +54,10 @@ func (r *UsersMongo) UpdateByID(id string, set map[string]interface{}) error {
 	return err
 }
 
-// GetByID retrieves user from the collection by given `userID`.
-func (r *UsersMongo) GetByID(userID string) (*user.User, error) {
+// GetByID retrieves model from the collection by given `userID`.
+func (r *UsersMongo) GetByID(userID string) (*model.User, error) {
 	var (
-		user *user.User
+		user *model.User
 		filter = bson.M{"id": userID}
 	)
 
@@ -69,10 +69,10 @@ func (r *UsersMongo) GetByID(userID string) (*user.User, error) {
 	return user, err
 }
 
-// GetByQuery retrieves user from the collection by given `query`.
-func (r *UsersMongo) GetByQuery(query map[string]interface{}) (*user.User, error) {
+// GetByQuery retrieves model from the collection by given `query`.
+func (r *UsersMongo) GetByQuery(query map[string]interface{}) (*model.User, error) {
 	var (
-		user *user.User
+		user *model.User
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))

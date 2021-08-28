@@ -10,3 +10,10 @@ func NewRegistrationResponse(user *model.User, jwt string) *RegistrationResponse
 		AccessToken: jwt,
 	}
 }
+
+// NewEnrollmentResponse presents EnrollmentResponse for gRPC proto for given `initialPassword`.
+func NewEnrollmentResponse(initialPassword string) *EnrollmentResponse {
+	return &EnrollmentResponse{
+		InitialPassword: initialPassword,
+	}
+}

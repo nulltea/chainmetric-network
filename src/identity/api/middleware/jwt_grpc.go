@@ -8,7 +8,7 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
-	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/auth"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -78,7 +78,7 @@ func tryRetrieveUserFromJWT(ctx context.Context) (*model.User, error) {
 	}
 
 	token := values[0]
-	claims, err := auth.VerifyJWT(token); if err != nil {
+	claims, err := access.VerifyJWT(token); if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %w", err)
 	}
 

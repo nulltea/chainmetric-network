@@ -1,4 +1,4 @@
-package auth
+package access
 
 import (
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
@@ -7,8 +7,8 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
 )
 
-// RequestVaultSecret writes singing certificate and key to Vault for one-time use.
-func RequestVaultSecret(user *model.User) (string, string, error) {
+// RequestFabricCredentialsSecret writes singing certificate and key to Vault for one-time use.
+func RequestFabricCredentialsSecret(user *model.User) (string, string, error) {
 	cert, key, err := identity.GetSigningCredentials(user)
 	if err != nil {
 		return "", "", err
@@ -19,7 +19,7 @@ func RequestVaultSecret(user *model.User) (string, string, error) {
 		return "", "", err
 	}
 
-	token, err := repository.NewIdentitiesVault(core.Vault).LoginUserpassAuth(user.IdentityName(), user.Passcode)
+	token, err := repository.NewIdentitiesVault(core.Vault).LoginWithUserpass(user.IdentityName(), user.Passcode)
 	if err != nil {
 		return "", "", err
 	}

@@ -33,16 +33,16 @@ var (
 	_ = anypb.Any{}
 )
 
-// Validate checks the field values on AuthRequest with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *AuthRequest) Validate() error {
+// Validate checks the field values on FabricCredentialsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *FabricCredentialsRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if err := m._validateEmail(m.GetEmail()); err != nil {
-		return AuthRequestValidationError{
+		return FabricCredentialsRequestValidationError{
 			field:  "Email",
 			reason: "value must be a valid email address",
 			cause:  err,
@@ -50,7 +50,7 @@ func (m *AuthRequest) Validate() error {
 	}
 
 	if len(m.GetPasscode()) < 8 {
-		return AuthRequestValidationError{
+		return FabricCredentialsRequestValidationError{
 			field:  "Passcode",
 			reason: "value length must be at least 8 bytes",
 		}
@@ -59,7 +59,7 @@ func (m *AuthRequest) Validate() error {
 	return nil
 }
 
-func (m *AuthRequest) _validateHostname(host string) error {
+func (m *FabricCredentialsRequest) _validateHostname(host string) error {
 	s := strings.ToLower(strings.TrimSuffix(host, "."))
 
 	if len(host) > 253 {
@@ -89,7 +89,7 @@ func (m *AuthRequest) _validateHostname(host string) error {
 	return nil
 }
 
-func (m *AuthRequest) _validateEmail(addr string) error {
+func (m *FabricCredentialsRequest) _validateEmail(addr string) error {
 	a, err := mail.ParseAddress(addr)
 	if err != nil {
 		return err
@@ -109,9 +109,9 @@ func (m *AuthRequest) _validateEmail(addr string) error {
 	return m._validateHostname(parts[1])
 }
 
-// AuthRequestValidationError is the validation error returned by
-// AuthRequest.Validate if the designated constraints aren't met.
-type AuthRequestValidationError struct {
+// FabricCredentialsRequestValidationError is the validation error returned by
+// FabricCredentialsRequest.Validate if the designated constraints aren't met.
+type FabricCredentialsRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -119,22 +119,24 @@ type AuthRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e AuthRequestValidationError) Field() string { return e.field }
+func (e FabricCredentialsRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AuthRequestValidationError) Reason() string { return e.reason }
+func (e FabricCredentialsRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AuthRequestValidationError) Cause() error { return e.cause }
+func (e FabricCredentialsRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AuthRequestValidationError) Key() bool { return e.key }
+func (e FabricCredentialsRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AuthRequestValidationError) ErrorName() string { return "AuthRequestValidationError" }
+func (e FabricCredentialsRequestValidationError) ErrorName() string {
+	return "FabricCredentialsRequestValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e AuthRequestValidationError) Error() string {
+func (e FabricCredentialsRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -146,14 +148,14 @@ func (e AuthRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAuthRequest.%s: %s%s",
+		"invalid %sFabricCredentialsRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AuthRequestValidationError{}
+var _ error = FabricCredentialsRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -161,31 +163,44 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AuthRequestValidationError{}
+} = FabricCredentialsRequestValidationError{}
 
-// Validate checks the field values on SetPasswordRequest with the rules
+// Validate checks the field values on FabricCredentialsResponse with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *SetPasswordRequest) Validate() error {
+func (m *FabricCredentialsResponse) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	// no validation rules for PrevPasscode
+	if v, ok := interface{}(m.GetSecret()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return FabricCredentialsResponseValidationError{
+				field:  "Secret",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
-	if len(m.GetNewPasscode()) < 8 {
-		return SetPasswordRequestValidationError{
-			field:  "NewPasscode",
-			reason: "value length must be at least 8 bytes",
+	// no validation rules for ApiAccessToken
+
+	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return FabricCredentialsResponseValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
 	}
 
 	return nil
 }
 
-// SetPasswordRequestValidationError is the validation error returned by
-// SetPasswordRequest.Validate if the designated constraints aren't met.
-type SetPasswordRequestValidationError struct {
+// FabricCredentialsResponseValidationError is the validation error returned by
+// FabricCredentialsResponse.Validate if the designated constraints aren't met.
+type FabricCredentialsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -193,24 +208,24 @@ type SetPasswordRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e SetPasswordRequestValidationError) Field() string { return e.field }
+func (e FabricCredentialsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e SetPasswordRequestValidationError) Reason() string { return e.reason }
+func (e FabricCredentialsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e SetPasswordRequestValidationError) Cause() error { return e.cause }
+func (e FabricCredentialsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e SetPasswordRequestValidationError) Key() bool { return e.key }
+func (e FabricCredentialsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e SetPasswordRequestValidationError) ErrorName() string {
-	return "SetPasswordRequestValidationError"
+func (e FabricCredentialsResponseValidationError) ErrorName() string {
+	return "FabricCredentialsResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e SetPasswordRequestValidationError) Error() string {
+func (e FabricCredentialsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -222,14 +237,14 @@ func (e SetPasswordRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sSetPasswordRequest.%s: %s%s",
+		"invalid %sFabricCredentialsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = SetPasswordRequestValidationError{}
+var _ error = FabricCredentialsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -237,7 +252,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = SetPasswordRequestValidationError{}
+} = FabricCredentialsResponseValidationError{}
 
 // Validate checks the field values on VaultSecret with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
@@ -308,42 +323,29 @@ var _ interface {
 	ErrorName() string
 } = VaultSecretValidationError{}
 
-// Validate checks the field values on AuthResponse with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *AuthResponse) Validate() error {
+// Validate checks the field values on UpdatePasswordRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdatePasswordRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return AuthResponseValidationError{
-				field:  "User",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+	// no validation rules for PrevPasscode
+
+	if len(m.GetNewPasscode()) < 8 {
+		return UpdatePasswordRequestValidationError{
+			field:  "NewPasscode",
+			reason: "value length must be at least 8 bytes",
 		}
 	}
-
-	if v, ok := interface{}(m.GetSecret()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return AuthResponseValidationError{
-				field:  "Secret",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for AccessToken
 
 	return nil
 }
 
-// AuthResponseValidationError is the validation error returned by
-// AuthResponse.Validate if the designated constraints aren't met.
-type AuthResponseValidationError struct {
+// UpdatePasswordRequestValidationError is the validation error returned by
+// UpdatePasswordRequest.Validate if the designated constraints aren't met.
+type UpdatePasswordRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -351,22 +353,24 @@ type AuthResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e AuthResponseValidationError) Field() string { return e.field }
+func (e UpdatePasswordRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AuthResponseValidationError) Reason() string { return e.reason }
+func (e UpdatePasswordRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AuthResponseValidationError) Cause() error { return e.cause }
+func (e UpdatePasswordRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AuthResponseValidationError) Key() bool { return e.key }
+func (e UpdatePasswordRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AuthResponseValidationError) ErrorName() string { return "AuthResponseValidationError" }
+func (e UpdatePasswordRequestValidationError) ErrorName() string {
+	return "UpdatePasswordRequestValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e AuthResponseValidationError) Error() string {
+func (e UpdatePasswordRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -378,14 +382,14 @@ func (e AuthResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAuthResponse.%s: %s%s",
+		"invalid %sUpdatePasswordRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AuthResponseValidationError{}
+var _ error = UpdatePasswordRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -393,4 +397,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AuthResponseValidationError{}
+} = UpdatePasswordRequestValidationError{}

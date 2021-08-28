@@ -22,7 +22,7 @@ func init() {
 			)),
 			server.WithStreamMiddleware(middleware.JWTAuthStreamInterceptor()),
 			server.WithServiceRegistrar(rpc.RegisterIdentityService),
-			server.WithServiceRegistrar(rpc.RegisterAuthService),
+			server.WithServiceRegistrar(rpc.RegisterAccessService),
 		)
 	}, "failed to initialize server")
 }
