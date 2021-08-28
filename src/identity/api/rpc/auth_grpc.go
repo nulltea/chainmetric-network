@@ -34,7 +34,7 @@ func (a authService) Authenticate(
 
 	user, err := repository.NewUserMongo(core.MongoDB).GetByQuery(map[string]interface{}{
 		"email": request.Email,
-		"password_hash": request.PasswordHash,
+		"passcode": request.Passcode,
 	})
 
 	if err == mongo.ErrNoDocuments {
@@ -58,17 +58,21 @@ func (a authService) Authenticate(
 
 // SetPassword implements AuthServiceServer gRPC service RPC.
 func (a authService) SetPassword(ctx context.Context, request *presenter.SetPasswordRequest) (*emptypb.Empty, error) {
-	var userID = presenter.MustRetrieveUserID(ctx)
+	var user = presenter.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if err := repository.NewUserMongo(core.MongoDB).UpdateByID(userID, map[string]interface{}{
-		"password_hash": request.PasswordHash,
+	if user.Passcode != request.PrevPasscode {
+		return nil, status.Error(codes.InvalidArgument, "previous passcode does not match")
+	}
+
+	if err := repository.NewUserMongo(core.MongoDB).UpdateByID(user.ID, map[string]interface{}{
+		"passcode": request.NewPasscode,
 	}); err != nil {
 		return nil, status.Error(codes.Internal, "failed to update user in database")
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }

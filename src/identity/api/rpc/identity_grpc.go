@@ -70,5 +70,5 @@ func (identityService) Enroll(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }

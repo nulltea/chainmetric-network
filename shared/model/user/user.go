@@ -28,7 +28,7 @@ type User struct {
 	ExpiresAt *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty" example:"2021-05-02T15:04:05Z07:00"`
 
 	EnrollmentSecret string `json:"-" bson:"enrollment_id"`
-	PasswordHash string `json:"-" bson:"password_hash"`
+	Passcode         string `json:"-" bson:"passcode"`
 }
 
 // IdentityName forms the unique name of user's identity.

@@ -10,11 +10,12 @@ import "validate/validate.proto";
 
 message AuthRequest {
   string email = 1 [(validate.rules).string = {email: true}];
-  string passwordHash = 2 [(validate.rules).string = {min_bytes: 8 }];
+  string passcode = 2 [(validate.rules).string = {min_bytes: 8}];
 }
 
 message SetPasswordRequest {
-  string passwordHash = 2 [(validate.rules).string = {min_bytes: 8 }];
+  string prevPasscode = 1;
+  string newPasscode = 2 [(validate.rules).string = {min_bytes: 8}];
 }
 
 message VaultSecret {

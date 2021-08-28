@@ -20,6 +20,6 @@
 
 .env
 connection.yaml
+connection-local.yaml
 
-data/wallet
-data/certs
+data

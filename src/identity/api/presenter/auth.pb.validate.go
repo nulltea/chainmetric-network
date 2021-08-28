@@ -49,9 +49,9 @@ func (m *AuthRequest) Validate() error {
 		}
 	}
 
-	if len(m.GetPasswordHash()) < 8 {
+	if len(m.GetPasscode()) < 8 {
 		return AuthRequestValidationError{
-			field:  "PasswordHash",
+			field:  "Passcode",
 			reason: "value length must be at least 8 bytes",
 		}
 	}
@@ -171,9 +171,11 @@ func (m *SetPasswordRequest) Validate() error {
 		return nil
 	}
 
-	if len(m.GetPasswordHash()) < 8 {
+	// no validation rules for PrevPasscode
+
+	if len(m.GetNewPasscode()) < 8 {
 		return SetPasswordRequestValidationError{
-			field:  "PasswordHash",
+			field:  "NewPasscode",
 			reason: "value length must be at least 8 bytes",
 		}
 	}

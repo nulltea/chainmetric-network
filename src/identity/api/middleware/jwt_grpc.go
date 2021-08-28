@@ -95,7 +95,7 @@ func tryRetrieveUserFromJWT(ctx context.Context) (*model.User, error) {
 		return nil, status.Errorf(codes.Unauthenticated, "user account hasn't been confirmed yet")
 	}
 
-	if user.ExpiresAt.Before(time.Now()) {
+	if user.ExpiresAt != nil && user.ExpiresAt.Before(time.Now()) {
 		return nil, status.Errorf(codes.Unauthenticated, "user account is expired")
 	}
 

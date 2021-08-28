@@ -74,17 +74,17 @@ func jwtSigningPrivateKey() *rsa.PrivateKey {
 	}
 
 	block, _ := pem.Decode(keyBytes)
-	key, err := x509.ParsePKCS8PrivateKey(block.Bytes); if err != nil {
+	key, err := x509.ParsePKCS1PrivateKey(block.Bytes); if err != nil {
 		core.Logrus.WithField("path", path).
 			Fatal("failed to parse rsa private key")
 		return nil
 	}
 
-	return key.(*rsa.PrivateKey)
+	return key
 }
 
 func jwtSigningPublicKey() *rsa.PublicKey {
-	var path = viper.GetString("api.jwt_signing_key")
+	var path = viper.GetString("api.jwt_signing_cert")
 
 	keyBytes, err := os.ReadFile(path)
 	if err != nil {

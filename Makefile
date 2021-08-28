@@ -49,7 +49,7 @@ grpc-gen:
 		--go-grpc_out=paths=source_relative:./src \
 		./src/identity/api/rpc/*.proto
 
-grpcui:
+grpc-ui:
 	grpcui \
  		--open-browser \
  		-cert ./data/certs/grpc/server.crt \

@@ -14,6 +14,15 @@ func RequestVaultSecret(user *model.User) (string, string, error) {
 		return "", "", err
 	}
 
-	return repository.NewIdentitiesVault(core.Vault).
-		WriteDynamicSecret(user.IdentityName(), cert, key)
+	path, err := repository.NewIdentitiesVault(core.Vault).WriteDynamicSecret(user.IdentityName(), cert, key)
+	if err != nil {
+		return "", "", err
+	}
+
+	token, err := repository.NewIdentitiesVault(core.Vault).LoginUserpassAuth(user.IdentityName(), user.Passcode)
+	if err != nil {
+		return "", "", err
+	}
+
+	return path, token, nil
 }
