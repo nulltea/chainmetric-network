@@ -8,17 +8,22 @@ swagger:
 
 deploy-identity:
 	kubectl create -n network secret tls identity.${ORG}.org.${DOMAIN}-tls \
-		--key="data/certs/server.key" \
-		--cert="data/certs/server.crt" \
+		--key="data/certs/grpc/server.key" \
+		--cert="data/certs/grpc/server.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	kubectl create secret generic identity.${ORG}.org.${DOMAIN}-ca \
-		--from-file="data/certs/ca.crt" \
+		--from-file="data/certs/grpc/ca.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	kubectl create secret generic identity-${ORG}-org-hlf-connection \
-	 --from-file=connection.yaml \
-	  --dry-run=client -o yaml | kubectl apply -f -
+		--from-file=connection.yaml \
+		--dry-run=client -o yaml | kubectl apply -f -
+
+	kubectl create secret generic identity-${ORG}-org-jwt-keys \
+		--from-file=data/certs/jwt/jwt-cert.pem \
+		--from-file=data/certs/jwt/jwt-key.pem \
+		--dry-run=client -o yaml | kubectl apply -f -
 
 	helm upgrade --install identity-chipa-inu deploy/charts/api-service
 
@@ -47,8 +52,8 @@ grpc-gen:
 grpcui:
 	grpcui \
  		--open-browser \
- 		-cert ./data/certs/server.crt \
- 		-key ./data/certs/server.key \
+ 		-cert ./data/certs/grpc/server.crt \
+ 		-key ./data/certs/grpc/server.key \
  		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
  		-proto ./src/identity/api/rpc/identity.proto \
