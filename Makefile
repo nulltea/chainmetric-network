@@ -1,3 +1,6 @@
+include .env
+export
+
 APP_SWAGGER_DIR=../app/app/assets/swagger
 DOMAIN=chainmetric.network
 ORG=chipa-inu
@@ -23,6 +26,10 @@ deploy-identity:
 	kubectl create secret generic identity-${ORG}-org-jwt-keys \
 		--from-file=data/certs/jwt/jwt-cert.pem \
 		--from-file=data/certs/jwt/jwt-key.pem \
+		--dry-run=client -o yaml | kubectl apply -f -
+
+	kubectl create secret generic vault-credentials \
+		--from-literal=token=${VAULT_TOKEN} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	helm upgrade --install identity-chipa-inu deploy/charts/api-service
@@ -57,6 +64,7 @@ grpc-ui:
  		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
  		-proto ./src/identity/api/rpc/identity.proto \
+ 		-proto ./src/identity/api/rpc/access.proto \
  		identity.chipa-inu.org.chainmetric.network:443
 
 grpc-tls-gen:

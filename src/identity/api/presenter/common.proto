@@ -14,5 +14,3 @@ enum Status {
   ACCEPTED = 202;
   NO_CONTENT = 204;
 }
-
-

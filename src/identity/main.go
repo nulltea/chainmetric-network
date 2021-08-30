@@ -18,7 +18,7 @@ func init() {
 	utils.MustExecute(func() error {
 		return server.Init(
 			server.WithUnaryMiddleware(middleware.JWTAuthUnaryInterceptor(
-				"IdentityService/register", "AuthService/authenticate",
+				"IdentityService/register", "AccessService/requestFabricCredentials",
 			)),
 			server.WithStreamMiddleware(middleware.JWTAuthStreamInterceptor()),
 			server.WithServiceRegistrar(rpc.RegisterIdentityService),

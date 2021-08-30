@@ -52,3 +52,8 @@ volumes:
     name: artifacts.pvc
     mountPath: /app/crypto
 
+envs:
+  - type: secret
+    name: VAULT_TOKEN
+    secretName: vault-credentials
+    secretKey: token
