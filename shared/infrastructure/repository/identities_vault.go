@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	vault "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
@@ -40,21 +41,20 @@ func (r *IdentitiesVault) WriteStaticSecret(id string, certificate, key []byte) 
 }
 
 // WriteDynamicSecret writes signing credentials to Vault for one-time use.
-func (r *IdentitiesVault) WriteDynamicSecret(id string, certificate, key []byte) (string, error) {
+func (r *IdentitiesVault) WriteDynamicSecret(username string, certificate, key []byte) (string, error) {
 	var (
-		path = fmt.Sprintf("fabric/auth/login/%s", id)
+		path = fmt.Sprintf("fabric/auth/login/%s", username)
 		data = map[string]interface{}{
 			"certificate": base64.StdEncoding.EncodeToString(certificate),
 			"signing_key": base64.StdEncoding.EncodeToString(key),
 		}
 	)
 
-	_, err := r.client.Logical().Write(path, data)
-	if err != nil {
+	if _, err := r.client.Logical().Write(path, data); err != nil {
 		return "", errors.Wrap(err, "failed to write identity secret to Vault")
 	}
 
-	return path, err
+	return path, nil
 }
 
 // GrantAccessWithUserpass creates user in Vault,
@@ -64,11 +64,18 @@ func (r *IdentitiesVault) GrantAccessWithUserpass(username, password string) err
 		path = fmt.Sprintf("auth/userpass/users/%s", username)
 		data = map[string]interface{}{
 			"password": password,
+			"policies": strings.Join([]string{username, "default"}, ","),
 		}
 	)
 
 	if _, err := r.client.Logical().Write(path, data); err != nil {
 		return errors.Wrap(err, "failed to create access for Vault")
+	}
+
+	if err := r.client.Sys().PutPolicy(username, fmt.Sprintf(`path "fabric/auth/login/%s" {
+	capabilities = [ "read" ]
+}`, username)); err != nil {
+		return errors.Wrapf(err, "failed to grand user access to '%s' path", path)
 	}
 
 	return nil
