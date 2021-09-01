@@ -1,7 +1,9 @@
 package identity
 
 import (
-	"github.com/google/uuid"
+	"crypto/md5"
+	"encoding/hex"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
@@ -12,9 +14,7 @@ import (
 // Register performs users initial registration.
 func Register(options ...RegistrationOption) (*user.User, error) {
 	var (
-		user = &user.User{
-			ID: uuid.NewString(),
-		}
+		user = &user.User{}
 		usersRepo = repository.NewUserMongo(core.MongoDB)
 		err error
 	)
@@ -22,6 +22,8 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 	for i := range options {
 		options[i].Apply(user)
 	}
+
+	user.ID = generateUserIDFromIdentityName(user.IdentityName())
 
 	if user.EnrollmentID, err = client.Register(&msp.RegistrationRequest{
 		Name: user.IdentityName(),
@@ -35,4 +37,9 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 	}
 
 	return user, nil
+}
+
+func generateUserIDFromIdentityName(username string) string {
+	usernameHash := md5.Sum([]byte(username))
+	return hex.EncodeToString(usernameHash[:])
 }

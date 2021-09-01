@@ -23,3 +23,12 @@ message VaultSecret {
   string path = 2;
 }
 
+message CertificateAuthRequest {
+  bytes certificate = 2 [(validate.rules).bytes = {min_len: 100}];
+  bytes signingKey = 3 [(validate.rules).bytes = {min_len: 25}];
+}
+
+message CertificateAuthResponse {
+  string apiAccessToken = 1;
+  User user = 2;
+}

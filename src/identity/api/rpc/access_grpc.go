@@ -8,6 +8,7 @@ import (
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,12 +19,12 @@ type accessService struct{
 	UnimplementedAccessServiceServer
 }
 
-// RegisterAccessService registers AuthServiceServer fir given gRPC `server` instance.
+// RegisterAccessService registers AccessServiceServer fir given gRPC `server` instance.
 func RegisterAccessService(server *grpc.Server) {
 	RegisterAccessServiceServer(server, &accessService{})
 }
 
-// RequestFabricCredentials implements AuthServiceServer gRPC service RPC.
+// RequestFabricCredentials implements AccessServiceServer gRPC service RPC.
 func (accessService) RequestFabricCredentials(
 	_ context.Context,
 	request *presenter.FabricCredentialsRequest,
@@ -62,4 +63,22 @@ func (accessService) RequestFabricCredentials(
 	}
 
 	return presenter.NewFabricCredentialsResponse(user, secretToken, secretPath, accessToken), nil
+}
+
+// AuthWithSigningIdentity implements AccessServiceServer gRPC service RPC.
+func (s accessService) AuthWithSigningIdentity(
+	ctx context.Context,
+	request *presenter.CertificateAuthRequest,
+) (*presenter.CertificateAuthResponse, error) {
+	user, err := identity.ParseSigningCredentials(request.Certificate, request.SigningKey)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "identity verification failed")
+	}
+
+	accessToken, err := access.GenerateJWT(user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return presenter.NewCertificateAuthResponse(user, accessToken), nil
 }

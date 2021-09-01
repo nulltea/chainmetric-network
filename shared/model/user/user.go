@@ -27,9 +27,16 @@ type User struct {
 
 // IdentityName forms the unique name of user's identity.
 func (u *User) IdentityName() string {
-	return fmt.Sprintf("%s.%s@%s.org.%s",
+	usernameParts := []string {
 		strings.ToLower(u.Firstname),
-		strings.ToLower(u.Lastname),
+	}
+
+	if len(u.Lastname) != 0 {
+		usernameParts = append(usernameParts, strings.ToLower(u.Lastname))
+	}
+
+	return fmt.Sprintf("%s@%s.org.%s",
+		strings.Join(usernameParts, "."),
 		viper.GetString("organization"),
 		viper.GetString("domain"),
 	)

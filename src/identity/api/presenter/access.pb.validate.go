@@ -322,3 +322,163 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = VaultSecretValidationError{}
+
+// Validate checks the field values on CertificateAuthRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CertificateAuthRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if len(m.GetCertificate()) < 100 {
+		return CertificateAuthRequestValidationError{
+			field:  "Certificate",
+			reason: "value length must be at least 100 bytes",
+		}
+	}
+
+	if len(m.GetSigningKey()) < 25 {
+		return CertificateAuthRequestValidationError{
+			field:  "SigningKey",
+			reason: "value length must be at least 25 bytes",
+		}
+	}
+
+	return nil
+}
+
+// CertificateAuthRequestValidationError is the validation error returned by
+// CertificateAuthRequest.Validate if the designated constraints aren't met.
+type CertificateAuthRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CertificateAuthRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CertificateAuthRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CertificateAuthRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CertificateAuthRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CertificateAuthRequestValidationError) ErrorName() string {
+	return "CertificateAuthRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CertificateAuthRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCertificateAuthRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CertificateAuthRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CertificateAuthRequestValidationError{}
+
+// Validate checks the field values on CertificateAuthResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CertificateAuthResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for ApiAccessToken
+
+	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CertificateAuthResponseValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// CertificateAuthResponseValidationError is the validation error returned by
+// CertificateAuthResponse.Validate if the designated constraints aren't met.
+type CertificateAuthResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CertificateAuthResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CertificateAuthResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CertificateAuthResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CertificateAuthResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CertificateAuthResponseValidationError) ErrorName() string {
+	return "CertificateAuthResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CertificateAuthResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCertificateAuthResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CertificateAuthResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CertificateAuthResponseValidationError{}

@@ -20,6 +20,7 @@ func init() {
 			server.WithUnaryMiddlewares(middleware.AuthWithJWTForUnaryGRPC(
 				"UserService/register",
 				"AccessService/requestFabricCredentials",
+				"AccessService/requestFabricCredentials",
 			)),
 			server.WithStreamMiddlewares(middleware.AuthWithJWTForStreamGRPC()),
 			server.WithServiceRegistrar(rpc.RegisterAdminService),

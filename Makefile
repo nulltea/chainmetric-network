@@ -56,6 +56,8 @@ grpc-gen:
 		--go-grpc_out=paths=source_relative:./src \
 		./src/identity/api/rpc/*.proto
 
+	ls ./src/identity/api/rpc/*_grpc_grpc.pb.go | sed -E "p;s/(.*)_grpc_grpc\.pb\.go/\1_grpc\.pb.\go/" | xargs -n2 mv
+
 grpc-ui:
 	grpcui \
  		--open-browser \

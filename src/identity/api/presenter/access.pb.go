@@ -194,6 +194,116 @@ func (x *VaultSecret) GetPath() string {
 	return ""
 }
 
+type CertificateAuthRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Certificate []byte `protobuf:"bytes,2,opt,name=certificate,proto3" json:"certificate,omitempty"`
+	SigningKey  []byte `protobuf:"bytes,3,opt,name=signingKey,proto3" json:"signingKey,omitempty"`
+}
+
+func (x *CertificateAuthRequest) Reset() {
+	*x = CertificateAuthRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_identity_api_presenter_access_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertificateAuthRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertificateAuthRequest) ProtoMessage() {}
+
+func (x *CertificateAuthRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_api_presenter_access_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertificateAuthRequest.ProtoReflect.Descriptor instead.
+func (*CertificateAuthRequest) Descriptor() ([]byte, []int) {
+	return file_identity_api_presenter_access_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CertificateAuthRequest) GetCertificate() []byte {
+	if x != nil {
+		return x.Certificate
+	}
+	return nil
+}
+
+func (x *CertificateAuthRequest) GetSigningKey() []byte {
+	if x != nil {
+		return x.SigningKey
+	}
+	return nil
+}
+
+type CertificateAuthResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ApiAccessToken string `protobuf:"bytes,1,opt,name=apiAccessToken,proto3" json:"apiAccessToken,omitempty"`
+	User           *User  `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+}
+
+func (x *CertificateAuthResponse) Reset() {
+	*x = CertificateAuthResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_identity_api_presenter_access_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertificateAuthResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertificateAuthResponse) ProtoMessage() {}
+
+func (x *CertificateAuthResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_api_presenter_access_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertificateAuthResponse.ProtoReflect.Descriptor instead.
+func (*CertificateAuthResponse) Descriptor() ([]byte, []int) {
+	return file_identity_api_presenter_access_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CertificateAuthResponse) GetApiAccessToken() string {
+	if x != nil {
+		return x.ApiAccessToken
+	}
+	return ""
+}
+
+func (x *CertificateAuthResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
 var File_identity_api_presenter_access_proto protoreflect.FileDescriptor
 
 var file_identity_api_presenter_access_proto_rawDesc = []byte{
@@ -226,12 +336,27 @@ var file_identity_api_presenter_access_proto_rawDesc = []byte{
 	0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x37, 0x0a, 0x0b, 0x56, 0x61, 0x75, 0x6c, 0x74, 0x53,
 	0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x70,
-	0x61, 0x74, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x42,
-	0x46, 0x5a, 0x44, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x69,
-	0x6d, 0x6f, 0x74, 0x68, 0x2d, 0x79, 0x2f, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x6d, 0x65, 0x74, 0x72,
-	0x69, 0x63, 0x2d, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x2f, 0x73, 0x72, 0x63,
-	0x2f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72,
-	0x65, 0x73, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x74, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x22,
+	0x6c, 0x0a, 0x16, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x41, 0x75,
+	0x74, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x29, 0x0a, 0x0b, 0x63, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x42, 0x07,
+	0xfa, 0x42, 0x04, 0x7a, 0x02, 0x10, 0x64, 0x52, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x12, 0x27, 0x0a, 0x0a, 0x73, 0x69, 0x67, 0x6e, 0x69, 0x6e, 0x67, 0x4b,
+	0x65, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x7a, 0x02, 0x10,
+	0x19, 0x52, 0x0a, 0x73, 0x69, 0x67, 0x6e, 0x69, 0x6e, 0x67, 0x4b, 0x65, 0x79, 0x22, 0x7b, 0x0a,
+	0x17, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x41, 0x75, 0x74, 0x68,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a, 0x0e, 0x61, 0x70, 0x69, 0x41,
+	0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0e, 0x61, 0x70, 0x69, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e,
+	0x12, 0x38, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x24,
+	0x2e, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x69, 0x64, 0x65,
+	0x6e, 0x74, 0x69, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x65, 0x73, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x2e,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x42, 0x46, 0x5a, 0x44, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x69, 0x6d, 0x6f, 0x74, 0x68, 0x2d,
+	0x79, 0x2f, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2d, 0x63, 0x6f,
+	0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x69, 0x64, 0x65, 0x6e,
+	0x74, 0x69, 0x74, 0x79, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x65, 0x73, 0x65, 0x6e, 0x74,
+	0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -246,21 +371,24 @@ func file_identity_api_presenter_access_proto_rawDescGZIP() []byte {
 	return file_identity_api_presenter_access_proto_rawDescData
 }
 
-var file_identity_api_presenter_access_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_identity_api_presenter_access_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_identity_api_presenter_access_proto_goTypes = []interface{}{
 	(*FabricCredentialsRequest)(nil),  // 0: chainmetric.identity.presenter.FabricCredentialsRequest
 	(*FabricCredentialsResponse)(nil), // 1: chainmetric.identity.presenter.FabricCredentialsResponse
 	(*VaultSecret)(nil),               // 2: chainmetric.identity.presenter.VaultSecret
-	(*User)(nil),                      // 3: chainmetric.identity.presenter.User
+	(*CertificateAuthRequest)(nil),    // 3: chainmetric.identity.presenter.CertificateAuthRequest
+	(*CertificateAuthResponse)(nil),   // 4: chainmetric.identity.presenter.CertificateAuthResponse
+	(*User)(nil),                      // 5: chainmetric.identity.presenter.User
 }
 var file_identity_api_presenter_access_proto_depIdxs = []int32{
 	2, // 0: chainmetric.identity.presenter.FabricCredentialsResponse.secret:type_name -> chainmetric.identity.presenter.VaultSecret
-	3, // 1: chainmetric.identity.presenter.FabricCredentialsResponse.user:type_name -> chainmetric.identity.presenter.User
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	5, // 1: chainmetric.identity.presenter.FabricCredentialsResponse.user:type_name -> chainmetric.identity.presenter.User
+	5, // 2: chainmetric.identity.presenter.CertificateAuthResponse.user:type_name -> chainmetric.identity.presenter.User
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_identity_api_presenter_access_proto_init() }
@@ -306,6 +434,30 @@ func file_identity_api_presenter_access_proto_init() {
 				return nil
 			}
 		}
+		file_identity_api_presenter_access_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertificateAuthRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_identity_api_presenter_access_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertificateAuthResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -313,7 +465,7 @@ func file_identity_api_presenter_access_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_identity_api_presenter_access_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
