@@ -16,8 +16,6 @@ var (
 // Init performs initialization of the identity package.
 func Init() error {
 	var (
-		// domain = viper.GetString("api.domain")
-		// org = viper.GetString("api.organization")
 		err error
 	)
 
@@ -27,20 +25,10 @@ func Init() error {
 
 	if client, err = msp.New(
 		sdk.Context(),
-		msp.WithOrg(viper.GetString("api.organization")),
+		msp.WithOrg(viper.GetString("organization")),
 	); err != nil {
 		return err
 	}
-
-	// adminID := fmt.Sprintf("Admin@%s.org.%s", org, domain )
-	//
-	// if ir, err := client.GetIdentity(adminID); err != nil || ir == nil {
-	// 	if err := client.Enroll(adminID,
-	// 		msp.WithSecret("adminpsw"),
-	// 	); err != nil {
-	// 		return err
-	// 	}
-	// }
 
 	return nil
 }

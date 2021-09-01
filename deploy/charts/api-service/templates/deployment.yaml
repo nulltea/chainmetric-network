@@ -39,6 +39,17 @@ spec:
                 secretKeyRef:
                   name: mongo-auth
                   key: password
+          {{- range .Values.envs }}
+            - name: {{ .name }}
+          {{- if eq .type "value" }}
+              value: {{ .value }}
+          {{- else if eq .type "secret" }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+          {{- end }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.path }}

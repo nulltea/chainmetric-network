@@ -1,3 +1,6 @@
+include .env
+export
+
 APP_SWAGGER_DIR=../app/app/assets/swagger
 DOMAIN=chainmetric.network
 ORG=chipa-inu
@@ -8,51 +11,61 @@ swagger:
 
 deploy-identity:
 	kubectl create -n network secret tls identity.${ORG}.org.${DOMAIN}-tls \
-		--key="data/certs/server.key" \
-		--cert="data/certs/server.crt" \
+		--key="data/certs/grpc/server.key" \
+		--cert="data/certs/grpc/server.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	kubectl create secret generic identity.${ORG}.org.${DOMAIN}-ca \
-		--from-file="data/certs/ca.crt" \
+		--from-file="data/certs/grpc/ca.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	kubectl create secret generic identity-${ORG}-org-hlf-connection \
-	 --from-file=connection.yaml \
-	  --dry-run=client -o yaml | kubectl apply -f -
+		--from-file=connection.yaml \
+		--dry-run=client -o yaml | kubectl apply -f -
+
+	kubectl create secret generic identity-${ORG}-org-jwt-keys \
+		--from-file=data/certs/jwt/jwt-cert.pem \
+		--from-file=data/certs/jwt/jwt-key.pem \
+		--dry-run=client -o yaml | kubectl apply -f -
+
+	kubectl create secret generic vault-credentials \
+		--from-literal=token=${VAULT_TOKEN} \
+		--dry-run=client -o yaml | kubectl apply -f -
 
 	helm upgrade --install identity-chipa-inu deploy/charts/api-service
 
 docker-build:
 	sudo docker buildx build \
 		--platform linux/arm64 -t chainmetric/api.identity \
-		-f ./deploy/docker/users.Dockerfile --push .
+		-f ./deploy/docker/identity.Dockerfile --push .
 
 deploy-build: docker-build deploy-identity
 
 grpc-gen:
 	protoc \
-		-I=./src/users/api/presenter \
+		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-	    --go_out=paths=source_relative:./src/users/api/presenter \
-	    --validate_out=lang=go,paths=source_relative:./src/users/api/presenter \
-		./src/users/api/presenter/*.proto
+	    --go_out=paths=source_relative:src \
+	    --validate_out=lang=go,paths=source_relative:src \
+		./src/identity/api/presenter/*.proto
 
 	protoc \
-		-I=./src/users/api/rpc \
-		-I=./src/users/api/presenter \
+		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-		--go-grpc_out=paths=source_relative:./src/users/api/rpc \
-		./src/users/api/rpc/*.proto
+		--go-grpc_out=paths=source_relative:./src \
+		./src/identity/api/rpc/*.proto
 
-grpcui:
+grpc-ui:
 	grpcui \
- 		-plaintext --open-browser \
- 		-import-path ./src/users/api/presenter \
- 		-import-path ./src/users/api/rpc \
+ 		--open-browser \
+ 		-cert ./data/certs/grpc/server.crt \
+ 		-key ./data/certs/grpc/server.key \
+ 		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
- 		-proto ./src/users/api/rpc/identity.proto \
- 		localhost:8080
+ 		-proto ./src/identity/api/rpc/identity.proto \
+ 		-proto ./src/identity/api/rpc/access.proto \
+ 		identity.chipa-inu.org.chainmetric.network:443
 
 grpc-tls-gen:
 	openssl genrsa \
@@ -70,7 +83,7 @@ grpc-tls-gen:
 	openssl x509 -req \
 		-in data/certs/server.csr \
 		-CA data/certs/ca.crt -CAkey data/certs/ca.key -CAcreateserial -days 365 \
-		-extfile <(printf "subjectAltName=DNS:localhost,DNS:identity-${ORG}-org") \
+		-extfile <(printf "subjectAltName=DNS:identity.${ORG}.org.${DOMAIN},DNS:localhost,DNS:identity-${ORG}-org") \
 		-out data/certs/server.crt
 
 

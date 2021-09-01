@@ -44,8 +44,16 @@ volumes:
     mountPath: /app/config
   - type: secret
     name: identity.chipa-inu.org.chainmetric.network-tls
-    mountPath: /app/certs
+    mountPath: /app/certs/grpc
+  - type: secret
+    name: identity-chipa-inu-org-jwt-keys
+    mountPath: /app/certs/jwt
   - type: claim
-    name: artifacts.pvc
+    name: artifacts
     mountPath: /app/crypto
 
+envs:
+  - type: secret
+    name: VAULT_TOKEN
+    secretName: vault-credentials
+    secretKey: token

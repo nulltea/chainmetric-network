@@ -30,7 +30,7 @@ kind: ServersTransport
 metadata:
   name: {{ .Release.Name }}-transport
 spec:
-  serverName: {{ .Release.Name }}
+  serverName: {{ .Values.externalAccess.serviceHostname }}-{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}
   rootCAsSecrets:
     - {{ .Values.externalAccess.serviceHostname }}.{{ .Values.externalAccess.ownershipMsp}}.{{ .Values.externalAccess.domain }}-ca
   certificatesSecrets:
