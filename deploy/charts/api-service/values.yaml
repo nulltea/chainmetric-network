@@ -49,7 +49,7 @@ volumes:
     name: identity-chipa-inu-org-jwt-keys
     mountPath: /app/certs/jwt
   - type: claim
-    name: artifacts.pvc
+    name: artifacts
     mountPath: /app/crypto
 
 envs:
