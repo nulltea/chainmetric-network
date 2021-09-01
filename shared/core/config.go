@@ -11,6 +11,7 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
+	viper.SetDefault("domain", "chainmetric.network")
 	viper.SetDefault("organization", "chipa-inu")
 	viper.SetDefault("logging", "info")
 
@@ -20,7 +21,6 @@ func initConfig() {
 	viper.SetDefault("chaincode.leveldb_enabled", true)
 	viper.SetDefault("chaincode.persistence_path", "app/storage")
 
-	viper.SetDefault("api.domain", "chainmetric.network")
 	viper.SetDefault("api.wallet_path", "./data")
 	viper.SetDefault("api.crypto_path", "./crypto")
 	viper.SetDefault("api.connection_config_path", "config/connection.yaml")

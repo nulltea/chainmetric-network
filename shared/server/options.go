@@ -13,15 +13,15 @@ type (
 	Option func(args *gRPCArgsStub)
 )
 
-func WithUnaryMiddleware(middleware grpc.UnaryServerInterceptor) Option {
+func WithUnaryMiddlewares(middlewares ...grpc.UnaryServerInterceptor) Option {
 	return func(args *gRPCArgsStub) {
-		args.UnaryInterceptors = append(args.UnaryInterceptors, middleware)
+		args.UnaryInterceptors = append(args.UnaryInterceptors, middlewares...)
 	}
 }
 
-func WithStreamMiddleware(middleware grpc.StreamServerInterceptor) Option {
+func WithStreamMiddlewares(middlewares ...grpc.StreamServerInterceptor) Option {
 	return func(args *gRPCArgsStub) {
-		args.StreamInterceptors = append(args.StreamInterceptors, middleware)
+		args.StreamInterceptors = append(args.StreamInterceptors, middlewares...)
 	}
 }
 

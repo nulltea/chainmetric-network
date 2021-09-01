@@ -23,7 +23,7 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 		options[i].Apply(user)
 	}
 
-	if user.EnrollmentSecret, err = client.Register(&msp.RegistrationRequest{
+	if user.EnrollmentID, err = client.Register(&msp.RegistrationRequest{
 		Name: user.IdentityName(),
 		Type: "client",
 	}); err != nil {
@@ -36,4 +36,3 @@ func Register(options ...RegistrationOption) (*user.User, error) {
 
 	return user, nil
 }
-

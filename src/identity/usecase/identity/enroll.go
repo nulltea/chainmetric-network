@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/privileges"
 )
 
 // Enroll generates msp.SigningIdentity for user and confirms one.
@@ -30,7 +31,10 @@ func Enroll(userID string, options ...EnrollmentOption) (string, error) {
 		return "", errors.Wrap(err, "failed to found user registration")
 	}
 
-	if err = client.Enroll(user.IdentityName(), msp.WithSecret(user.EnrollmentSecret)); err != nil {
+	if err = client.Enroll(user.IdentityName(),
+		msp.WithSecret(user.EnrollmentID),
+		msp.WithType(identityTypeByRole(argsStub.Role)),
+	); err != nil {
 		return "", errors.Wrap(err, "failed to enroll user")
 	}
 
@@ -66,4 +70,12 @@ func generatePasscode() (string, string) {
 	password, _ := gen.Generate()
 	hash := md5.Sum([]byte(*password))
 	return *password, hex.EncodeToString(hash[:])
+}
+
+func identityTypeByRole(role string) string {
+	if privileges.RoleHas(role, "identity.enroll") {
+		return "admin"
+	}
+
+	return "client"
 }

@@ -24,7 +24,12 @@ func Init() {
 	}
 }
 
-// Has determines whether the user has certain privilege for given `path.
+// Has determines whether the user has certain privilege for given `path`.
 func Has(user *model.User, path string) bool {
 	return config.GetBool(fmt.Sprintf("%s.%s", user.Role, path))
+}
+
+// RoleHas determines whether the role has certain privilege for given `path`.
+func RoleHas(role string, path string) bool {
+	return config.GetBool(fmt.Sprintf("%s.%s", role, path))
 }

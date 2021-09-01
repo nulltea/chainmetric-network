@@ -63,32 +63,3 @@ func (accessService) RequestFabricCredentials(
 
 	return presenter.NewFabricCredentialsResponse(user, secretToken, secretPath, accessToken), nil
 }
-
-// UpdatePassword implements AuthServiceServer gRPC service RPC.
-func (accessService) UpdatePassword(
-	ctx context.Context,
-	request *presenter.UpdatePasswordRequest,
-) (*presenter.StatusResponse, error) {
-	var user = presenter.MustRetrieveUser(ctx)
-
-	if err := request.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if user.Passcode != request.PrevPasscode {
-		return nil, status.Error(codes.InvalidArgument, "previous passcode does not match")
-	}
-
-	if err := repository.NewUserMongo(core.MongoDB).UpdateByID(user.ID, map[string]interface{}{
-		"passcode": request.NewPasscode,
-	}); err != nil {
-		return nil, status.Error(codes.Internal, "failed to update user in database")
-	}
-
-	if err := repository.NewIdentitiesVault(core.Vault).
-		UpdateUserpassAccess(user.IdentityName(), request.NewPasscode); err != nil {
-		return nil, status.Error(codes.Internal, "failed to update user pass on Vault")
-	}
-
-	return presenter.NewStatusResponse(presenter.Status_OK), nil
-}

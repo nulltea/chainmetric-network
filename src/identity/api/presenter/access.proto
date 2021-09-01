@@ -23,7 +23,3 @@ message VaultSecret {
   string path = 2;
 }
 
-message UpdatePasswordRequest {
-  string prevPasscode = 1;
-  string newPasscode = 2 [(validate.rules).string = {min_bytes: 8}];
-}

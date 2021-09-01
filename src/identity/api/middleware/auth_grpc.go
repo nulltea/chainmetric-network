@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
@@ -16,8 +17,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// JWTAuthUnaryInterceptor returns grpc.UnaryServerInterceptor func for JWT access control.
-func JWTAuthUnaryInterceptor(skipMethods ...string) grpc.UnaryServerInterceptor {
+// AuthWithJWTForUnaryGRPC returns grpc.UnaryServerInterceptor func for JWT access control.
+func AuthWithJWTForUnaryGRPC(skipMethods ...string) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -28,8 +29,17 @@ func JWTAuthUnaryInterceptor(skipMethods ...string) grpc.UnaryServerInterceptor 
 			return handler(ctx, req)
 		}
 
-		user, err := tryRetrieveUserFromJWT(ctx)
+		claims, err := tryParseJWT(ctx)
 		if err != nil {
+			return nil, err
+		}
+
+		user, err := retrieveUserFromDB(claims.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = authenticateUser(user); err != nil {
 			return nil, err
 		}
 
@@ -42,8 +52,8 @@ func JWTAuthUnaryInterceptor(skipMethods ...string) grpc.UnaryServerInterceptor 
 	}
 }
 
-// JWTAuthStreamInterceptor returns grpc.StreamServerInterceptor func for JWT access control.
-func JWTAuthStreamInterceptor(skipMethods ...string) grpc.StreamServerInterceptor {
+// AuthWithJWTForStreamGRPC returns grpc.StreamServerInterceptor func for JWT access control.
+func AuthWithJWTForStreamGRPC(skipMethods ...string) grpc.StreamServerInterceptor {
 	return func(
 		srv interface{},
 		stream grpc.ServerStream,
@@ -54,13 +64,22 @@ func JWTAuthStreamInterceptor(skipMethods ...string) grpc.StreamServerIntercepto
 			return handler(srv, stream)
 		}
 
-		user, err := tryRetrieveUserFromJWT(stream.Context())
+		claims, err := tryParseJWT(stream.Context())
 		if err != nil {
 			return err
 		}
 
+		user, err := retrieveUserFromDB(claims.Id)
+		if err != nil {
+			return err
+		}
+
+		if err = authenticateUser(user); err != nil {
+			return err
+		}
+
 		_ = stream.SetHeader(metadata.New(map[string]string{
-			"user_id": user.ID,
+			"user_id":    claims.Id,
 			"user_model": user.Encode(),
 		}))
 
@@ -68,7 +87,7 @@ func JWTAuthStreamInterceptor(skipMethods ...string) grpc.StreamServerIntercepto
 	}
 }
 
-func tryRetrieveUserFromJWT(ctx context.Context) (*model.User, error) {
+func tryParseJWT(ctx context.Context) (*jwt.StandardClaims, error) {
 	meta, ok := metadata.FromIncomingContext(ctx); if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
 	}
@@ -82,7 +101,11 @@ func tryRetrieveUserFromJWT(ctx context.Context) (*model.User, error) {
 		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %w", err)
 	}
 
-	user, err := repository.NewUserMongo(core.MongoDB).GetByID(claims.Id)
+	return claims, nil
+}
+
+func retrieveUserFromDB(id string) (*model.User, error) {
+	user, err := repository.NewUserMongo(core.MongoDB).GetByID(id)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.Unauthenticated, "access token points to unknown user")
@@ -91,15 +114,19 @@ func tryRetrieveUserFromJWT(ctx context.Context) (*model.User, error) {
 		return nil, status.Errorf(codes.Internal, "failed to resolve user from token claims")
 	}
 
+	return user, nil
+}
+
+func authenticateUser(user *model.User) error {
 	if !user.Confirmed {
-		return nil, status.Errorf(codes.Unauthenticated, "user account hasn't been confirmed yet")
+		return status.Errorf(codes.Unauthenticated, "user account hasn't been confirmed yet")
 	}
 
 	if user.ExpiresAt != nil && user.ExpiresAt.Before(time.Now()) {
-		return nil, status.Errorf(codes.Unauthenticated, "user account is expired")
+		return status.Errorf(codes.Unauthenticated, "user account is expired")
 	}
 
-	return user, nil
+	return nil
 }
 
 func skipValidation(method string, skipMethods []string) bool {
@@ -117,4 +144,30 @@ func skipValidation(method string, skipMethods []string) bool {
 	}
 
 	return skip
+}
+
+func MustRetrieveUser(ctx context.Context) *model.User {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		panic("failed to get metadata from context")
+	}
+
+	if values := md.Get("user_model"); len(values) == 1 {
+		return model.User{}.Decode(values[0])
+	}
+
+	panic("user_model is missing in context")
+}
+
+func MustRetrieveUserID(ctx context.Context) string {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		panic("failed to get metadata from context")
+	}
+
+	if values := md.Get("user_id"); len(values) == 1 {
+		return values[0]
+	}
+
+	panic("user_id is missing in context")
 }

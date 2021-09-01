@@ -5,27 +5,28 @@ import (
 
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-contracts/src/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/identity"
-	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/privileges"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type identityService struct{
-	UnimplementedIdentityServiceServer
+type userService struct{
+	UnimplementedUserServiceServer
 }
 
-// RegisterIdentityService registers IdentityServiceServer fir given gRPC `server` instance.
-func RegisterIdentityService(server *grpc.Server) {
-	RegisterIdentityServiceServer(server, &identityService{})
+// RegisterUserService registers UserServiceServer fir given gRPC `server` instance.
+func RegisterUserService(server *grpc.Server) {
+	RegisterUserServiceServer(server, &userService{})
 }
 
 // Register implements IdentityServiceServer gRPC service.
-func (identityService) Register(
+func (userService) Register(
 	_ context.Context,
 	request *presenter.RegistrationRequest,
 ) (*presenter.RegistrationResponse, error) {
@@ -57,28 +58,36 @@ func (identityService) Register(
 	return presenter.NewRegistrationResponse(user, accessToken), nil
 }
 
-// Enroll implements IdentityServiceClient gRPC service.
-func (identityService) Enroll(
+func (s userService) GetState(ctx context.Context, _ *emptypb.Empty) (*presenter.User, error) {
+	var user = middleware.MustRetrieveUser(ctx)
+	return presenter.NewUserProto(user), nil
+}
+
+// ChangePassword implements UserServiceServer gRPC service RPC.
+func (userService) ChangePassword(
 	ctx context.Context,
-	request *presenter.EnrollmentRequest,
-) (*presenter.EnrollmentResponse, error) {
-	var user = presenter.MustRetrieveUser(ctx)
+	request *presenter.ChangePasswordRequest,
+) (*presenter.StatusResponse, error) {
+	var user = middleware.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if !privileges.Has(user, "identity.enroll") {
-		return nil, status.Error(codes.Unauthenticated, "user has not privileges for this method")
+	if user.Passcode != request.PrevPasscode {
+		return nil, status.Error(codes.InvalidArgument, "previous passcode does not match")
 	}
 
-	initPassword, err := identity.Enroll(request.UserID,
-		identity.WithRole(request.Role),
-		identity.WithExpirationPb(request.ExpireAt),
-	)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	if err := repository.NewUserMongo(core.MongoDB).UpdateByID(user.ID, map[string]interface{}{
+		"passcode": request.NewPasscode,
+	}); err != nil {
+		return nil, status.Error(codes.Internal, "failed to update user in database")
 	}
 
-	return presenter.NewEnrollmentResponse(initPassword), nil
+	if err := repository.NewIdentitiesVault(core.Vault).
+		UpdateUserpassAccess(user.IdentityName(), request.NewPasscode); err != nil {
+		return nil, status.Error(codes.Internal, "failed to update user pass on Vault")
+	}
+
+	return presenter.NewStatusResponse(presenter.Status_OK), nil
 }

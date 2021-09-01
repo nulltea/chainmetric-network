@@ -82,3 +82,22 @@ func (r *UsersMongo) GetByQuery(query map[string]interface{}) (*model.User, erro
 
 	return user, err
 }
+
+// ListByQuery retrieves model from the collection by given `query`.
+func (r *UsersMongo) ListByQuery(query map[string]interface{}) ([]*model.User, error) {
+	var (
+		users []*model.User
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+	defer cancel()
+
+	cursor, err := r.collection.Find(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	cursor.All(ctx, users)
+
+	return users, err
+}

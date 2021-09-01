@@ -1,10 +1,7 @@
 package presenter
 
 import (
-	"context"
-
 	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -12,12 +9,14 @@ import (
 func NewUserProto(user *model.User) *User {
 	proto := &User{
 		Id:        user.ID,
+		Username:  user.IdentityName(),
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,
 		Email:     user.Email,
 		Role:      user.Email,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		Confirmed: user.Confirmed,
+		Trained:   user.Trained,
 	}
 
 	if user.ExpiresAt != nil {
@@ -27,28 +26,24 @@ func NewUserProto(user *model.User) *User {
 	return proto
 }
 
-func MustRetrieveUser(ctx context.Context) *model.User {
-	md, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		panic("failed to get metadata from context")
+// NewUsersResponse presents UsersResponse for given native models slice `users`.
+func NewUsersResponse(users []*model.User) *UsersResponse {
+	var resp = &UsersResponse{
+		Count: int64(len(users)),
 	}
 
-	if values := md.Get("user_model"); len(values) == 1 {
-		return model.User{}.Decode(values[0])
+	for i := range users {
+		resp.Users = append(resp.Users, NewUserProto(users[i]))
 	}
 
-	panic("user_model is missing in context")
+	return resp
 }
 
-func MustRetrieveUserID(ctx context.Context) string {
-	md, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		panic("failed to get metadata from context")
+// NewRegistrationResponse presents RegistrationResponse for gRPC proto for given `user`,
+// and grants access via `jwt`.
+func NewRegistrationResponse(user *model.User, jwt string) *RegistrationResponse {
+	return &RegistrationResponse{
+		User: NewUserProto(user),
+		AccessToken: jwt,
 	}
-
-	if values := md.Get("user_id"); len(values) == 1 {
-		return values[0]
-	}
-
-	panic("user_id is missing in context")
 }

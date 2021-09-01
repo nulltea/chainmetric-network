@@ -17,11 +17,12 @@ func init() {
 	utils.MustExecute(identity.Init, "failed to initialize identity package")
 	utils.MustExecute(func() error {
 		return server.Init(
-			server.WithUnaryMiddleware(middleware.JWTAuthUnaryInterceptor(
-				"IdentityService/register", "AccessService/requestFabricCredentials",
+			server.WithUnaryMiddlewares(middleware.AuthWithJWTForUnaryGRPC(
+				"UserService/register",
+				"AccessService/requestFabricCredentials",
 			)),
-			server.WithStreamMiddleware(middleware.JWTAuthStreamInterceptor()),
-			server.WithServiceRegistrar(rpc.RegisterIdentityService),
+			server.WithStreamMiddlewares(middleware.AuthWithJWTForStreamGRPC()),
+			server.WithServiceRegistrar(rpc.RegisterAdminService),
 			server.WithServiceRegistrar(rpc.RegisterAccessService),
 		)
 	}, "failed to initialize server")
