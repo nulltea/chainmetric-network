@@ -2,9 +2,12 @@ package rpc
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
+	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
@@ -25,7 +28,7 @@ func RegisterUserService(server *grpc.Server) {
 	RegisterUserServiceServer(server, &userService{})
 }
 
-// Register implements IdentityServiceServer gRPC service.
+// Register implements UserServiceServer gRPC service RPC.
 func (userService) Register(
 	_ context.Context,
 	request *presenter.RegistrationRequest,
@@ -58,9 +61,32 @@ func (userService) Register(
 	return presenter.NewRegistrationResponse(user, accessToken), nil
 }
 
+// GetState implements UserServiceServer gRPC service RPC.
 func (s userService) GetState(ctx context.Context, _ *emptypb.Empty) (*presenter.User, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 	return presenter.NewUserProto(user), nil
+}
+
+// PingAccountStatus implements UserServiceServer gRPC service RPC.
+func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*presenter.UserStatusResponse, error) {
+	var user = middleware.MustRetrieveUser(ctx)
+
+	if user.Status == model.Approved {
+		initialPassword := user.Passcode
+
+		passwordHash := md5.Sum([]byte(initialPassword))
+
+		if err := repository.NewUserMongo(core.MongoDB).UpdateByID(user.ID, map[string]interface{}{
+			"status": model.Active,
+			"passcode": hex.EncodeToString(passwordHash[:]),
+		}); err != nil {
+			return nil, status.Error(codes.Internal, "something went wrong during activating user account")
+		}
+
+		return presenter.NewUserStatusResponse(user.Status, &initialPassword), nil
+	}
+
+	return presenter.NewUserStatusResponse(user.Status, nil), nil
 }
 
 // ChangePassword implements UserServiceServer gRPC service RPC.

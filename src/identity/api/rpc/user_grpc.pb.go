@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 type UserServiceClient interface {
 	Register(ctx context.Context, in *presenter.RegistrationRequest, opts ...grpc.CallOption) (*presenter.RegistrationResponse, error)
 	GetState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presenter.User, error)
+	PingAccountStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presenter.UserStatusResponse, error)
 	ChangePassword(ctx context.Context, in *presenter.ChangePasswordRequest, opts ...grpc.CallOption) (*presenter.StatusResponse, error)
 }
 
@@ -51,6 +52,15 @@ func (c *userServiceClient) GetState(ctx context.Context, in *emptypb.Empty, opt
 	return out, nil
 }
 
+func (c *userServiceClient) PingAccountStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presenter.UserStatusResponse, error) {
+	out := new(presenter.UserStatusResponse)
+	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.UserService/pingAccountStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) ChangePassword(ctx context.Context, in *presenter.ChangePasswordRequest, opts ...grpc.CallOption) (*presenter.StatusResponse, error) {
 	out := new(presenter.StatusResponse)
 	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.UserService/changePassword", in, out, opts...)
@@ -66,6 +76,7 @@ func (c *userServiceClient) ChangePassword(ctx context.Context, in *presenter.Ch
 type UserServiceServer interface {
 	Register(context.Context, *presenter.RegistrationRequest) (*presenter.RegistrationResponse, error)
 	GetState(context.Context, *emptypb.Empty) (*presenter.User, error)
+	PingAccountStatus(context.Context, *emptypb.Empty) (*presenter.UserStatusResponse, error)
 	ChangePassword(context.Context, *presenter.ChangePasswordRequest) (*presenter.StatusResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -79,6 +90,9 @@ func (UnimplementedUserServiceServer) Register(context.Context, *presenter.Regis
 }
 func (UnimplementedUserServiceServer) GetState(context.Context, *emptypb.Empty) (*presenter.User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetState not implemented")
+}
+func (UnimplementedUserServiceServer) PingAccountStatus(context.Context, *emptypb.Empty) (*presenter.UserStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PingAccountStatus not implemented")
 }
 func (UnimplementedUserServiceServer) ChangePassword(context.Context, *presenter.ChangePasswordRequest) (*presenter.StatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
@@ -132,6 +146,24 @@ func _UserService_GetState_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_PingAccountStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).PingAccountStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chainmetric.identity.service.UserService/pingAccountStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).PingAccountStatus(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(presenter.ChangePasswordRequest)
 	if err := dec(in); err != nil {
@@ -164,6 +196,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getState",
 			Handler:    _UserService_GetState_Handler,
+		},
+		{
+			MethodName: "pingAccountStatus",
+			Handler:    _UserService_PingAccountStatus_Handler,
 		},
 		{
 			MethodName: "changePassword",

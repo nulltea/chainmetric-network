@@ -30,8 +30,8 @@ func (r *UsersMongo) Upsert(u model.User) error {
 	defer cancel()
 
 	var (
-		filter = bson.D{{"id", u.ID}}
-		update = bson.D{{ "$set", u }}
+		filter = bson.M{"id": u.ID}
+		update = bson.M{ "$set": u }
 	)
 
 	_, err := r.collection.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
@@ -45,8 +45,8 @@ func (r *UsersMongo) UpdateByID(id string, set map[string]interface{}) error {
 	defer cancel()
 
 	var (
-		filter = bson.D{{"id", id}}
-		update = bson.D{{ "$set", set}}
+		filter = bson.M{"id": id}
+		update = bson.M{"$set": set}
 	)
 
 	_, err := r.collection.UpdateOne(ctx, filter, update)

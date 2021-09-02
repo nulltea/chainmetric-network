@@ -8,13 +8,16 @@ import (
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
-	"github.com/timoth-y/chainmetric-contracts/shared/model/user"
+	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 )
 
 // Register performs users initial registration.
-func Register(options ...RegistrationOption) (*user.User, error) {
+func Register(options ...RegistrationOption) (*model.User, error) {
 	var (
-		user = &user.User{}
+		user = &model.User{
+			Confirmed: false,
+			Status: model.PendingApproval,
+		}
 		usersRepo = repository.NewUserMongo(core.MongoDB)
 		err error
 	)

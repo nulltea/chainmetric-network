@@ -21,9 +21,20 @@ type User struct {
 	Passcode     string     `json:"passcode" bson:"passcode"`
 	CreatedAt    time.Time  `json:"created_at" bson:"created_at"`
 	Confirmed    bool       `json:"confirmed" bson:"confirmed"`
-	Trained      bool       `json:"trained" bson:"trained"`
+	Status       Status     `json:"status" bson:"status"`
 	ExpiresAt    *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty"`
 }
+
+type Status int
+
+const (
+	PendingApproval = iota
+	Approved
+	Declined
+	Active
+	Expired
+	Canceled
+)
 
 // IdentityName forms the unique name of user's identity.
 func (u *User) IdentityName() string {
