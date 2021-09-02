@@ -2,23 +2,16 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/timoth-y/chainmetric-contracts/shared/core"
-	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
 	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
-	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/access"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
-// AuthWithJWTForUnaryGRPC returns grpc.UnaryServerInterceptor func for JWT access control.
-func AuthWithJWTForUnaryGRPC(skipMethods ...string) grpc.UnaryServerInterceptor {
+// AuthForUnaryGRPC returns grpc.UnaryServerInterceptor func for JWT access control.
+func AuthForUnaryGRPC(skipMethods ...string) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -29,31 +22,23 @@ func AuthWithJWTForUnaryGRPC(skipMethods ...string) grpc.UnaryServerInterceptor 
 			return handler(ctx, req)
 		}
 
-		claims, err := tryParseJWT(ctx)
-		if err != nil {
-			return nil, err
+		user, _ := TryRetrieveUser(ctx)
+
+		// If previous interceptor skipped, skipping this one too:
+		if user == nil {
+			return handler(ctx, req)
 		}
 
-		user, err := retrieveUserFromDB(claims.Id)
-		if err != nil {
+		if err := authenticateUser(user); err != nil {
 			return nil, err
 		}
-
-		if err = authenticateUser(user); err != nil {
-			return nil, err
-		}
-
-		ctx = metadata.AppendToOutgoingContext(ctx,
-			"user_id", user.ID,
-			"user_model", user.Encode(),
-		)
 
 		return handler(ctx, req)
 	}
 }
 
-// AuthWithJWTForStreamGRPC returns grpc.StreamServerInterceptor func for JWT access control.
-func AuthWithJWTForStreamGRPC(skipMethods ...string) grpc.StreamServerInterceptor {
+// AuthForStreamGRPC returns grpc.StreamServerInterceptor func for JWT access control.
+func AuthForStreamGRPC(skipMethods ...string) grpc.StreamServerInterceptor {
 	return func(
 		srv interface{},
 		stream grpc.ServerStream,
@@ -64,57 +49,19 @@ func AuthWithJWTForStreamGRPC(skipMethods ...string) grpc.StreamServerIntercepto
 			return handler(srv, stream)
 		}
 
-		claims, err := tryParseJWT(stream.Context())
-		if err != nil {
-			return err
+		user, _ := TryRetrieveUser(stream.Context())
+
+		// If previous interceptor skipped, skipping this one too:
+		if user == nil {
+			return handler(srv, stream)
 		}
 
-		user, err := retrieveUserFromDB(claims.Id)
-		if err != nil {
+		if err := authenticateUser(user); err != nil {
 			return err
 		}
-
-		if err = authenticateUser(user); err != nil {
-			return err
-		}
-
-		_ = stream.SetHeader(metadata.New(map[string]string{
-			"user_id":    claims.Id,
-			"user_model": user.Encode(),
-		}))
 
 		return handler(srv, stream)
 	}
-}
-
-func tryParseJWT(ctx context.Context) (*jwt.StandardClaims, error) {
-	meta, ok := metadata.FromIncomingContext(ctx); if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
-	}
-
-	values := meta["authorization"]; if len(values) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
-	}
-
-	token := values[0]
-	claims, err := access.VerifyJWT(token); if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %w", err)
-	}
-
-	return claims, nil
-}
-
-func retrieveUserFromDB(id string) (*model.User, error) {
-	user, err := repository.NewUserMongo(core.MongoDB).GetByID(id)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, status.Errorf(codes.Unauthenticated, "access token points to unknown user")
-		}
-
-		return nil, status.Errorf(codes.Internal, "failed to resolve user from token claims")
-	}
-
-	return user, nil
 }
 
 func authenticateUser(user *model.User) error {
@@ -127,47 +74,4 @@ func authenticateUser(user *model.User) error {
 	}
 
 	return nil
-}
-
-func skipValidation(method string, skipMethods []string) bool {
-	skip := false
-
-	if skipMethods == nil {
-		return false
-	}
-
-	for i := range skipMethods {
-		if fmt.Sprintf("/chainmetric.identity.service.%s", skipMethods[i]) == method {
-			skip = true
-			break
-		}
-	}
-
-	return skip
-}
-
-func MustRetrieveUser(ctx context.Context) *model.User {
-	md, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		panic("failed to get metadata from context")
-	}
-
-	if values := md.Get("user_model"); len(values) == 1 {
-		return model.User{}.Decode(values[0])
-	}
-
-	panic("user_model is missing in context")
-}
-
-func MustRetrieveUserID(ctx context.Context) string {
-	md, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		panic("failed to get metadata from context")
-	}
-
-	if values := md.Get("user_id"); len(values) == 1 {
-		return values[0]
-	}
-
-	panic("user_id is missing in context")
 }
