@@ -83,10 +83,10 @@ func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*
 			return nil, status.Error(codes.Internal, "something went wrong during activating user account")
 		}
 
-		return presenter.NewUserStatusResponse(user.Status, &initialPassword), nil
+		return presenter.NewUserStatusResponse(user.Status, &user.Role, &initialPassword), nil
 	}
 
-	return presenter.NewUserStatusResponse(user.Status, nil), nil
+	return presenter.NewUserStatusResponse(user.Status, nil, nil), nil
 }
 
 // ChangePassword implements UserServiceServer gRPC service RPC.

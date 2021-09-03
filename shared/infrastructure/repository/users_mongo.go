@@ -97,7 +97,7 @@ func (r *UsersMongo) ListByQuery(query map[string]interface{}) ([]*model.User, e
 		return nil, err
 	}
 
-	cursor.All(ctx, users)
+	cursor.All(ctx, &users)
 
 	return users, err
 }
