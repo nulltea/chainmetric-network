@@ -1,0 +1,16 @@
+dataStorage:
+  enabled: true
+  size: 5Gi
+  mountPath: "/vault/data"
+  storageClass: local-path
+
+dev:
+  enabled: true
+
+standalone:
+  enabled: true
+
+ui:
+  enabled: true
+
+debug: true

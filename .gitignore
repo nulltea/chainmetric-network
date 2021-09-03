@@ -19,7 +19,12 @@
 # vendor/
 
 .env
+.lego
 connection.yaml
 connection-local.yaml
 
 data
+
+.secrets
+.crypto-config.*.network
+.channel-artifacts.*.network

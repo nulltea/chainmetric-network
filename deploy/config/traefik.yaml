@@ -1,0 +1,91 @@
+image:
+  name: traefik
+  tag: "v2.4"
+  pullPolicy: IfNotPresent
+
+deployment:
+  enabled: true
+  kind: Deployment
+  replicas: 1
+  additionalContainers: []
+  additionalVolumes: []
+  initContainers: []
+
+pilot:
+  enabled: false
+  token: ""
+
+ingressRoute:
+  dashboard:
+    enabled: false
+
+rollingUpdate:
+  maxUnavailable: 1
+  maxSurge: 1
+
+providers:
+  kubernetesCRD:
+    enabled: true
+    namespaces: []
+  kubernetesIngress:
+    enabled: false
+
+logs:
+  general:
+    level: DEBUG
+
+additionalArguments:
+  - --certificatesResolvers.le.acme.email=timothy@chainmetric.network
+  - --certificatesresolvers.le.acme.storage=/data/acme.json
+# - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+# - --certificatesresolvers.le.acme.httpchallenge=true
+# - --certificatesResolvers.le.acme.httpchallenge.entrypoint=web
+  - --certificatesResolvers.le.acme.dnschallenge.provider=digitalocean
+  - --certificatesResolvers.le.acme.dnsChallenge.resolvers="ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
+
+env:
+ - name: DO_AUTH_TOKEN
+   valueFrom:
+     secretKeyRef:
+       name: do-auth-token
+       key: token
+
+ports:
+  traefik:
+    port: 8080
+  web:
+    port: 8000
+    expose: true
+    exposedPort: 80
+    protocol: TCP
+    redirectTo: websecure
+  websecure:
+    port: 8443
+    expose: true
+    exposedPort: 443
+    protocol: TCP
+    tls:
+      enabled: true
+      certResolver: le
+      domains:
+       - main: chainmetric.network
+         sans:
+           - "*.chainmetric.network"
+
+service:
+  enabled: true
+  type: LoadBalancer
+
+autoscaling:
+  enabled: false
+
+persistence:
+  enabled: false
+  name: data
+  accessMode: ReadWriteOnce
+  size: 128Mi
+  storageClass: local-path
+  path: /data
+
+rbac:
+  enabled: true

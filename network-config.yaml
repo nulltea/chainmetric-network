@@ -1,0 +1,62 @@
+domain: chainmetric.network
+
+orderer:
+  name: Orderer
+  type: etcdraft
+  mspID: orderer
+  hostname: orderer
+  port: 7050
+  profile: OrdererGenesis
+  channelID: system-channel
+
+organizations:
+  - name: Chipa-INU
+    mspID: chipa-inu
+    hostname: chipa-inu.org
+    peers:
+      - hostname: peer0
+        port: 7051
+    channelProfile: SupplyChannel
+    channelID: supply-channel
+  - name: Blueberry-GO
+    mspID: blueberry-go
+    hostname: blueberry-go.org
+    peers:
+      - hostname: peer0
+        port: 7051
+    channelProfile: SupplyChannel
+    channelID: supply-channel
+  - name: Moon-LAN
+    mspID: moon-lan
+    hostname: moon-lan.org
+    peers:
+      - hostname: peer0
+        port: 7051
+    channelProfile: SupplyChannel
+    channelID: supply-channel
+  - name: Blockchampion
+    mspID: blockchampion
+    hostname: blockchampion.org
+    peers:
+      - hostname: peer0
+        port: 7051
+    channelProfile: SupplyChannel
+    channelID: supply-channel
+  - name: SiGaN-Labs
+    mspID: sigan-labs
+    hostname: sigan-labs.org
+    peers:
+      - hostname: peer0
+        port: 7051
+    channelProfile: SupplyChannel
+    channelID: supply-channel
+
+channels:
+  - name: SupplyChannel
+    profile: SupplyChannel
+    channelID: supply-channel
+    consortium: SupplyConsortium
+    organizations:
+      - Chipa-INU
+      - Blueberry-GO
+      - Moon-LAN

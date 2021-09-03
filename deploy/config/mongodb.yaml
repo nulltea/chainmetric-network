@@ -1,0 +1,18 @@
+architecture: standalone
+
+image:
+  repository: arm64v8/mongo
+  tag: 4.4.8
+
+readinessProbe:
+  enabled: false
+
+persistence:
+  storageClass: local-path
+  mountPath: /data/db
+  size: 1Gi
+
+auth:
+  enabled: false
+  database: chainmetric
+  username: chainmetric_admin
