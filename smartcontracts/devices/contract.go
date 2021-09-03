@@ -6,10 +6,10 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
+	"github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/shared/core"
 	"github.com/timoth-y/chainmetric-network/shared/model/couchdb"
 	utils2 "github.com/timoth-y/chainmetric-network/shared/utils"
-	"github.com/timoth-y/chainmetric-core/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 

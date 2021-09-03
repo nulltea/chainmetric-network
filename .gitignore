@@ -23,8 +23,7 @@
 connection.yaml
 connection-local.yaml
 
-data
-
+.data
 .secrets
 .crypto-config.*.network
 .channel-artifacts.*.network
