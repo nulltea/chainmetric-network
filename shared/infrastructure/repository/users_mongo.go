@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/spf13/viper"
-	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
+	model "github.com/timoth-y/chainmetric-network/shared/model/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

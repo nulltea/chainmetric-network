@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/shared/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

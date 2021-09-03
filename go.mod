@@ -1,11 +1,10 @@
-module github.com/timoth-y/chainmetric-contracts
+module github.com/timoth-y/chainmetric-network
 
 go 1.16
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/golang-jwt/jwt/v4 v4.0.0
-	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20200424173110-d7076418f212

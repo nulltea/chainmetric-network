@@ -4,7 +4,7 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/timoth-y/chainmetric-contracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/shared/core"
 )
 
 // Iterate performs iteration over state query results calling `fn` for each record.
