@@ -1,0 +1,73 @@
+component: peer
+
+replicaCount: 1
+logging: DEBUG
+
+devmode: true
+
+peer:
+  image:
+    repository: hyperledger/fabric-peer
+    pullPolicy: IfNotPresent
+    tag: amd64-2.2.0
+  service:
+    type: ClusterIP
+    port: 7051
+    chaincodePort: 7052
+
+cli:
+  image:
+    repository: hyperledger/fabric-tools
+    pullPolicy: IfNotPresent
+    tag: amd64-2.2.0
+
+ca:
+  enabled: true
+  image:
+    repository: hyperledger/fabric-ca
+    pullPolicy: IfNotPresent
+    tag: amd64-1.4.7
+  service:
+    type: ClusterIP
+    port: 7054
+
+couchdb:
+  enabled: true
+  image:
+    repository: hyperledger/fabric-couchdb
+    pullPolicy: IfNotPresent
+    tag: amd64-0.4.22
+  service:
+    type: ClusterIP
+    port: 5984
+
+ingress:
+  enabled: true
+  entrypoints:
+    - web
+    - websecure
+
+resources: {}
+
+affinity: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+artifacts:
+  claim: artifacts
+
+config:
+  mspID: org1
+  domain: example.com
+  hostname: org1
+  peer: peer0
+  tls: true
+
+orderer:
+  domain: example.com
+  hostname: orderer
+
+storageClass: local-path

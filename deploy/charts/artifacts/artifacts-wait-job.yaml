@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: artifacts.wait
+  labels:
+    fabnctl/cid: artifacts.wait
+spec:
+  template:
+    metadata:
+      labels:
+        name: waiter
+    spec:
+      containers:
+        - name: wait
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - sleep
+            - "1d"
+          volumeMounts:
+            - mountPath: /artifacts
+              name: artifacts
+          workingDir: /artifacts
+      volumes:
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: artifacts
+      restartPolicy: Never

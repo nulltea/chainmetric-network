@@ -1,0 +1,40 @@
+component: orderer
+
+replicaCount: 1
+logging: DEBUG
+
+image:
+  repository: hyperledger/fabric-orderer
+  pullPolicy: IfNotPresent
+  tag: amd64-2.2.0
+
+service:
+  type: ClusterIP
+  port: 7050
+
+ingress:
+  enabled: true
+  entrypoints:
+    - web
+    - websecure
+
+resources: {}
+
+affinity: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+artifacts:
+  claim: artifacts
+
+config:
+  mspID: orderer
+  domain: chainmetric.network
+  hostname: orderer
+  profile: OrdererGenesis
+  tls: true
+
+storageClass: local-path

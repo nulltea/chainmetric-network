@@ -1,0 +1,56 @@
+{{- if .Values.ca.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ca.{{ .Values.config.hostname }}
+  labels:
+    app: ca.{{ .Values.config.hostname }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ca.{{ .Values.config.hostname }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ca.{{ .Values.config.hostname }}
+        fabnctl/cid: org-ca
+        fabnctl/app: ca.{{ .Values.config.hostname }}
+        fabnctl/domain: {{ .Values.config.domain }}
+        fabnctl/hostname: ca.{{ .Values.config.hostname }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      containers:
+        - name: ca
+          image: "{{ .Values.ca.image.repository }}:{{ .Values.ca.image.tag }}"
+          imagePullPolicy: {{ .Values.ca.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.ca.service.port }}
+          args:
+            - sh
+            - -c
+            - fabric-ca-server start -b admin:adminpw --ca.name ca-{{ .Values.config.hostname | replace "." "-" }} --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.{{ .Values.config.hostname }}.{{ .Values.config.domain }}-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/priv_sk --csr.hosts ca-{{ .Values.config.hostname | replace "." "-" }},localhost -d
+          env:
+            - name: FABRIC_LOGGING_SPEC
+              value: {{ .Values.logging }}
+            - name: FABRIC_CA_SERVER_PORT
+              value: "{{ .Values.ca.service.port }}"
+            - name: FABRIC_CA_HOME
+              value: /etc/hyperledger/fabric-ca-server
+            - name: FABRIC_CA_SERVER_CA_NAME
+              value: ca-{{ .Values.config.hostname | replace "." "-" }}
+            - name: FABRIC_CA_SERVER_TLS_ENABLED
+              value: "false"
+          volumeMounts:
+            - name: artifacts
+              mountPath: /etc/hyperledger/fabric-ca-server-config
+              subPath: crypto-config/peerOrganizations/{{.Values.config.hostname}}.{{ .Values.config.domain }}/ca
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+      restartPolicy: Always
+      volumes:
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ .Values.artifacts.claim }}
+{{- end -}}

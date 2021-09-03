@@ -1,0 +1,39 @@
+{{- if .Values.couchdb.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  labels:
+    app: couchdb.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: couchdb.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: couchdb.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/cid: org-peer-couchdb
+        fabnctl/app: couchdb.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/domain: {{ .Values.config.domain }}
+        fabnctl/hostname: couchdb.{{ .Values.config.peer }}.{{ .Values.config.hostname }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      containers:
+      - name: couchdb
+        image: "{{ .Values.couchdb.image.repository }}:{{ .Values.couchdb.image.tag }}"
+        env:
+          - name: COUCHDB_USER
+            valueFrom:
+              secretKeyRef:
+                name: couchdb-auth
+                key: user
+          - name: COUCHDB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: couchdb-auth
+                key: password
+{{- end -}}

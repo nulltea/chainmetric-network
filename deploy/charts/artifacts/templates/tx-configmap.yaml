@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}.configtx
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+data:
+  {{- $domain := .Values.domain }}
+  configtx.yaml: |
+    Organizations:
+    {{- with .Values.config.orderer }}
+      - &{{ .name }}
+        Name: {{ .name }}
+        ID: {{ .mspID }}
+        MSPDir: crypto-config/ordererOrganizations/{{ $domain }}/msp
+        Policies:
+          Readers:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.member')"
+          Writers:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.member')"
+          Admins:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.admin')"
+    {{ end }}
+
+    {{- range .Values.config.organizations }}
+    {{- $orgHostname := .hostname }}
+      - &{{ .name }}
+        Name: {{ .name }}
+        ID: {{ .mspID }}
+        MSPDir: crypto-config/peerOrganizations/{{ .hostname }}.{{ $domain }}/msp
+        {{- range .peers }}
+        AnchorPeers:
+          - Host: {{ .hostname }}-{{ $orgHostname | replace "." "-" }}
+            Port: {{ .port }}
+        {{- end }}
+        Policies:
+          Readers:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.admin', '{{ .mspID }}.peer', '{{ .mspID }}.client', '{{ .mspID }}.member')"
+          Writers:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.admin', '{{ .mspID }}.client', '{{ .mspID }}.member')"
+          Admins:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.admin', '{{ .mspID }}.member')"
+          Endorsement:
+            Type: Signature
+            Rule: "OR('{{ .mspID }}.peer', '{{ .mspID }}.member')"
+    {{ end }}
+
+    {{- with .Values.config.orderer }}
+    Orderer: &OrdererDefaults
+      Addresses:
+        - {{ .hostname }}.{{ $domain }}:443
+      OrdererType: {{ .type }}
+      {{- if eq .type "etcdraft" }}
+      EtcdRaft:
+        Consenters:
+          - Host: {{ .hostname }}.{{ $domain }}
+            Port: 443
+            ClientTLSCert: crypto-config/ordererOrganizations/{{ $domain }}/orderers/{{ .hostname }}.{{ $domain }}/tls/server.crt
+            ServerTLSCert: crypto-config/ordererOrganizations/{{ $domain }}/orderers/{{ .hostname }}.{{ $domain }}/tls/server.crt
+      {{- end }}
+      BatchTimeout: 2s
+      BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+      # Organizations is the list of organisations which are defined as participants on
+      # the orderer side of the network
+      Organizations:
+
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+        BlockValidation:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+    {{- end }}
+
+    Capabilities:
+      Channel: &ChannelCapabilities
+          V2_0: true
+      Orderer: &OrdererCapabilities
+          V2_0: true
+      Application: &ApplicationCapabilities
+          V2_0: true
+
+    Application: &ApplicationDefaults
+      Organizations:
+
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+      Capabilities:
+        <<: *ApplicationCapabilities
+
+    Channel: &ChannelDefaults
+      Policies:
+        # Who may invoke the 'Deliver' API
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        # Who may invoke the 'Broadcast' API
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        # By default, who may modify elements at this config level
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+      Capabilities:
+        <<: *ChannelCapabilities
+
+    Profiles:
+      {{ .Values.config.orderer.profile }}:
+        <<: *ChannelDefaults
+        Orderer:
+          <<: *OrdererDefaults
+          Organizations:
+            - *{{ .Values.config.orderer.name }}
+          Capabilities:
+              <<: *OrdererCapabilities
+        Consortiums:
+          SupplyConsortium:
+            Organizations:
+            {{- range .Values.config.organizations }}
+              - *{{ .name }}
+            {{- end }}
+    {{- range .Values.config.channels }}
+      {{ .name }}:
+        Consortium: SupplyConsortium
+        <<: *ChannelDefaults
+        Application:
+          <<: *ApplicationDefaults
+          Organizations:
+          {{- range .organizations }}
+            - *{{ . }}
+          {{- end }}
+          Capabilities:
+              <<: *ApplicationCapabilities
+    {{ end }}

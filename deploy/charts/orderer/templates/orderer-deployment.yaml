@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          args:
+            - orderer
+          env:
+            - name: FABRIC_LOGGING_SPEC
+              value: {{ .Values.logging }}
+            - name: ORDERER_GENERAL_LISTENADDRESS
+              value: 0.0.0.0
+            - name: ORDERER_GENERAL_LISTENPORT
+              value: "{{ .Values.service.port }}"
+            - name: ORDERER_GENERAL_GENESISMETHOD
+              value: file
+            - name: ORDERER_GENERAL_GENESISFILE
+              value: /var/hyperledger/orderer/genesis.block
+            - name: ORDERER_GENERAL_LOCALMSPDIR
+              value: /var/hyperledger/orderer/msp
+            - name: ORDERER_GENERAL_LOCALMSPID
+              value: {{ .Values.config.mspID }}
+            - name: ORDERER_GENERAL_TLS_CERTIFICATE
+              value: /var/hyperledger/orderer/tls/server.crt
+            - name: ORDERER_GENERAL_TLS_ENABLED
+              value: "{{ .Values.config.tls }}"
+            - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+              value: /var/hyperledger/orderer/tls/server.key
+            - name: ORDERER_GENERAL_TLS_ROOTCAS
+              value: "[/var/hyperledger/orderer/tls/ca.crt]"
+            - name: ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE
+              value: /var/hyperledger/orderer/tls/server.crt
+            - name: ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY
+              value: /var/hyperledger/orderer/tls/server.key
+            - name: ORDERER_GENERAL_CLUSTER_ROOTCAS
+              value: "[/var/hyperledger/orderer/tls/ca.crt]"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/hyperledger/production
+            - name: artifacts
+              mountPath: /var/hyperledger/orderer/genesis.block
+              subPath: channel-artifacts/genesis.block
+            - name: artifacts
+              mountPath: /var/hyperledger/orderer/msp
+              subPath: crypto-config/ordererOrganizations/{{ .Values.config.domain }}/orderers/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/msp
+            - name: artifacts
+              mountPath: /var/hyperledger/orderer/tls
+              subPath: crypto-config/ordererOrganizations/{{ .Values.config.domain }}/orderers/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/tls
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+      restartPolicy: Always
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}.storage.pvc
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ .Values.artifacts.claim }}
+

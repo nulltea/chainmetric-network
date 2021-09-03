@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  labels:
+    app: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+    fabnctl/cid: org.peer
+    fabnctl/app: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+    fabnctl/domain: {{ .Values.config.domain }}
+    fabnctl/hostname: {{ .Values.config.peer }}.{{ .Values.config.hostname }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/cid: org.peer
+        fabnctl/app: {{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/domain: {{ .Values.config.domain }}
+        fabnctl/hostname: {{ .Values.config.peer }}.{{ .Values.config.hostname }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.peer.image.repository }}:{{ .Values.peer.image.tag }}"
+          imagePullPolicy: {{ .Values.peer.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.peer.service.port }}
+            - containerPort: {{ .Values.peer.service.chaincodePort }}
+          args:
+            - peer
+            - node
+            - start
+            {{- if .Values.devmode }}
+            - --peer-chaincodedev=true
+            {{- end }}
+          env:
+            - name: FABRIC_LOGGING_SPEC
+              value: {{ .Values.logging }}
+            - name: CORE_PEER_ID
+              value: "{{ .Values.config.peer }}-{{ .Values.config.hostname }}-{{ .Values.config.domain }}"
+            - name: CORE_PEER_LOCALMSPID
+              value: {{ .Values.config.mspID }}
+            - name: CORE_PEER_ADDRESS
+              value: "{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}:443"
+            - name: CORE_PEER_LISTENADDRESS
+              value: "0.0.0.0:{{ .Values.peer.service.port }}"
+            - name: CORE_PEER_ADDRESSAUTODETECT
+              value: "true"
+            - name: CORE_PEER_GOSSIP_USELEADERELECTION
+              value: "true"
+            - name: CORE_PEER_GOSSIP_BOOTSTRAP
+              value: "{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}:443"
+            - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+              value: "{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}:443"
+            - name: CORE_PEER_PROFILE_ENABLED
+              value: "true"
+            - name: CORE_PEER_MSPCONFIGPATH
+              value: /etc/hyperledger/fabric/msp
+            - name: CORE_PEER_TLS_CERT_FILE
+              value: /etc/hyperledger/fabric/tls/server.crt
+            - name: CORE_PEER_TLS_ENABLED
+              value: "{{ .Values.config.tls }}"
+            - name: CORE_PEER_TLS_KEY_FILE
+              value: /etc/hyperledger/fabric/tls/server.key
+            - name: CORE_PEER_TLS_ROOTCERT_FILE
+              value: /etc/hyperledger/fabric/tls/ca.crt
+            - name: CORE_VM_ENDPOINT
+              value: http://localhost:2375
+            {{- if .Values.couchdb.enabled }}
+            - name: CORE_LEDGER_STATE_STATEDATABASE
+              value: "CouchDB"
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+              value: "couchdb-{{ .Values.config.peer}}-{{ .Values.config.hostname | replace "." "-" }}:{{ .Values.couchdb.service.port }}"
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-auth
+                  key: user
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-auth
+                  key: password
+            {{- end }}
+          volumeMounts:
+            - name: storage
+              mountPath: /var/hyperledger/production
+            - name: core
+              mountPath: /etc/hyperledger/fabric/core.yaml
+              subPath: core.yaml
+            - name: artifacts
+              mountPath: /etc/hyperledger/fabric/msp
+              subPath: crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/peers/{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}/msp
+            - name: artifacts
+              mountPath: /etc/hyperledger/fabric/tls
+              subPath: crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/peers/{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}/tls
+            - name: builders-detect
+              mountPath: /builders/external/bin/detect
+              subPath: detect
+            - name: builders-build
+              mountPath: /builders/external/bin/build
+              subPath: build
+            - name: builders-release
+              mountPath: /builders/external/bin/release
+              subPath: release
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+      restartPolicy: Always
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.config.peer}}.{{ .Values.config.hostname }}.storage.pvc
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ .Values.artifacts.claim }}
+        - name: core
+          configMap:
+            name: {{ .Values.config.peer}}.{{ .Values.config.hostname }}.core.config
+            items:
+              - key: core.yaml
+                path: core.yaml
+        - name: builders-detect
+          configMap:
+            name: {{ .Values.config.peer}}.{{ .Values.config.hostname }}.builders.config
+            items:
+              - key: detect
+                path: detect
+                mode: 0544
+        - name: builders-build
+          configMap:
+            name: {{ .Values.config.peer}}.{{ .Values.config.hostname }}.builders.config
+            items:
+              - key: build
+                path: build
+                mode: 0544
+        - name: builders-release
+          configMap:
+            name: {{ .Values.config.peer}}.{{ .Values.config.hostname }}.builders.config
+            items:
+              - key: release
+                path: release
+                mode: 0544

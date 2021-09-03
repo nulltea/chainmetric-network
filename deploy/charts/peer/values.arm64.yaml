@@ -1,0 +1,19 @@
+peer:
+  image:
+    repository: xuchenhao001/fabric-peer
+    tag: 2.3.0
+
+cli:
+  image:
+    repository: xuchenhao001/fabric-tools
+    tag: 2.3.0
+
+ca:
+  image:
+    repository: xuchenhao001/fabric-ca
+    tag: 2.0.0-alpha
+
+couchdb:
+  image:
+    repository: busan15/fabric-couchdb
+    tag: arm64-0.4.20
