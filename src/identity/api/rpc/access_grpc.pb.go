@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccessServiceClient interface {
 	RequestFabricCredentials(ctx context.Context, in *presenter.FabricCredentialsRequest, opts ...grpc.CallOption) (*presenter.FabricCredentialsResponse, error)
+	AuthWithSigningIdentity(ctx context.Context, in *presenter.CertificateAuthRequest, opts ...grpc.CallOption) (*presenter.CertificateAuthResponse, error)
 }
 
 type accessServiceClient struct {
@@ -39,11 +40,21 @@ func (c *accessServiceClient) RequestFabricCredentials(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *accessServiceClient) AuthWithSigningIdentity(ctx context.Context, in *presenter.CertificateAuthRequest, opts ...grpc.CallOption) (*presenter.CertificateAuthResponse, error) {
+	out := new(presenter.CertificateAuthResponse)
+	err := c.cc.Invoke(ctx, "/chainmetric.identity.service.AccessService/authWithSigningIdentity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccessServiceServer is the server API for AccessService service.
 // All implementations must embed UnimplementedAccessServiceServer
 // for forward compatibility
 type AccessServiceServer interface {
 	RequestFabricCredentials(context.Context, *presenter.FabricCredentialsRequest) (*presenter.FabricCredentialsResponse, error)
+	AuthWithSigningIdentity(context.Context, *presenter.CertificateAuthRequest) (*presenter.CertificateAuthResponse, error)
 	mustEmbedUnimplementedAccessServiceServer()
 }
 
@@ -53,6 +64,9 @@ type UnimplementedAccessServiceServer struct {
 
 func (UnimplementedAccessServiceServer) RequestFabricCredentials(context.Context, *presenter.FabricCredentialsRequest) (*presenter.FabricCredentialsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestFabricCredentials not implemented")
+}
+func (UnimplementedAccessServiceServer) AuthWithSigningIdentity(context.Context, *presenter.CertificateAuthRequest) (*presenter.CertificateAuthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuthWithSigningIdentity not implemented")
 }
 func (UnimplementedAccessServiceServer) mustEmbedUnimplementedAccessServiceServer() {}
 
@@ -85,6 +99,24 @@ func _AccessService_RequestFabricCredentials_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccessService_AuthWithSigningIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(presenter.CertificateAuthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccessServiceServer).AuthWithSigningIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chainmetric.identity.service.AccessService/authWithSigningIdentity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccessServiceServer).AuthWithSigningIdentity(ctx, req.(*presenter.CertificateAuthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccessService_ServiceDesc is the grpc.ServiceDesc for AccessService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,7 +128,11 @@ var AccessService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "requestFabricCredentials",
 			Handler:    _AccessService_RequestFabricCredentials_Handler,
 		},
+		{
+			MethodName: "authWithSigningIdentity",
+			Handler:    _AccessService_AuthWithSigningIdentity_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "identity/api/rpc/access.proto",
+	Metadata: "identity/api/rpc/access_grpc.proto",
 }

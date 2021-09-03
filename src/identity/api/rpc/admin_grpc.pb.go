@@ -134,5 +134,5 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "identity/api/rpc/admin.proto",
+	Metadata: "identity/api/rpc/admin_grpc.proto",
 }

@@ -25,8 +25,8 @@ func WithStreamMiddlewares(middlewares ...grpc.StreamServerInterceptor) Option {
 	}
 }
 
-func WithServiceRegistrar(registrar func(server *grpc.Server)) Option {
+func WithServiceRegistrar(registrars ...func(server *grpc.Server)) Option {
 	return func(args *gRPCArgsStub) {
-		args.ServicesRegistrars = append(args.ServicesRegistrars, registrar)
+		args.ServicesRegistrars = append(args.ServicesRegistrars, registrars...)
 	}
 }

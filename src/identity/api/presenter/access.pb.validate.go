@@ -165,42 +165,34 @@ var _ interface {
 	ErrorName() string
 } = FabricCredentialsRequestValidationError{}
 
-// Validate checks the field values on FabricCredentialsResponse with the rules
+// Validate checks the field values on CertificateAuthRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *FabricCredentialsResponse) Validate() error {
+func (m *CertificateAuthRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetSecret()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return FabricCredentialsResponseValidationError{
-				field:  "Secret",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+	if len(m.GetCertificate()) < 100 {
+		return CertificateAuthRequestValidationError{
+			field:  "Certificate",
+			reason: "value length must be at least 100 bytes",
 		}
 	}
 
-	// no validation rules for ApiAccessToken
-
-	if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return FabricCredentialsResponseValidationError{
-				field:  "User",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+	if len(m.GetSigningKey()) < 25 {
+		return CertificateAuthRequestValidationError{
+			field:  "SigningKey",
+			reason: "value length must be at least 25 bytes",
 		}
 	}
 
 	return nil
 }
 
-// FabricCredentialsResponseValidationError is the validation error returned by
-// FabricCredentialsResponse.Validate if the designated constraints aren't met.
-type FabricCredentialsResponseValidationError struct {
+// CertificateAuthRequestValidationError is the validation error returned by
+// CertificateAuthRequest.Validate if the designated constraints aren't met.
+type CertificateAuthRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -208,24 +200,24 @@ type FabricCredentialsResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e FabricCredentialsResponseValidationError) Field() string { return e.field }
+func (e CertificateAuthRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e FabricCredentialsResponseValidationError) Reason() string { return e.reason }
+func (e CertificateAuthRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e FabricCredentialsResponseValidationError) Cause() error { return e.cause }
+func (e CertificateAuthRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e FabricCredentialsResponseValidationError) Key() bool { return e.key }
+func (e CertificateAuthRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e FabricCredentialsResponseValidationError) ErrorName() string {
-	return "FabricCredentialsResponseValidationError"
+func (e CertificateAuthRequestValidationError) ErrorName() string {
+	return "CertificateAuthRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e FabricCredentialsResponseValidationError) Error() string {
+func (e CertificateAuthRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -237,14 +229,14 @@ func (e FabricCredentialsResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sFabricCredentialsResponse.%s: %s%s",
+		"invalid %sCertificateAuthRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = FabricCredentialsResponseValidationError{}
+var _ error = CertificateAuthRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -252,73 +244,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = FabricCredentialsResponseValidationError{}
-
-// Validate checks the field values on VaultSecret with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *VaultSecret) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Token
-
-	// no validation rules for Path
-
-	return nil
-}
-
-// VaultSecretValidationError is the validation error returned by
-// VaultSecret.Validate if the designated constraints aren't met.
-type VaultSecretValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e VaultSecretValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e VaultSecretValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e VaultSecretValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e VaultSecretValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e VaultSecretValidationError) ErrorName() string { return "VaultSecretValidationError" }
-
-// Error satisfies the builtin error interface
-func (e VaultSecretValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sVaultSecret.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = VaultSecretValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = VaultSecretValidationError{}
+} = CertificateAuthRequestValidationError{}

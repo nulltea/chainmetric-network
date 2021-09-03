@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-contracts/shared/core"
 	"github.com/timoth-y/chainmetric-contracts/shared/infrastructure/repository"
+	model "github.com/timoth-y/chainmetric-contracts/shared/model/user"
 	"github.com/timoth-y/chainmetric-contracts/src/identity/usecase/privileges"
 )
 
@@ -51,9 +52,10 @@ func Enroll(userID string, options ...EnrollmentOption) (string, error) {
 
 	if err = usersRepo.UpdateByID(user.ID, map[string]interface{}{
 		"confirmed": true,
+		"status":    model.Approved,
 		"role":      argsStub.Role,
 		"expire_at": argsStub.ExpireAt,
-		"passcode":  passwordHash,
+		"passcode":  initialPassword, // save password as is for exposing it to user latter
 	}); err != nil {
 		return "", errors.Wrap(err, "failed to update user")
 	}

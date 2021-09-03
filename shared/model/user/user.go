@@ -21,15 +21,33 @@ type User struct {
 	Passcode     string     `json:"passcode" bson:"passcode"`
 	CreatedAt    time.Time  `json:"created_at" bson:"created_at"`
 	Confirmed    bool       `json:"confirmed" bson:"confirmed"`
-	Trained      bool       `json:"trained" bson:"trained"`
+	Status       Status     `json:"status" bson:"status"`
 	ExpiresAt    *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty"`
 }
 
+type Status int
+
+const (
+	PendingApproval = iota
+	Approved
+	Declined
+	Active
+	Expired
+	Canceled
+)
+
 // IdentityName forms the unique name of user's identity.
 func (u *User) IdentityName() string {
-	return fmt.Sprintf("%s.%s@%s.org.%s",
+	usernameParts := []string {
 		strings.ToLower(u.Firstname),
-		strings.ToLower(u.Lastname),
+	}
+
+	if len(u.Lastname) != 0 {
+		usernameParts = append(usernameParts, strings.ToLower(u.Lastname))
+	}
+
+	return fmt.Sprintf("%s@%s.org.%s",
+		strings.Join(usernameParts, "."),
 		viper.GetString("organization"),
 		viper.GetString("domain"),
 	)

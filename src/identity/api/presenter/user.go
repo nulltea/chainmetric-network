@@ -13,10 +13,9 @@ func NewUserProto(user *model.User) *User {
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,
 		Email:     user.Email,
-		Role:      user.Email,
+		Role:      user.Role,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		Confirmed: user.Confirmed,
-		Trained:   user.Trained,
 	}
 
 	if user.ExpiresAt != nil {
@@ -47,3 +46,14 @@ func NewRegistrationResponse(user *model.User, jwt string) *RegistrationResponse
 		AccessToken: jwt,
 	}
 }
+
+// NewUserStatusResponse presents UserStatusResponse for gRPC proto for given `user`,
+// and grants access via `jwt`.
+func NewUserStatusResponse(status model.Status, role, initialPassword *string) *UserStatusResponse {
+	return &UserStatusResponse{
+		Status: UserStatus(status),
+		Role: role,
+		InitialPassword: initialPassword,
+	}
+}
+

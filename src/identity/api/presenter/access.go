@@ -14,3 +14,12 @@ func NewFabricCredentialsResponse(user *model.User, secretToken, secretPath, jwt
 		ApiAccessToken: jwt,
 	}
 }
+
+// NewCertificateAuthResponse presents CertificateAuthResponse for gRPC proto with given `user`
+// and grants access via `jwt`.
+func NewCertificateAuthResponse(user *model.User, jwt string) *CertificateAuthResponse {
+	return &CertificateAuthResponse{
+		User: NewUserProto(user),
+		ApiAccessToken: jwt,
+	}
+}
