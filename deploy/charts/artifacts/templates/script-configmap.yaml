@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}.script
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+data:
+  script.sh: |
+    echo "<$ Generating crypto materials $>"
+    cryptogen generate --config=./crypto-config.yaml;
+
+    echo "<$ Generating orderer genesis block artifact $>"
+    configtxgen -configPath . -profile {{ .Values.config.orderer.profile }} -channelID {{.Values.config.orderer.channelID }} \
+        -outputBlock channel-artifacts/genesis.block;
+
+    echo "<$ Generating channels artifacts $>"
+    {{- range .Values.config.channels }}
+    configtxgen -configPath . -profile {{ .profile }} -channelID {{ .channelID }} \
+      -outputCreateChannelTx ./channel-artifacts/{{ .channelID }}.tx;
+    {{- $profile := .profile }}
+    {{- $id := .channelID }}
+      {{- range .organizations }}
+    configtxgen -configPath . -profile {{ $profile }} -channelID {{ $id }} -asOrg {{ . }} \
+        -outputAnchorPeersUpdate ./channel-artifacts/{{ . | lower }}-anchors.tx;
+      {{- end }}
+    {{- end }}
+    echo "<$ Done! $>"

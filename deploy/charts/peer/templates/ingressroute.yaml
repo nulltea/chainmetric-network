@@ -1,0 +1,78 @@
+{{- if .Values.ingress.enabled -}}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  {{- toYaml .Values.ingress.entrypoints | nindent 4 }}
+  routes:
+    - match: Host(`{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}`)
+      kind: Rule
+      services:
+        - name: {{ .Values.config.peer}}-{{ .Values.config.hostname | replace "." "-" }}
+          port: {{ .Values.peer.service.port }}
+          scheme: https
+          {{- if .Values.config.tls }}
+          serversTransport: {{ .Release.Name }}-transport
+          {{- end }}
+    {{- if .Values.couchdb.enabled }}
+    - match: Host(`couchdb.{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}`)
+      kind: Rule
+      services:
+        - name: couchdb-{{ .Values.config.peer}}-{{ .Values.config.hostname | replace "." "-" }}
+          port: {{ .Values.couchdb.service.port }}
+          scheme: https
+    {{- end -}}
+  {{- if .Values.config.tls }}
+  tls:
+    secretName: {{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+  {{- end }}
+---
+{{- if .Values.config.tls }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: {{ .Release.Name }}-transport
+spec:
+  serverName: {{ .Values.config.peer}}-{{ .Values.config.hostname | replace "." "-" }}
+  rootCAsSecrets:
+    - {{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}-ca
+  certificatesSecrets:
+    - {{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+{{- end }}
+{{- if .Values.ca.enabled }}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ca-{{ .Values.config.hostname | replace "." "-" }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  {{- toYaml .Values.ingress.entrypoints | nindent 4 }}
+  routes:
+    - match: Host(`ca.{{ .Values.config.hostname }}.{{ .Values.config.domain }}`)
+      kind: Rule
+      services:
+        - name: ca-{{ .Values.config.hostname | replace "." "-" }}
+          port: {{ .Values.ca.service.port }}
+          scheme: http
+---
+  {{- if .Values.config.tls }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: ca-{{ .Values.config.hostname | replace "." "-" }}-transport
+spec:
+  serverName: ca-{{ .Values.config.hostname | replace "." "-" }}
+  certificatesSecrets:
+    - ca.{{ .Values.config.hostname }}.{{ .Values.config.domain }}-tls
+---
+{{- end -}}
+{{- end }}
+{{- end }}

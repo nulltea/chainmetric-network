@@ -1,0 +1,16 @@
+{{- if .Values.ca.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ca-{{ .Values.config.hostname | replace "." "-" }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ca.service.type }}
+  ports:
+    - name: ca
+      port: {{ .Values.ca.service.port }}
+      targetPort: {{ .Values.ca.service.port }}
+  selector:
+    app: ca.{{ .Values.config.hostname }}
+{{- end -}}

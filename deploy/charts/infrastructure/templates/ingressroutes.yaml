@@ -1,0 +1,51 @@
+{{ $root := .Values }}
+{{- range  .Values.ingressroutes }}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}{{- if .tls.enabled }}-secure{{- end }}
+  labels:
+    project: {{ $root.project }}
+    component: traefik-dashboard
+spec:
+  entryPoints:
+  {{- toYaml .entrypoints | nindent 4 }}
+  routes:
+    - match: Host(`{{ .serviceHostname }}.{{ .domain }}`)
+      kind: Rule
+      services:
+        {{- with .service }}
+          - name: {{ .name }}
+            port: {{ .port }}
+            kind: {{ .kind }}
+            scheme: {{ .scheme }}
+        {{- end }}
+  {{- if .tls.enabled }}
+  tls:
+    certResolver: {{ .tls.certResolver }}
+  {{- end }}
+---
+  {{- if .tls.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}
+  labels:
+    project: {{ $root.project }}
+    component: traefik-dashboard
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .serviceHostname }}.{{ .domain }}`)
+      kind: Rule
+      services:
+        {{- with .service }}
+          - name: {{ .name }}
+            port: {{ .port }}
+            kind: {{ .kind }}
+            scheme: {{ .scheme }}
+        {{- end }}
+  {{- end }}
+{{- end }}

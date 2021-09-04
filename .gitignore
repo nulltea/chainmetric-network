@@ -1,5 +1,4 @@
 # IDE & Editors configs
-.idea
 .vscode
 
 # Binaries for programs and plugins
@@ -19,7 +18,11 @@
 # vendor/
 
 .env
+.lego
 connection.yaml
 connection-local.yaml
 
-data
+.data
+.secrets
+.crypto-config.*.network
+.channel-artifacts.*.network

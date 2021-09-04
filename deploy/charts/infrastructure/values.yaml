@@ -1,0 +1,32 @@
+project: chainmetric
+
+ingressroutes:
+  - name: traefik-dashboard
+    domain: chainmetric.network
+    serviceHostname: traefik.dev
+    entrypoints:
+      - web
+      - websecure
+    service:
+      name: api@internal
+      kind: TraefikService
+      port: 8080
+      scheme: http
+    # - name: traefik-auth
+    tls:
+      enabled: true
+      certResolver: le
+  - name: vault
+    domain: chainmetric.network
+    serviceHostname: vault.infra
+    entrypoints:
+      - web
+      - websecure
+    service:
+      name: vault
+      kind: Service
+      port: 8200
+      scheme: http
+    tls:
+      enabled: true
+      certResolver: le

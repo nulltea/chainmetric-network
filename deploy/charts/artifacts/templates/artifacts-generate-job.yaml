@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: artifacts.generate
+  labels:
+    fabnctl/cid: artifacts.generate
+spec:
+  backoffLimit: 0
+  parallelism: 1
+  template:
+    metadata:
+      name: artifacts.generate
+    spec:
+      restartPolicy: "Never"
+      initContainers:
+        - name: copy
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - rm -rf /artifacts/*;
+              cp /config/* /artifacts;
+          volumeMounts:
+            - name: artifacts
+              mountPath: /artifacts
+            - name: config
+              mountPath: /config
+      containers:
+        - name: generate
+          image: "{{.Values.image.repository}}:{{.Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - script.sh
+          volumeMounts:
+            - name: artifacts
+              mountPath: /artifacts
+          workingDir: /artifacts
+      volumes:
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}
+        - name: config
+          projected:
+            sources:
+              - configMap:
+                  name: {{ .Release.Name }}.configtx
+                  items:
+                    - key: configtx.yaml
+                      path: configtx.yaml
+              - configMap:
+                  name: {{ .Release.Name }}.crypto-config
+                  items:
+                    - key: crypto-config.yaml
+                      path: crypto-config.yaml
+              - configMap:
+                  name: {{ .Release.Name }}.core
+                  items:
+                    - key: core.yaml
+                      path: core.yaml
+              - configMap:
+                  name: {{ .Release.Name }}.script
+                  items:
+                    - key: script.sh
+                      path: script.sh

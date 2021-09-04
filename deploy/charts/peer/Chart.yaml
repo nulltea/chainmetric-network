@@ -1,0 +1,10 @@
+apiVersion: v2
+name: peer
+description: IoT enabled blockhain peer organization
+type: application
+version: 0.1.0
+appVersion: 1.0.0
+sources:
+  - https://github.com/timoth-y/fabnctl
+maintainers:
+  - name: Timothy Yalugin

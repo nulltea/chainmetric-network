@@ -1,0 +1,15 @@
+This is {{ .Values.component }}.
+From outside the cluster, the {{ .Values.component }} is available by URL:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.routes }} {{ $host := .host }}
+  {{- range .paths }}
+  - http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host }}{{ . }}
+  {{- end }}
+{{- end }}
+{{- else }}
+Lookup external ingress controller configuration.
+{{- end }}
+For more info contact project maintainers:
+{{- range .Chart.Maintainers }}
+  - {{ .Name }}
+{{- end }}

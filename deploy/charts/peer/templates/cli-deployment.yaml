@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cli.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  labels:
+    app: cli.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: cli.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cli.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/cid: org-peer-cli
+        fabnctl/app: cli.{{ .Values.config.peer}}.{{ .Values.config.hostname }}
+        fabnctl/domain: {{ .Values.config.domain }}
+        fabnctl/hostname: {{ .Values.config.peer }}.{{ .Values.config.hostname }}
+        fabnctl/org: {{ .Values.config.mspID }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      containers:
+        - name: cli
+          image: "{{.Values.cli.image.repository}}:{{.Values.cli.image.tag }}"
+          imagePullPolicy: {{.Values.cli.image.pullPolicy}}
+          env:
+            - name: FABRIC_LOGGING_SPEC
+              value: {{ .Values.logging }}
+            - name: CORE_PEER_ID
+              value: "{{ .Values.config.peer }}-{{ .Values.config.hostname }}-{{ .Values.config.domain }}"
+            - name: CORE_PEER_LOCALMSPID
+              value: {{ .Values.config.mspID }}
+            - name: CORE_PEER_ADDRESS
+              value: "{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}:443"
+            - name: CORE_PEER_LISTENADDRESS
+              value: "0.0.0.0:{{ .Values.peer.service.port }}"
+            - name: CORE_PEER_MSPCONFIGPATH
+              value: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/users/Admin@{{ .Values.config.hostname }}.{{ .Values.config.domain }}/msp
+            - name: CORE_PEER_TLS_ENABLED
+              value: "{{ .Values.config.tls }}"
+            - name: CORE_PEER_TLS_CERT_FILE
+              value: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/peers/{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}/tls/server.crt
+            - name: CORE_PEER_TLS_KEY_FILE
+              value: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/peers/{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}/tls/server.key
+            - name: CORE_PEER_TLS_ROOTCERT_FILE
+              value: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/{{ .Values.config.hostname }}.{{ .Values.config.domain }}/peers/{{ .Values.config.peer }}.{{ .Values.config.hostname }}.{{ .Values.config.domain }}/tls/ca.crt
+            - name: GOPATH
+              value: /opt/gopath
+            - name: ORDERER_CA
+              value: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/{{ .Values.orderer.domain}}/orderers/{{.Values.orderer.hostname}}.{{ .Values.orderer.domain}}/msp/tlscacerts/tlsca.{{.Values.orderer.domain}}-cert.pem
+          tty: true
+          volumeMounts:
+            - name: artifacts
+              mountPath: /opt/gopath/src/github.com/hyperledger/fabric/peer
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+      restartPolicy: Always
+      volumes:
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ .Values.artifacts.claim }}
