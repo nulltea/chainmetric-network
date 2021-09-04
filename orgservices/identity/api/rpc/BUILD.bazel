@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "rpc",
+    srcs = [
+        "access_grpc.go",
+        "admin_grpc.go",
+        "user_grpc.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/api/middleware",
+        "//orgservices/identity/api/presenter",
+        "//orgservices/identity/api/proto/common",
+        "//orgservices/identity/api/proto/user",
+        "//orgservices/identity/infrastructure/repository",
+        "//orgservices/identity/model",
+        "//orgservices/identity/usecase/access",
+        "//orgservices/identity/usecase/identity",
+        "//orgservices/shared/core",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_google_protobuf//types/known/emptypb",
+        "@org_mongodb_go_mongo_driver//mongo",
+    ],
+)

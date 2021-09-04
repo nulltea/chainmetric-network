@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "presenter",
+    srcs = ["users.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/api/proto/user",
+        "//orgservices/identity/model",
+        "@org_golang_google_protobuf//types/known/timestamppb",
+    ],
+)

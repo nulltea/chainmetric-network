@@ -1,6 +1,6 @@
 module github.com/timoth-y/chainmetric-network
 
-go 1.16
+go 1.17
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.1.0

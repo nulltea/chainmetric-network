@@ -2,6 +2,7 @@ load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("@golink//proto:proto.bzl", "go_proto_link")
+load("@com_envoyproxy_protoc_gen_validate//bazel:pgv_proto_library.bzl", "pgv_go_proto_library")
 
 proto_library(
     name = "user_proto",
@@ -12,7 +13,7 @@ proto_library(
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/identity/api/proto/common:common_proto",
-        "//validate:validate_proto",
+        "@com_envoyproxy_protoc_gen_validate//validate:validate_proto",
         "@com_google_protobuf//:empty_proto",
         "@com_google_protobuf//:timestamp_proto",
     ],
@@ -20,21 +21,33 @@ proto_library(
 
 go_proto_library(
     name = "user_go_proto",
-    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
-    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/protos/user",
+    compilers = [
+        "//:go_validate",
+        "@io_bazel_rules_go//proto:go_grpc",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/user",
     proto = ":user_proto",
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/identity/api/proto/common",
-        "//validate:validate_proto",
+        "@com_envoyproxy_protoc_gen_validate//validate:go_default_library",
     ],
 )
 
+pgv_go_proto_library(
+    name = "user_pgv_go_proto",
+)
+
 go_library(
-    name = "go_default_library",
+    name = "user",
+    srcs = [
+        "user.pb.validate.go",
+        "user_grpc.pb.validate.go",
+    ],
     embed = [":user_go_proto"],
-    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/protos/user",
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/user",
     visibility = ["//visibility:public"],
+    deps = ["@org_golang_google_protobuf//types/known/anypb"],
 )
 
 go_proto_link(

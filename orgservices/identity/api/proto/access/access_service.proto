@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package chainmetric.identity;
-option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/protos/access";
+option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/access";
 
 import "orgservices/identity/api/proto/access/access.proto";
 

@@ -20,13 +20,22 @@ def add_go_repos():
     )
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-        strip_prefix = "protobuf-3.11.4",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
+        sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
+        strip_prefix = "protobuf-3.14.0",
+        urls = [
+            "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+            "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        ],
     )
     http_archive(
         name = "golink",
         urls = ["https://github.com/nikunjy/golink/archive/v1.1.0.tar.gz"],
         sha256 = "c505a82b7180d4315bbaf05848e9b7d2683e80f1b16159af51a0ecae6fb2d54d",
         strip_prefix = "golink-1.1.0",
+    )
+    http_archive(
+        name = "com_envoyproxy_protoc_gen_validate",
+        sha256 = "c695fc5a2e5a1b52904cd8a58ce7a1c3a80f7f50719496fd606e551685c01101",
+        strip_prefix = "protoc-gen-validate-0.6.1",
+        urls = ["https://github.com/envoyproxy/protoc-gen-validate/archive/v0.6.1.tar.gz"],
     )

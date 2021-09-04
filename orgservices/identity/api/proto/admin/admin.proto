@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chainmetric.identity;
 
-option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter/admin";
+option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/admin";
 
 import "validate/validate.proto";
 import "google/protobuf/timestamp.proto";

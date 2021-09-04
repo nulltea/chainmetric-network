@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chainmetric.identity;
 
-option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter/access";
+option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/access";
 
 import "orgservices/identity/api/proto/user/user.proto";
 import "validate/validate.proto";
