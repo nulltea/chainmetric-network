@@ -26,3 +26,5 @@ connection-local.yaml
 .secrets
 .crypto-config.*.network
 .channel-artifacts.*.network
+
+bazel-*

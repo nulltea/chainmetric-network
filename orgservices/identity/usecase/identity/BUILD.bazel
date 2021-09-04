@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "identity",
+    srcs = [
+        "client.go",
+        "enroll.go",
+        "enroll_options.go",
+        "identities.go",
+        "register.go",
+        "register_options.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/infrastructure/repository",
+        "//orgservices/identity/model",
+        "//orgservices/identity/usecase/privileges",
+        "//orgservices/shared/core",
+        "@com_github_hyperledger_fabric_sdk_go//pkg/client/msp:go_default_library",
+        "@com_github_hyperledger_fabric_sdk_go//pkg/common/providers/msp:go_default_library",
+        "@com_github_hyperledger_fabric_sdk_go//pkg/core/config:go_default_library",
+        "@com_github_hyperledger_fabric_sdk_go//pkg/fabsdk:go_default_library",
+        "@com_github_m1_go_generate_password//generator:go_default_library",
+        "@com_github_pkg_errors//:go_default_library",
+        "@com_github_spf13_viper//:go_default_library",
+        "@org_golang_google_protobuf//types/known/timestamppb:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+    ],
+)

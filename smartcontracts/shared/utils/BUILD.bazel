@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "utils",
+    srcs = ["utils.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//smartcontracts/shared/core",
+        "@com_github_hyperledger_fabric_chaincode_go//shim:go_default_library",
+        "@com_github_hyperledger_fabric_contract_api_go//contractapi:go_default_library",
+        "@com_github_pkg_errors//:go_default_library",
+    ],
+)

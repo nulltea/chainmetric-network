@@ -1,0 +1,58 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "rpc_proto",
+    srcs = [
+        "access_grpc.proto",
+        "admin_grpc.proto",
+        "user_grpc.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//identity/api/presenter:presenter_proto",
+        "@com_google_protobuf//:empty_proto",
+    ],
+)
+
+go_proto_library(
+    name = "rpc_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc",
+    proto = ":rpc_proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//identity/api/presenter:access_proto",
+        "//identity/api/presenter:admin_proto",
+        "//identity/api/presenter:common_proto",
+        "//identity/api/presenter:user_proto",
+    ],
+)
+
+go_library(
+    name = "rpc",
+    srcs = [
+        "access_grpc.go",
+        "admin_grpc.go",
+        "user_grpc.go",
+    ],
+    embed = [":rpc_go_proto"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/api/middleware",
+        "//orgservices/identity/api/presenter",
+        "//orgservices/identity/infrastructure/repository",
+        "//orgservices/identity/model",
+        "//orgservices/identity/usecase/access",
+        "//orgservices/identity/usecase/identity",
+        "//orgservices/identity/usecase/privileges",
+        "//orgservices/shared/core",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes:go_default_library",
+        "@org_golang_google_grpc//status:go_default_library",
+        "@org_golang_google_protobuf//types/known/emptypb:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+    ],
+)

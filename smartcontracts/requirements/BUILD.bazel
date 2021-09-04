@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "requirements_lib",
+    srcs = [
+        "contract.go",
+        "main.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/requirements",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//smartcontracts/shared/core",
+        "//smartcontracts/shared/model/couchdb",
+        "//smartcontracts/shared/utils",
+        "@com_github_hyperledger_fabric_chaincode_go//shim:go_default_library",
+        "@com_github_hyperledger_fabric_contract_api_go//contractapi:go_default_library",
+        "@com_github_pkg_errors//:go_default_library",
+        "@com_github_timoth_y_chainmetric_core//models:go_default_library",
+        "@com_github_timoth_y_chainmetric_core//utils:go_default_library",
+        "@com_github_ztrue_shutdown//:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "requirements",
+    embed = [":requirements_lib"],
+    visibility = ["//visibility:public"],
+)
