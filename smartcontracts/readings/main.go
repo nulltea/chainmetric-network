@@ -3,7 +3,7 @@ package main
 import (
 	"syscall"
 
-	"github.com/timoth-y/chainmetric-network/shared/core"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/ztrue/shutdown"
 )
 
@@ -13,7 +13,7 @@ func init() {
 }
 
 func main() {
-	go core.BootstrapContract(NewReadingsContract())
+	go core.BootstrapChaincodeServer(NewReadingsContract())
 
 	shutdown.Add(core.CloseLevelDB)
 	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)

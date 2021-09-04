@@ -8,9 +8,9 @@ import (
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/models/requests"
 	"github.com/timoth-y/chainmetric-core/utils"
-	"github.com/timoth-y/chainmetric-network/shared/core"
-	"github.com/timoth-y/chainmetric-network/shared/model/couchdb"
-	utils2 "github.com/timoth-y/chainmetric-network/shared/utils"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
+	utils2 "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 )
 
 // Command handles models.DeviceCommand execution requests for devices.

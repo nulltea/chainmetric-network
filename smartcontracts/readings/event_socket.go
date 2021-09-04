@@ -8,8 +8,8 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"github.com/timoth-y/chainmetric-network/shared/core"
-	"github.com/timoth-y/chainmetric-network/shared/model/response"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/response"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/utils"
 )
