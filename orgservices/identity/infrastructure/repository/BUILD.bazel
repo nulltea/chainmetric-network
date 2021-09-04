@@ -10,11 +10,11 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/identity/model",
-        "@com_github_hashicorp_vault_api//:go_default_library",
-        "@com_github_pkg_errors//:go_default_library",
-        "@com_github_spf13_viper//:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+        "@com_github_hashicorp_vault_api//:api",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_spf13_viper//:viper",
+        "@org_mongodb_go_mongo_driver//bson",
+        "@org_mongodb_go_mongo_driver//mongo",
+        "@org_mongodb_go_mongo_driver//mongo/options",
     ],
 )

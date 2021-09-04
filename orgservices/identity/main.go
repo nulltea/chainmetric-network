@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/privileges"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
@@ -30,9 +29,6 @@ func init() {
 				middleware.AuthForStreamGRPC(),
 			),
 			server2.WithServiceRegistrar(
-				rpc.RegisterAccessService,
-				rpc.RegisterAdminService,
-				rpc.RegisterUserService,
 			),
 		)
 	}, "failed to initialize server")

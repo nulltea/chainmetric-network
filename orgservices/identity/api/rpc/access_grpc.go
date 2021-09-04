@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter"
+	presenter "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter/access"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/access"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"

@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter"
+	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter/admin"
+	presenter "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter/user"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/privileges"
@@ -49,8 +50,8 @@ func (s adminService) GetCandidates(ctx context.Context, _ *presenter.UsersReque
 // EnrollUser implements IdentityServiceClient gRPC service.
 func (adminService) EnrollUser(
 	ctx context.Context,
-	request *presenter.EnrollUserRequest,
-) (*presenter.EnrollUserResponse, error) {
+	request *admin.EnrollUserRequest,
+) (*admin.EnrollUserResponse, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
@@ -69,5 +70,5 @@ func (adminService) EnrollUser(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return presenter.NewEnrollUserResponse(initPassword), nil
+	return admin.NewEnrollUserResponse(initPassword), nil
 }

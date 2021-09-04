@@ -7,7 +7,6 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//orgservices/identity/api/middleware",
-        "//orgservices/identity/api/rpc",
         "//orgservices/identity/usecase/identity",
         "//orgservices/identity/usecase/privileges",
         "//orgservices/shared/core",

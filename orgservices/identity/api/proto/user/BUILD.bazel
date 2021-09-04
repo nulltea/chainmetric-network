@@ -1,0 +1,44 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@golink//proto:proto.bzl", "go_proto_link")
+
+proto_library(
+    name = "user_proto",
+    srcs = [
+        "user.proto",
+        "user_grpc.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/api/proto/common:common_proto",
+        "//validate:validate_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+go_proto_library(
+    name = "user_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/protos/user",
+    proto = ":user_proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/api/proto/common",
+        "//validate:validate_proto",
+    ],
+)
+
+go_library(
+    name = "go_default_library",
+    embed = [":user_go_proto"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/protos/user",
+    visibility = ["//visibility:public"],
+)
+
+go_proto_link(
+    name = "user_go_proto_link",
+    dep = ":user_go_proto",
+    version = "v1",
+)

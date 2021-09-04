@@ -8,6 +8,6 @@ go_library(
     deps = [
         "//orgservices/identity/model",
         "//orgservices/shared/core",
-        "@com_github_spf13_viper//:go_default_library",
+        "@com_github_spf13_viper//:viper",
     ],
 )

@@ -5,5 +5,5 @@ go_library(
     srcs = ["records.go"],
     importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_timoth_y_chainmetric_core//models:go_default_library"],
+    deps = ["@com_github_timoth_y_chainmetric_core//models"],
 )
