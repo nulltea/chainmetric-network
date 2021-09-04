@@ -158,48 +158,48 @@ grpc-gen:
 		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-	    --go_out=paths=source_relative:src \
-	    --validate_out=lang=go,paths=source_relative:src \
-		./src/identity/api/presenter/*.proto
+	    --go_out=paths=source_relative:orgservices \
+	    --validate_out=lang=go,paths=source_relative:orgservices \
+		./orgservices/identity/api/presenter/*.proto
 
 	protoc \
 		-I=src \
 		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-		--go-grpc_out=paths=source_relative:./src \
-		./src/identity/api/rpc/*.proto
+		--go-grpc_out=paths=source_relative:./orgservices \
+		./orgservices/identity/api/rpc/*.proto
 
-	ls ./src/identity/api/rpc/*_grpc_grpc.pb.go | sed -E "p;s/(.*)_grpc_grpc\.pb\.go/\1_grpc\.pb.\go/" | xargs -n2 mv
+	ls ./orgservices/identity/api/rpc/*_grpc_grpc.pb.go | sed -E "p;s/(.*)_grpc_grpc\.pb\.go/\1_grpc\.pb.\go/" | xargs -n2 mv
 
 grpc-ui:
 	grpcui \
  		--open-browser \
- 		-cert ./data/certs/grpc/server.crt \
- 		-key ./data/certs/grpc/server.key \
+ 		-cert .data/certs/grpc/server.crt \
+ 		-key .data/certs/grpc/server.key \
  		-import-path ./src \
  		-import-path ${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
- 		-proto ./src/identity/api/rpc/identity.proto \
- 		-proto ./src/identity/api/rpc/access.proto \
+ 		-proto ./orgservices/identity/api/rpc/identity.proto \
+ 		-proto ./orgservices/identity/api/rpc/access.proto \
  		identity.chipa-inu.org.chainmetric.network:443
 
 grpc-tls-gen:
 	openssl genrsa \
-		-out data/certs/ca.key 2048
+		-out .data/certs/ca.key 2048
 
 	openssl req \
 		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=identity.${ORG}.org.${DOMAIN}" \
-		-new -x509 -days 365 -key data/certs/ca.key -out data/certs/ca.crt
+		-new -x509 -days 365 -key .data/certs/ca.key -out .data/certs/ca.crt
 
 	openssl req -newkey rsa:2048 \
-		-nodes -keyout data/certs/server.key \
+		-nodes -keyout .data/certs/server.key \
 		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=identity.${ORG}.org.${DOMAIN}" \
-		-out data/certs/server.csr
+		-out .data/certs/server.csr
 
 	openssl x509 -req \
-		-in data/certs/server.csr \
-		-CA data/certs/ca.crt -CAkey data/certs/ca.key -CAcreateserial -days 365 \
+		-in .data/certs/server.csr \
+		-CA .data/certs/ca.crt -CAkey .data/certs/ca.key -CAcreateserial -days 365 \
 		-extfile <(printf "subjectAltName=DNS:identity.${ORG}.org.${DOMAIN},DNS:localhost,DNS:identity-${ORG}-org") \
-		-out data/certs/server.crt
+		-out .data/certs/server.crt
 
 cp-proto-app:
-	cp ./src/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
-	cp ./src/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto
+	cp ./orgservices/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
+	cp ./orgservices/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto
