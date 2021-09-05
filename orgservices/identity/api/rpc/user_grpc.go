@@ -7,8 +7,6 @@ import (
 
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/common"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/user"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/access"
@@ -22,19 +20,19 @@ import (
 )
 
 type userService struct{
-	user.UnimplementedUserServiceServer
+	UnimplementedUserServiceServer
 }
 
 // RegisterUserService registers UserServiceServer fir given gRPC `server` instance.
 func RegisterUserService(server *grpc.Server) {
-	user.RegisterUserServiceServer(server, &userService{})
+	RegisterUserServiceServer(server, &userService{})
 }
 
 // Register implements UserServiceServer gRPC service RPC.
 func (userService) Register(
 	_ context.Context,
-	request *user.RegistrationRequest,
-) (*user.RegistrationResponse, error) {
+	request *presenter.RegistrationRequest,
+) (*presenter.RegistrationResponse, error) {
 	if err := request.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -64,13 +62,13 @@ func (userService) Register(
 }
 
 // GetState implements UserServiceServer gRPC service RPC.
-func (s userService) GetState(ctx context.Context, _ *emptypb.Empty) (*proto.User, error) {
+func (s userService) GetState(ctx context.Context, _ *emptypb.Empty) (*presenter.User, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 	return presenter.NewUserProto(user), nil
 }
 
 // PingAccountStatus implements UserServiceServer gRPC service RPC.
-func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*proto.UserStatusResponse, error) {
+func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*presenter.UserStatusResponse, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 
 	if user.Status == model.Approved {
@@ -94,8 +92,8 @@ func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*
 // ChangePassword implements UserServiceServer gRPC service RPC.
 func (userService) ChangePassword(
 	ctx context.Context,
-	request *user.ChangePasswordRequest,
-) (*common.StatusResponse, error) {
+	request *presenter.ChangePasswordRequest,
+) (*presenter.StatusResponse, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
@@ -117,5 +115,5 @@ func (userService) ChangePassword(
 		return nil, status.Error(codes.Internal, "failed to update user pass on Vault")
 	}
 
-	return common.NewStatusResponse(common.Status_OK), nil
+	return presenter.NewStatusResponse(presenter.Status_OK), nil
 }

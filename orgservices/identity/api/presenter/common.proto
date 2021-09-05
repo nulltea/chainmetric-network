@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chainmetric.identity;
 
-option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/common";
+option go_package = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter";
 
 message StatusResponse {
   Status status = 1;

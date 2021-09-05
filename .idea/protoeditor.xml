@@ -14,7 +14,7 @@
           <option name="location" value="file:///usr/include" />
         </ImportPathEntry>
         <ImportPathEntry>
-          <option name="location" value="file://$USER_HOME$/go/pkg/mod" />
+          <option name="location" value="file://$USER_HOME$/go/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1" />
         </ImportPathEntry>
       </list>
     </option>

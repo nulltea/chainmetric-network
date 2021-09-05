@@ -1,14 +1,13 @@
 package presenter
 
 import (
-	proto "github.com/timoth-y/chainmetric-network/orgservices/identity/api/proto/user"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // NewUserProto casts native user model to protobuf User.
-func NewUserProto(user *model.User) *proto.User {
-	proto := &proto.User{
+func NewUserProto(user *model.User) *User {
+	proto := &User{
 		Id:        user.ID,
 		Username:  user.IdentityName(),
 		Firstname: user.Firstname,
@@ -27,8 +26,8 @@ func NewUserProto(user *model.User) *proto.User {
 }
 
 // NewUsersResponse presents UsersResponse for given native models slice `users`.
-func NewUsersResponse(users []*model.User) *proto.UsersResponse {
-	var resp = &proto.UsersResponse{
+func NewUsersResponse(users []*model.User) *UsersResponse {
+	var resp = &UsersResponse{
 		Count: int64(len(users)),
 	}
 
@@ -41,8 +40,8 @@ func NewUsersResponse(users []*model.User) *proto.UsersResponse {
 
 // NewRegistrationResponse presents RegistrationResponse for gRPC proto for given `user`,
 // and grants access via `jwt`.
-func NewRegistrationResponse(user *model.User, jwt string) *proto.RegistrationResponse {
-	return &proto.RegistrationResponse{
+func NewRegistrationResponse(user *model.User, jwt string) *RegistrationResponse {
+	return &RegistrationResponse{
 		User:        NewUserProto(user),
 		AccessToken: jwt,
 	}
@@ -50,9 +49,9 @@ func NewRegistrationResponse(user *model.User, jwt string) *proto.RegistrationRe
 
 // NewUserStatusResponse presents UserStatusResponse for gRPC proto for given `user`,
 // and grants access via `jwt`.
-func NewUserStatusResponse(status model.Status, role, initialPassword *string) *proto.UserStatusResponse {
-	return &proto.UserStatusResponse{
-		Status:          proto.UserStatus(status),
+func NewUserStatusResponse(status model.Status, role, initialPassword *string) *UserStatusResponse {
+	return &UserStatusResponse{
+		Status:          UserStatus(status),
 		// Role:            role,
 		// InitialPassword: initialPassword,
 	}

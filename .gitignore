@@ -28,3 +28,5 @@ connection-local.yaml
 .channel-artifacts.*.network
 
 bazel-*
+*.pb.go
+*.pb.validate.go
