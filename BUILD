@@ -15,6 +15,7 @@ gazelle_binary(
 # gazelle:go_proto_compilers @io_bazel_rules_go//proto:go_grpc,//:go_validate
 # gazelle:resolve proto validate/validate.proto @com_envoyproxy_protoc_gen_validate//validate:validate_proto
 # gazelle:resolve proto go validate/validate.proto @com_envoyproxy_protoc_gen_validate//validate:validate_go_proto
+# gazelle:exclude **/*.pb.validate.go
 gazelle(
     name = "gazelle",
     gazelle = "//:gazelle_binary",
