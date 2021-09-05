@@ -7,7 +7,11 @@
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BUILD" beforeDir="false" afterPath="$PROJECT_DIR$/BUILD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orgservices/identity/api/presenter/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/api/presenter/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WORKSPACE" beforeDir="false" afterPath="$PROJECT_DIR$/WORKSPACE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/go/BUILD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/go/WORKSPACE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/go/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/go/def.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/go/repos.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/go/repos.bzl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

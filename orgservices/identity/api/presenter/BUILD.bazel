@@ -27,7 +27,7 @@ go_proto_library(
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter",
     proto = ":presenter_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_envoyproxy_protoc_gen_validate//validate:validate_go_proto"],
+    deps = ["@com_envoyproxy_protoc_gen_validate//validate:go_default_library"],
 )
 
 go_library(

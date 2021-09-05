@@ -2,8 +2,9 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+load("@com_envoyproxy_protoc_gen_validate//:dependencies.bzl", _pgv_go_third_party = "go_third_party")
 
-def go_rules_deps():
+def go_rules():
     go_rules_dependencies()
     go_register_toolchains(go_version = "1.17")
 
@@ -33,3 +34,5 @@ def go_rules_deps():
         sum = "h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=",
         version = "v0.3.0",
     )
+
+    _pgv_go_third_party()
