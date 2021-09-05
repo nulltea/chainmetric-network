@@ -30,3 +30,5 @@ connection-local.yaml
 bazel-*
 *.pb.go
 *.pb.validate.go
+
+go_third_party.bzl

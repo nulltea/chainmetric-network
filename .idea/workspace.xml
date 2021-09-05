@@ -5,15 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/build/docker/multiarch.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WORKSPACE" beforeDir="false" afterPath="$PROJECT_DIR$/WORKSPACE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docker/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/docker/def.bzl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go_third_party.bzl" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,15 +39,15 @@
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.proto" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/go.mod" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.proto" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.proto" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.proto" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/deploy/docker/assets.Dockerfile" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.pb.go" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/go_third_party.bzl" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/build/go/def.bzl" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Makefile" root0="FORCE_HIGHLIGHTING" />
@@ -59,7 +55,13 @@
     <setting file="file://$PROJECT_DIR$/.gitignore" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BUILD" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/WORKSPACE" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/go.sum" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/build/go/repos.bzl" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="KubernetesApiPersistence">
     <option name="context" value="ecac-dev-ecosec" />
