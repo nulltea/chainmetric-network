@@ -52,8 +52,7 @@ func NewRegistrationResponse(user *model.User, jwt string) *RegistrationResponse
 func NewUserStatusResponse(status model.Status, role, initialPassword *string) *UserStatusResponse {
 	return &UserStatusResponse{
 		Status:          UserStatus(status),
-		Role:            role,
-		InitialPassword: initialPassword,
+		// Role:            role,
+		// InitialPassword: initialPassword,
 	}
 }
-

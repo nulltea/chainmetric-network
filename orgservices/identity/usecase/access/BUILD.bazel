@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "access",
+    srcs = [
+        "claims_jwt.go",
+        "credentials_fabric.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/access",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/infrastructure/repository",
+        "//orgservices/identity/model",
+        "//orgservices/identity/usecase/identity",
+        "//orgservices/shared/core",
+        "@com_github_golang_jwt_jwt_v4//:jwt",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_spf13_viper//:viper",
+    ],
+)

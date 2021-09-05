@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "middleware",
+    srcs = [
+        "auth_grpc.go",
+        "ctx_grpc.go",
+        "jwt_grpc.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/identity/infrastructure/repository",
+        "//orgservices/identity/model",
+        "//orgservices/identity/usecase/access",
+        "//orgservices/shared/core",
+        "@com_github_golang_jwt_jwt_v4//:jwt",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//metadata",
+        "@org_golang_google_grpc//status",
+        "@org_mongodb_go_mongo_driver//mongo",
+    ],
+)

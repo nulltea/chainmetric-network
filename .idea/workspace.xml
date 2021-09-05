@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/build/docker/multiarch.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WORKSPACE" beforeDir="false" afterPath="$PROJECT_DIR$/WORKSPACE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/docker/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/docker/def.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///usr/lib/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.pb.validate.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/admin_grpc.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.pb.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/go_third_party.bzl" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/build/go/def.bzl" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Makefile" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/admin_grpc.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/.gitignore" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BUILD" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WORKSPACE" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/build/go/repos.bzl" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="KubernetesApiPersistence">
+    <option name="context" value="ecac-dev-ecosec" />
+    <option name="namespace" value="team-ecosec" />
+  </component>
+  <component name="ProjectId" id="1xgoa8mPonrZqo90z0tS3D8g2XF" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.formatter.settings.were.checked" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.vendoring.notification.had.been.shown" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$/go/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/orgservices/identity/api/presenter" />
+      <recent name="$PROJECT_DIR$/orgservices/identity/api/rpc" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+</project>

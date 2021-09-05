@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/chainmetric-contracts.iml" filepath="$PROJECT_DIR$/.idea/chainmetric-contracts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/chainmetric-network.iml" filepath="$PROJECT_DIR$/.idea/chainmetric-network.iml" />
     </modules>
   </component>
 </project>

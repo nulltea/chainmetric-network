@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "response",
+    srcs = [
+        "assets.go",
+        "readings.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/response",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_timoth_y_chainmetric_core//models"],
+)

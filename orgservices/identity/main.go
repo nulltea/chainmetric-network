@@ -30,9 +30,9 @@ func init() {
 				middleware.AuthForStreamGRPC(),
 			),
 			server2.WithServiceRegistrar(
-				rpc.RegisterAccessService,
-				rpc.RegisterAdminService,
+				//rpc.RegisterAccessService,
 				rpc.RegisterUserService,
+				//rpc.RegisterAdminService,
 			),
 		)
 	}, "failed to initialize server")
