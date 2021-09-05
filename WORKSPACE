@@ -14,6 +14,10 @@ load("//build/docker:repos.bzl", "docker_repos")
 
 docker_repos()
 
+load("//build/docker:def.bzl", "docker_deps")
+
+docker_deps()
+
 load("//:go_third_party.bzl", "go_dependencies")
 
 # gazelle:repository_macro go_third_party.bzl%go_dependencies

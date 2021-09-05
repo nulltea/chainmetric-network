@@ -5,13 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/build/docker/multiarch.bzl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BUILD" beforeDir="false" afterPath="$PROJECT_DIR$/BUILD" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WORKSPACE" beforeDir="false" afterPath="$PROJECT_DIR$/WORKSPACE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/go/BUILD" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/go/WORKSPACE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/go/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/go/def.bzl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/go/repos.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/go/repos.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/docker/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/docker/def.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +88,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="google.protobuf.language" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
