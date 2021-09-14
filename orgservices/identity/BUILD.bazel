@@ -1,6 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("//build/docker:multiarch.bzl", "multiarch_image")
 
 go_library(
@@ -36,8 +36,17 @@ go_image(
 container_image(
     name = "image",
     base = ":base_image",
+    repository = "chainmetric",
     stamp = True,
     visibility = ["//visibility:public"],
+)
+
+container_push(
+    name = "image-push",
+    format = "Docker",
+    image = ":image",
+    registry = "index.docker.io",
+    repository = "chainmetric/identity-service",
 )
 
 multiarch_image(

@@ -6,13 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go_third_party.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/go_third_party.bzl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/contract.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/usecase/validation/cache.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/usecase/validation/cache.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/usecase/validation/rules.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/usecase/validation/rules.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/contract.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,11 +160,6 @@
           <url>file://$PROJECT_DIR$/smartcontracts/readings/contract.go</url>
           <line>27</line>
           <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go</url>
-          <line>25</line>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
