@@ -184,6 +184,14 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 	return nil
 }
 
+// NotifyRequirementsChange ...
+func (rc *ReadingsContract) NotifyRequirementsChange(
+	_ contractapi.TransactionContextInterface,
+	r *models.Requirements,
+) {
+	validation.SetRequirements(r)
+}
+
 func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {
 	var readings []*models.MetricReadings
 

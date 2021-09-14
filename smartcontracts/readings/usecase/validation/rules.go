@@ -1,44 +1,30 @@
 package validation
 
 import (
-	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/timoth-y/chainmetric-core/models"
-	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
+	"github.com/timoth-y/chainmetric-core/utils"
 )
 
-var (
-	requirements = make(map[string]map[models.Metric][]models.Requirement)
-)
-
-func SyncRequirements(ctx contractapi.TransactionContextInterface) error {
-	var reqs []*models.Requirements
-
-	payload, err := utils.CrossChaincodeCall(ctx, "requirements", "All")
-	if err != nil {
-		return utils.LoggedError(err, "failed to request requirements for validator")
-	}
-
-	if err = json.Unmarshal(payload, &reqs); err != nil {
-		return utils.LoggedError(err, "failed to decode requirements")
-	}
-
-	for _, r := range reqs {
-		if rm := requirements[r.AssetID]; rm == nil {
-			requirements[r.AssetID] = make(map[models.Metric][]models.Requirement)
-		}
-
-		for m, mr := range r.Metrics {
-			requirements[r.AssetID][m] = append(requirements[r.AssetID][m], mr)
-		}
-	}
-
-	return nil
+type Violation struct {
+	Value     float64 `json:"value"`
+	Timestamp time.Time `json:"timestamp"`
+	Location  string `json:"location"`
 }
 
+type Notification struct {
+	AssetID     string        `json:"asset_id"`
+	Metric      models.Metric `json:"metric"`
+	Occurrences []Violation   `json:"occurrences"`
+}
+
+var violations = make(map[string]map[models.Metric][]Violation)
+
 func Validate(ctx contractapi.TransactionContextInterface, r *models.MetricReadings) error {
-	var reqs = requirements[r.AssetID]
+	var reqs = rqmCache[r.AssetID]
 
 	if len(reqs) == 0 {
 		return nil
@@ -46,8 +32,31 @@ func Validate(ctx contractapi.TransactionContextInterface, r *models.MetricReadi
 
 	for m, mr := range reqs {
 		for i := range mr {
-			if r.Values[m] < mr[i].MinLimit || r.Values[m] > mr[i].MaxLimit {
+			if v, ok := r.Values[m]; ok {
+				if v < mr[i].MinLimit || v > mr[i].MaxLimit {
+					if vm := violations[r.AssetID]; vm == nil {
+						violations[r.AssetID] = make(map[models.Metric][]Violation)
+					}
 
+					vs := violations[r.AssetID][m]
+
+					vs = append(violations[r.AssetID][m], Violation{
+						Value:     v,
+						Timestamp: r.Timestamp,
+						Location:  r.Location,
+					})
+
+					if len(vs) % 5 == 0 {
+						_ = ctx.GetStub().SetEvent(
+							fmt.Sprintf("asset.%s.requirements.%s.violation", r.AssetID, m),
+							[]byte(utils.MustEncode(Notification{
+								AssetID: r.AssetID,
+								Metric: m,
+								Occurrences: vs,
+							})),
+						)
+					}
+				}
 			}
 		}
 	}

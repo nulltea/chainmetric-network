@@ -110,6 +110,14 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 		return "", sharedutils.LoggedError(err, "failed saving requirements record")
 	}
 
+	defer func() {
+		if _, e := sharedutils.CrossChaincodeCall(ctx,
+			"readings", "NotifyRequirementsChange", string(requirements.Encode()),
+		); e != nil {
+			core.Logger.Error(e)
+		}
+	}()
+
 	return requirements.ID, nil
 }
 
