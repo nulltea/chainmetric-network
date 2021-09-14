@@ -5,11 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/storage/000001.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/storage/CURRENT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/storage/LOCK" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/storage/LOG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/storage/MANIFEST-000000" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smartcontracts/readings/usecase/validation/rules.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go_third_party.bzl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/docker/def.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/build/docker/def.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy/charts/chaincode/templates/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/deploy/charts/chaincode/templates/deployment.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go_third_party.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/go_third_party.bzl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/event_socket.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/event_socket.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/contract.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,37 +41,47 @@
     <option name="indexEntireGoPath" value="false" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.pb.validate.go" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/admin_grpc.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/go.mod" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.proto" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/deploy/docker/assets.Dockerfile" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/build/go/def.bzl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Makefile" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/admin_grpc.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/.gitignore" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BUILD" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/WORKSPACE" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/go.sum" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/user_grpc.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/build/go/repos.bzl" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/build/go/def.bzl" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/usecase/validation/rules.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/orgservices/identity/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/deploy/docker/assets.Dockerfile" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/shared/core/bootstrap.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BUILD" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/go.mod" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/go.sum" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/.gitignore" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Makefile" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WORKSPACE" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-chaincode-go@v0.0.0-20200424173110-d7076418f212/shim/stub.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-chaincode-go@v0.0.0-20200424173110-d7076418f212/shim/shim.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/main.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-chaincode-go@v0.0.0-20200424173110-d7076418f212/shim/handler.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/smartcontracts/readings/contract.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/admin.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-chaincode-go@v0.0.0-20200424173110-d7076418f212/shim/chaincodeserver.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/access_grpc.pb.validate.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-contract-api-go@v1.1.1/contractapi/contract.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/common.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/access.proto" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/hyperledger/fabric-contract-api-go@v1.1.1/contractapi/contract_chaincode.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/presenter/user.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/orgservices/identity/api/rpc/admin_grpc.proto" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="KubernetesApiPersistence">
     <option name="context" value="ecac-dev-ecosec" />
@@ -98,11 +118,73 @@
       <recent name="$PROJECT_DIR$/orgservices/identity/api/rpc" />
     </key>
   </component>
+  <component name="RunManager" selected="Go Build.go build github.com/timoth-y/chainmetric-network/smartcontracts/readings">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="chainmetric-network" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build contract.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="chainmetric-network" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/smartcontracts/readings/contract.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build github.com/timoth-y/chainmetric-network/smartcontracts/readings" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="chainmetric-network" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/timoth-y/chainmetric-network/smartcontracts/readings" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/smartcontracts/readings/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="chainmetric-network" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/smartcontracts/requirements/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="chainmetric-network" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build github.com/timoth-y/chainmetric-network/smartcontracts/readings" />
+        <item itemvalue="Go Build.go build main.go" />
+        <item itemvalue="Go Build.go build contract.go" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/smartcontracts/readings/contract.go</url>
+          <line>41</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

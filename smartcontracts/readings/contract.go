@@ -6,16 +6,17 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
+	"github.com/timoth-y/chainmetric-core/utils"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/readings/usecase/validation"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/response"
-	utils2 "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
-	"github.com/timoth-y/chainmetric-core/utils"
+	sharedutils "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 )
 
-// ReadingsContract provides functions for managing an models.MetricReadings from models.Device sensors
+// ReadingsContract provides functions for managing a models.MetricReadings from models.Device sensors
 type ReadingsContract struct {
 	contractapi.Contract
 	socketTickets map[string]EventSocketSubscriptionTicket
@@ -30,6 +31,15 @@ func NewReadingsContract() *ReadingsContract {
 	rc.recoverEventTicketsFromBackup()
 
 	return rc
+}
+
+func (rc *ReadingsContract) Init(ctx contractapi.TransactionContextInterface) error {
+	core.Logger.Debug("init ReadingsContract")
+	if err := validation.SyncRequirements(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ForAsset retrieves all models.MetricReadings records from blockchain ledger for specific asset by given `assetID`,
@@ -51,7 +61,7 @@ func (rc *ReadingsContract) ForAsset(
 
 	iter, err := ctx.GetStub().GetQueryResult(core.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	readings := rc.drain(iter)
@@ -87,7 +97,7 @@ func (rc *ReadingsContract) ForMetric(ctx contractapi.TransactionContextInterfac
 
 	iter, err := ctx.GetStub().GetQueryResult(core.BuildQuery(qMap, "timestamp", "asc"))
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	readings := rc.drain(iter)
@@ -114,14 +124,18 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 	)
 
 	if readings, err = readings.Decode([]byte(payload)); err != nil {
-		return "", utils2.LoggedError(err, "failed to deserialize input")
+		return "", sharedutils.LoggedError(err, "failed to deserialize input")
 	}
 
 	if readings.ID, err = generateCompositeKey(ctx, readings); err != nil {
-		return "", utils2.LoggedError(err, "failed to generate composite key")
+		return "", sharedutils.LoggedError(err, "failed to generate composite key")
 	}
 
 	go rc.sendToSocketListeners(ctx, readings)
+
+	if err = validation.Validate(ctx, readings); err != nil {
+		return "", sharedutils.LoggedError(err, "failed to validate readings")
+	}
 
 	return readings.ID, rc.save(ctx, readings)
 }
@@ -129,7 +143,7 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 // Exists determines whether the models.MetricReadings record exists in the blockchain ledger.
 func (rc *ReadingsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return false, utils2.LoggedError(err, "failed to read from world state")
+		return false, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
@@ -145,7 +159,7 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 		return errors.Errorf("the readings with ID %q does not exist", id)
 	}
 
-	return utils2.LoggedError(
+	return sharedutils.LoggedError(
 		ctx.GetStub().DelState(id),
 		"failed removing metric readings record",
 	)
@@ -156,10 +170,10 @@ func (rc *ReadingsContract) Remove(ctx contractapi.TransactionContextInterface, 
 func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.ReadingsRecordType, []string {})
 	if err != nil {
-		return utils2.LoggedError(err, "failed to read from world state")
+		return sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
-	utils2.Iterate(iter, func(key string, _ []byte) error {
+	sharedutils.Iterate(iter, func(key string, _ []byte) error {
 		if err = ctx.GetStub().DelState(key); err != nil {
 			return errors.Wrap(err, "failed to remove readings record")
 		}
@@ -173,7 +187,7 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {
 	var readings []*models.MetricReadings
 
-	utils2.Iterate(iter, func(_ string, value []byte) error {
+	sharedutils.Iterate(iter, func(_ string, value []byte) error {
 		record, err := models.MetricReadings{}.Decode(value); if err != nil {
 			return errors.Wrap(err, "failed to deserialize readings record")
 		}

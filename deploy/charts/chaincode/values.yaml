@@ -6,7 +6,7 @@ logging: DEBUG
 image:
   repository: iotchainnetwork/cc.requirements
   pullPolicy: Always
-  tag: latest
+  tag: image
 
 service:
   type: ClusterIP

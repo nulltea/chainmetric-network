@@ -8,10 +8,10 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
-	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/response"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/utils"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/response"
 )
 
 // EventSocketSubscriptionTicket defines subscription ticket of event socket for metric readings.
@@ -23,7 +23,7 @@ type EventSocketSubscriptionTicket struct {
 
 // BindToEventSocket creates EventSocketSubscriptionTicket for connected party,
 // so that each posted models.MetricReadings record, which satisfies client request for given `assetID` and `metric`,
-// would be send directly to it via event streaming subscription.
+// would be sent directly to it via event streaming subscription.
 func (rc *ReadingsContract) BindToEventSocket(ctx contractapi.TransactionContextInterface, assetID, metric string) string {
 	var (
 		timestamp   = time.Now()
