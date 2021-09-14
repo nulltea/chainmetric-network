@@ -6,12 +6,11 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
+	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
 	sharedutils "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
-
-	"github.com/timoth-y/chainmetric-core/models"
 )
 
 // RequirementsContract implements requirements-managing Smart Contract transaction handlers.

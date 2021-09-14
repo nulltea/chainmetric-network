@@ -7,6 +7,12 @@ api:
   jwt_signing_key: .data/certs/jwt/jwt-key.pem
   jwt_signing_cert: .data/certs/jwt/jwt-cert.pem
 
+chaincode:
+  ccid: readings:fea847456677173c28bac45add06c92d7549dcbcf8aa5ac713924e407aee4c45
+  address: localhost:7052
+  name: readings
+  persistence_path: .data/cache
+
 
 mongo_auth: false
 mongo_username: root

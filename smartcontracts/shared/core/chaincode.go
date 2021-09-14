@@ -23,7 +23,6 @@ func NewChaincode(contracts ...contractapi.ContractInterface) (*Chaincode, error
 
 
 func (cc *Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
-	// TODO: call init
 	return cc.ContractChaincode.Init(stub)
 }
 

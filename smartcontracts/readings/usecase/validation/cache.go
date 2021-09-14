@@ -8,7 +8,7 @@ import (
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 )
 
-var rqmCache = make(map[string]map[models.Metric][]models.Requirement)
+var rqmCache map[string]map[models.Metric][]models.Requirement
 
 func SyncRequirements(ctx contractapi.TransactionContextInterface) error {
 	var reqs []*models.Requirements
@@ -22,14 +22,22 @@ func SyncRequirements(ctx contractapi.TransactionContextInterface) error {
 		return utils.LoggedError(err, "failed to decode rqmCache")
 	}
 
+	rqmCache = make(map[string]map[models.Metric][]models.Requirement)
+
 	for _, r := range reqs {
-		SetRequirements(r)
+		SetRequirements(ctx, r)
 	}
 
 	return nil
 }
 
-func SetRequirements(r *models.Requirements) {
+func SetRequirements(ctx contractapi.TransactionContextInterface, r *models.Requirements) {
+	if rqmCache == nil {
+		SyncRequirements(ctx)
+
+		return
+	}
+
 	if rm := rqmCache[r.AssetID]; rm == nil {
 		rqmCache[r.AssetID] = make(map[models.Metric][]models.Requirement)
 	}

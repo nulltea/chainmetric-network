@@ -34,7 +34,6 @@ func NewReadingsContract() *ReadingsContract {
 }
 
 func (rc *ReadingsContract) Init(ctx contractapi.TransactionContextInterface) error {
-	core.Logger.Debug("init ReadingsContract")
 	if err := validation.SyncRequirements(ctx); err != nil {
 		return err
 	}
@@ -186,10 +185,10 @@ func (rc *ReadingsContract) RemoveAll(ctx contractapi.TransactionContextInterfac
 
 // NotifyRequirementsChange ...
 func (rc *ReadingsContract) NotifyRequirementsChange(
-	_ contractapi.TransactionContextInterface,
+	ctx contractapi.TransactionContextInterface,
 	r *models.Requirements,
 ) {
-	validation.SetRequirements(r)
+	validation.SetRequirements(ctx, r)
 }
 
 func (rc *ReadingsContract) drain(iter shim.StateQueryIteratorInterface) []*models.MetricReadings {

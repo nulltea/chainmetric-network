@@ -24,6 +24,10 @@ type Notification struct {
 var violations = make(map[string]map[models.Metric][]Violation)
 
 func Validate(ctx contractapi.TransactionContextInterface, r *models.MetricReadings) error {
+	if rqmCache == nil {
+		SyncRequirements(ctx)
+	}
+
 	var reqs = rqmCache[r.AssetID]
 
 	if len(reqs) == 0 {
