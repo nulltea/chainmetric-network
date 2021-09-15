@@ -1,9 +1,7 @@
 package main
 
 import (
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/privileges"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/api/rpc"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/middleware"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/server"
@@ -12,26 +10,18 @@ import (
 
 func init() {
 	core.Init()
-	privileges.Init()
-	utils.MustExecute(identity.Init, "failed to initialize identity package")
 	utils.MustExecute(func() error {
 		return server.Init(
 			server.WithUnaryMiddlewares(
-				middleware.JWTForUnaryGRPC(
-					"UserService/register",
-					"AccessService/requestFabricCredentials",
-					"AccessService/authWithSigningIdentity",
-				),
-				middleware.AuthForUnaryGRPC("UserService/pingAccountStatus"),
+				middleware.JWTForUnaryGRPC(),
+				middleware.AuthForUnaryGRPC(),
 			),
 			server.WithStreamMiddlewares(
 				middleware.JWTForStreamGRPC(),
 				middleware.AuthForStreamGRPC(),
 			),
 			server.WithServiceRegistrar(
-				rpc.RegisterAccessService,
-				rpc.RegisterUserService,
-				rpc.RegisterAdminService,
+				rpc.RegisterSubscriberService,
 			),
 		)
 	}, "failed to initialize server")

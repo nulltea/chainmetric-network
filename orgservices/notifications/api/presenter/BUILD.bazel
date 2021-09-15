@@ -5,11 +5,7 @@ load("@golink//proto:proto.bzl", "go_proto_link")
 
 proto_library(
     name = "presenter_proto",
-    srcs = [
-        "access.proto",
-        "admin.proto",
-        "user.proto",
-    ],
+    srcs = ["subscription.proto"],
     visibility = ["//visibility:public"],
     deps = [
         "@com_envoyproxy_protoc_gen_validate//validate:validate_proto",
@@ -23,7 +19,7 @@ go_proto_library(
         "@io_bazel_rules_go//proto:go_grpc",
         "//:go_validate",
     ],
-    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter",
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/presenter",
     proto = ":presenter_proto",
     visibility = ["//visibility:public"],
     deps = ["@com_envoyproxy_protoc_gen_validate//validate:go_default_library"],
@@ -31,18 +27,10 @@ go_proto_library(
 
 go_library(
     name = "presenter",
-    srcs = [
-        "access.go",
-        "admin.go",
-        "user.go",
-    ],
+    srcs = ["subscription.go"],
     embed = [":presenter_go_proto"],
-    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter",
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/presenter",
     visibility = ["//visibility:public"],
-    deps = [
-        "//orgservices/identity/model",
-        "@org_golang_google_protobuf//types/known/timestamppb",
-    ],
 )
 
 go_proto_link(

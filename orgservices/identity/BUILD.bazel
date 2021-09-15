@@ -9,11 +9,11 @@ go_library(
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity",
     visibility = ["//visibility:private"],
     deps = [
-        "//orgservices/identity/api/middleware",
         "//orgservices/identity/api/rpc",
         "//orgservices/identity/usecase/identity",
         "//orgservices/identity/usecase/privileges",
         "//orgservices/shared/core",
+        "//orgservices/shared/middleware",
         "//orgservices/shared/server",
         "//orgservices/shared/utils",
     ],

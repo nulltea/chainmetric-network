@@ -15,7 +15,7 @@ import (
 // MongoDB is an instance of the MongoDB client for managing off-chain persistent data.
 var MongoDB *mongo.Client
 
-func InitMongoDB() {
+func initMongoDB() {
 	var (
 		opts = options.Client()
 		err  error

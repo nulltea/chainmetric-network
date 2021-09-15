@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "notifications_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "notifications",
+    embed = [":notifications_lib"],
+    visibility = ["//visibility:public"],
+)

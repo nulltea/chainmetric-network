@@ -1,0 +1,35 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@golink//proto:proto.bzl", "go_proto_link")
+
+proto_library(
+    name = "proto_proto",
+    srcs = ["status.proto"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "proto_go_proto",
+    compilers = [
+        "@io_bazel_rules_go//proto:go_grpc",
+        "//:go_validate",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/shared/proto",
+    proto = ":proto_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "proto",
+    srcs = ["status.go"],
+    embed = [":proto_go_proto"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/shared/proto",
+    visibility = ["//visibility:public"],
+)
+
+go_proto_link(
+    name = "proto_go_proto_link",
+    dep = ":proto_go_proto",
+    version = "v1",
+)

@@ -1,7 +1,9 @@
 package core
 
-// InitCore performs core dependencies initialization sequence.
-func InitCore() {
+// Init performs core dependencies initialization sequence.
+func Init() {
 	initConfig()
 	initLogger()
+	initMongoDB()
+	initVault()
 }

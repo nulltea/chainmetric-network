@@ -7,7 +7,7 @@ go_library(
         "ctx_grpc.go",
         "jwt_grpc.go",
     ],
-    importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware",
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/shared/middleware",
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/identity/infrastructure/repository",
