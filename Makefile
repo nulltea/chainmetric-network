@@ -41,55 +41,64 @@ mongodb:
 hyperledger-init:
 	kubectl create namespace network || echo "Namespace 'network' already exists"
 	kubectl config set-context --current --namespace=network
-	fabnctl gen artifacts -a=arm64 -d=chainmetric.network -f ./network-config.yaml
+	fabnctl gen artifacts -a=arm64 -d=chainmetric.network -f ./network-config.yaml \
+    	--charts=./deploy/charts
 
-hyperledger-deploy:
-	fabnctl deploy orderer -a=arm64 -d=chainmetric.network
+hyperledger-install:
+	fabnctl install orderer -a=arm64 -d=chainmetric.network \
+		--charts=./deploy/charts
 
 	kubectl create secret generic couchdb-auth \
 		--from-literal=user=${COUCHDB_USERNAME} --from-literal=password=${COUCHDB_PASSWORD} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o moon-lan -p peer0
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0 \
+		--charts=./deploy/charts
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0 \
+		--charts=./deploy/charts
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o moon-lan -p peer0 \
+		--charts=./deploy/charts
 
-	fabnctl deploy channel -a=arm64 -d=chainmetric.network -c=supply-channel \
+	fabnctl install channel -a=arm64 -d=chainmetric.network -c=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/assets.Dockerfile \
+		--image=chainmetric/assets-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/devices.Dockerfile \
+		--image=chainmetric/devices-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/requirements.Dockerfile \
+		--image=chainmetric/requirements-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/readings.Dockerfile \
+		--image=chainmetric/readings-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
 			-o=chipa-inu \

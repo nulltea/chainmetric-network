@@ -211,16 +211,16 @@ deployment script for the whole network would basically stay the same for most c
 
 ```makefile
 hyperledger-deploy:
-	fabnctl deploy orderer -a=arm64 -d=chainmetric.network
+	fabnctl install orderer -a=arm64 -d=chainmetric.network
 
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0
 
-	fabnctl deploy channel -a=arm64 -d=chainmetric.network -c=supply-channel \
+	fabnctl install channel -a=arm64 -d=chainmetric.network -c=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-r iotchainnetwork ../contracts

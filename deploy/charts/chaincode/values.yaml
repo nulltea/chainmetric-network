@@ -4,9 +4,9 @@ component: chaincode
 logging: DEBUG
 
 image:
-  repository: chainmetric/smartcontracts/assets
+  repository: chainmetric/assets-contract
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP

@@ -6,14 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="3c8407e5-9ea9-416d-bc94-7de230ed861c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/deploy/charts/chaincode/values.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go_third_party.bzl" beforeDir="false" afterPath="$PROJECT_DIR$/go_third_party.bzl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/orgservices/identity/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/assets/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/devices/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/readings/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/requirements/BUILD.bazel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartcontracts/shared/core/chaincode.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartcontracts/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/smartcontracts/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
