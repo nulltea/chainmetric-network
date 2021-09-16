@@ -6,6 +6,7 @@ import (
 
 	"firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
+	"github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
 )
 
@@ -29,7 +30,13 @@ func (nf *NotificationsFirebase) Push(n model.Notification) error {
 
 	if _, err = client.Send(context.Background(), &messaging.Message{
 		Topic: string(n.Topic),
-
+		Notification: &messaging.Notification{
+			Title: n.Caption,
+			Body: n.Description,
+		},
+		Data: map[string]string{
+			"data": utils.MustEncode(n.Data),
+		},
 	}); err != nil {
 		return fmt.Errorf("failed to send %s notification: %w", n.Topic, err)
 	}

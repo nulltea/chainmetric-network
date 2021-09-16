@@ -33,6 +33,8 @@ func initConfig() {
 	viper.SetDefault("api.jwt_signing_cert", "./certs/jwt/jwt-cert.pem")
 	viper.SetDefault("api.firebase_credentials", "./certs/firebase/firebase_credentials.json")
 
+	viper.SetDefault("api.notifications.events_buffer_size", 1000)
+
 	viper.SetDefault("mongo_enabled", true)
 	viper.SetDefault("mongo_address", "mongodb://localhost:27017")
 	viper.SetDefault("mongo_connection_timeout", "10s")

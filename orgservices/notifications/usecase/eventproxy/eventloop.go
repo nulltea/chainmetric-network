@@ -13,45 +13,39 @@ import (
 )
 
 var (
-	ctx context.Context
-	cancel context.CancelFunc
-	contract *fabgateway.Contract
+	contract  *fabgateway.Contract
 )
 
 func init() {
-	ctx, cancel = context.WithCancel(context.Background())
 	contract = core.Fabric.GetContract("readings")
 }
 
 func Start() error {
-	subs, err := repository.NewSubscriptionsMongo(core.MongoDB).GetAll()
+	tickets, err := repository.NewSubscriptionsMongo(core.MongoDB).GetAll()
 
 	if err != nil && err != mongo.ErrNoDocuments {
 		return fmt.Errorf("failed to retrieve subscription from db: %w", err)
 	}
 
-	for i := range subs {
-		go eventLoop(ctx, subs[i])
-	}
+	spawnListeners(tickets...)
+	spawnReceivers()
 
 	return nil
 }
 
 func Stop() {
-	cancel()
+	cancelAll()
 }
 
-func eventLoop(ctx context.Context, sub *model.Subscription) {
-	var (
-		event = fmt.Sprintf("asset.%s.requirements.%s.violation", sub.AssetID, sub.Metric)
-	)
+func eventLoop(ctx context.Context, ticket *model.SubscriptionTicket) {
+	var filter = fmt.Sprintf("asset.%s.requirements.%s.violation", ticket.AssetID, ticket.Metric)
 
-	reg, notifier, err := contract.RegisterEvent(event)
+	reg, notifier, err := contract.RegisterEvent(filter)
 	if err != nil {
-		core.Logger.Errorf("failed to register event '%s': %v", event, err)
+		core.Logger.Errorf("failed to register filter '%s': %v", filter, err)
 
 		time.Sleep(time.Minute) // TODO: algorithmic backoff
-		eventLoop(ctx, sub)
+		eventLoop(ctx, ticket)
 
 		return
 	}
@@ -61,7 +55,10 @@ func eventLoop(ctx context.Context, sub *model.Subscription) {
 	for {
 		select {
 		case e := <-notifier:
-			fmt.Println(e)
+			eventsPipe <- event{
+				ticket: ticket,
+				payload: e.Payload,
+			}
 		case <- ctx.Done():
 			return
 		}

@@ -24,12 +24,13 @@ func NewSubscriptionsMongo(client *mongo.Client) *SubscriptionsMongo {
 }
 
 // GetAll retrieves all model.Subscription from the collection.
-func (r *SubscriptionsMongo) GetAll() ([]*model.Subscription, error) {
+func (r *SubscriptionsMongo) GetAll() ([]model.SubscriptionTicket, error) {
 	var (
-		subs []*model.Subscription
+		subs []model.SubscriptionTicket
+		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{})
@@ -43,11 +44,19 @@ func (r *SubscriptionsMongo) GetAll() ([]*model.Subscription, error) {
 }
 
 // Insert stores model.Subscription in the database.
-func (r *SubscriptionsMongo) Insert(s model.Subscription) error {
-	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
+	var (
+		docs []interface{}
+		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+	)
+
 	defer cancel()
 
-	_, err := r.collection.InsertOne(ctx, s)
+	for i := range tickets {
+		docs = append(docs, tickets[i])
+	}
+
+	_, err := r.collection.InsertMany(ctx, docs)
 
 	return err
 }

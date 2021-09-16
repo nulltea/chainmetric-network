@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 )
 
 var config *viper.Viper
@@ -17,7 +17,7 @@ func Init() {
 	config.SetConfigType("yaml")
 	config.SetConfigName("privileges")
 	config.AddConfigPath("data")
-	config.AddConfigPath("src/identity/data")
+	config.AddConfigPath("orgservices/shared/data")
 
 	if err := config.ReadInConfig(); err != nil {
 		core.Logrus.Fatal("failed to read privileges config")
