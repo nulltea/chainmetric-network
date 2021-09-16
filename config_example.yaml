@@ -1,0 +1,22 @@
+api:
+  organization: org1
+  connection_config_path: ./connection_example.yaml
+  wallet_path: data/wallet
+  grpc_tls_cert: certs/grpc/server.crt
+  grpc_tls_key: certs/grpc/server.key
+  fabric_cert: certs/fabric/admin.crt
+  fabric_key: certs/fabric/admin.key
+  jwt_signing_key: certs/jwt/jwt-key.pem
+  jwt_signing_cert: certs/jwt/jwt-cert.pem
+
+chaincode:
+  ccid: assets:fea847456677173c28bac45add06c92d7549dcbcf8aa5ac713924e407aee4c45
+  address: localhost:7052
+  name: assets
+  persistence_path: data/cache
+
+
+mongo_auth: false
+mongo_username: root
+mongo_password: example
+
