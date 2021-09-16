@@ -15,7 +15,6 @@ chaincode:
   name: assets
   persistence_path: data/cache
 
-
 mongo_auth: false
 mongo_username: root
 mongo_password: example
