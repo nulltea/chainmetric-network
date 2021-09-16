@@ -7,4 +7,5 @@ func Init() {
 	initFabric()
 	initMongoDB()
 	initVault()
+	initFirebase()
 }
