@@ -4,6 +4,8 @@ api:
   wallet_path: .data/wallet
   grpc_tls_cert: .data/certs/grpc/server.crt
   grpc_tls_key: .data/certs/grpc/server.key
+  fabric_cert: .data/certs/fabric/admin.crt
+  fabric_key: .data/certs/fabric/admin.key
   jwt_signing_key: .data/certs/jwt/jwt-key.pem
   jwt_signing_cert: .data/certs/jwt/jwt-cert.pem
 

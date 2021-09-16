@@ -20,9 +20,9 @@ type User struct {
 	Role         string     `json:"role,omitempty" bson:"role,omitempty"`
 	Passcode     string     `json:"passcode" bson:"passcode"`
 	CreatedAt    time.Time  `json:"created_at" bson:"created_at"`
-	Confirmed bool       `json:"confirmed" bson:"confirmed"`
-	Status    Status     `json:"status" bson:"status"`
-	ExpiresAt *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty"`
+	Confirmed    bool       `json:"confirmed" bson:"confirmed"`
+	Status       Status     `json:"status" bson:"status"`
+	ExpiresAt    *time.Time `json:"expires_at,omitempty" bson:"expires_at,omitempty"`
 }
 
 // Status defines enumeration of possibles statuses of User.

@@ -4,6 +4,7 @@ package core
 func Init() {
 	initConfig()
 	initLogger()
+	initFabric()
 	initMongoDB()
 	initVault()
 }

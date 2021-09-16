@@ -24,6 +24,8 @@ func initConfig() {
 	viper.SetDefault("api.wallet_path", "./data")
 	viper.SetDefault("api.crypto_path", "./crypto")
 	viper.SetDefault("api.connection_config_path", "config/connection.yaml")
+	viper.SetDefault("api.fabric_cert", "./certs/fabric/admin.crt")
+	viper.SetDefault("api.fabric_key", "./certs/fabric/admin.key")
 	viper.SetDefault("api.grpc_tls_cert", "./certs/grpc/tls.crt")
 	viper.SetDefault("api.grpc_tls_key", "./certs/grpc/tls.key")
 	viper.SetDefault("api.jwt_expiration", 0)

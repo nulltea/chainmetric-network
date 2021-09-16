@@ -14,31 +14,26 @@ func init() {
 	core.Init()
 	privileges.Init()
 	utils.MustExecute(identity.Init, "failed to initialize identity package")
-	utils.MustExecute(func() error {
-		return server.Init(
-			server.WithUnaryMiddlewares(
-				middleware.JWTForUnaryGRPC(
-					"UserService/register",
-					"AccessService/requestFabricCredentials",
-					"AccessService/authWithSigningIdentity",
-				),
-				middleware.AuthForUnaryGRPC("UserService/pingAccountStatus"),
-			),
-			server.WithStreamMiddlewares(
-				middleware.JWTForStreamGRPC(),
-				middleware.AuthForStreamGRPC(),
-			),
-			server.WithServiceRegistrar(
-				rpc.RegisterAccessService,
-				rpc.RegisterUserService,
-				rpc.RegisterAdminService,
-			),
-		)
-	}, "failed to initialize server")
 }
 
 func main() {
-	utils.MustExecute(func() error {
-		return server.Serve(":8080")
-	}, "failed to initialize gRPC server")
+	core.BootstrapGRPCServer(8080,
+		server.WithUnaryMiddlewares(
+			middleware.JWTForUnaryGRPC(
+				"UserService/register",
+				"AccessService/requestFabricCredentials",
+				"AccessService/authWithSigningIdentity",
+			),
+			middleware.AuthForUnaryGRPC("UserService/pingAccountStatus"),
+		),
+		server.WithStreamMiddlewares(
+			middleware.JWTForStreamGRPC(),
+			middleware.AuthForStreamGRPC(),
+		),
+		server.WithServiceRegistrar(
+			rpc.RegisterAccessService,
+			rpc.RegisterUserService,
+			rpc.RegisterAdminService,
+		),
+	)
 }
