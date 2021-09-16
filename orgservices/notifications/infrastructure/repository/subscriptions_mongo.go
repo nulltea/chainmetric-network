@@ -60,3 +60,18 @@ func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
 
 	return err
 }
+
+// DeleteByIDs removes model.Subscription from the database by given `ids`.
+func (r *SubscriptionsMongo) DeleteByIDs(ids ...string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+
+	defer cancel()
+
+	_, err := r.collection.DeleteMany(ctx, bson.M{
+		"id": bson.M{
+			"$in": ids,
+		},
+	})
+
+	return err
+}

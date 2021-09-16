@@ -30,12 +30,18 @@ func Include(tickets ...model.SubscriptionTicket) error {
 	return nil
 }
 
-func Revoke(ids ...string) {
+func Revoke(ids ...string) error {
+	if err := repository.NewSubscriptionsMongo(core.MongoDB).DeleteByIDs(ids...); err != nil {
+		return fmt.Errorf("failed to delete new subscribtions tickets: %w", err)
+	}
+
 	for i := range ids {
 		if cancel, ok := cancelMap[ids[i]]; ok {
 			cancel()
 		}
 	}
+
+	return nil
 }
 
 func spawnListeners(tickets ...model.SubscriptionTicket) {
