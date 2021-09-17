@@ -42,15 +42,7 @@ func spawnReceivers() {
 }
 
 func redirect(e event) error {
-	var (
-		fcmService = services.NewNotificationsFirebase(core.Firebase)
-	)
-
-	notification, err := e.Notification(e.payload)
-	if err != nil {
-		return fmt.Errorf("failed to form notification for '%s' concern with '%s' topic: %w",
-			e.OfTopic(), e.SubscriptionToken(), err)
-	}
+	var fcmService = services.NewNotificationsFirebase(core.Firebase)
 
 	subs, err := repository.NewSubscriptionsMongo(core.MongoDB).GetByToken(e.SubscriptionToken())
 	if err != nil {
@@ -62,9 +54,14 @@ func redirect(e event) error {
 			e.SubscriptionToken(), err)
 	}
 
-
 	for i, sub := range subs {
-		if err = fcmService.Push(sub.UserID, notification); err != nil {
+		notification, err := e.NotificationFor(sub.UserID, e.payload)
+		if err != nil {
+			return fmt.Errorf("failed to form notification for '%s' concern with '%s' topic: %w",
+				e.OfTopic(), e.SubscriptionToken(), err)
+		}
+
+		if err = fcmService.Push(notification); err != nil {
 			core.Logrus.WithError(err).
 				WithField("topic", e.OfTopic()).
 				WithField("sub_id", e.SubscriptionToken()).

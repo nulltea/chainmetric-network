@@ -3,8 +3,8 @@ package eventproxy
 import (
 	"context"
 	"fmt"
-	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
@@ -35,12 +35,18 @@ func eventLoop(ctx context.Context, concern intention.EventConcern) {
 	)
 
 	if err != nil {
-		core.Logger.Errorf("failed to register filter '%s': %v", concern.Filter(), err)
+		core.Logrus.WithError(err).
+			WithField("filter", concern.Filter()).
+			WithField("contract", concern.SourceContract()).
+			Errorln("failed registering event listener")
 
-		time.Sleep(time.Minute) // TODO: algorithmic backoff
-		eventLoop(ctx, concern)
-
-		return
+		if err = backoff.Retry(func() error {
+			reg, notifier, err = contract.RegisterEvent(concern.Filter())
+			return err
+		}, backoff.NewExponentialBackOff()); err != nil {
+			core.Logrus.WithError(err).Errorln("backoff retry failed")
+			return
+		}
 	}
 
 	defer contract.Unregister(reg)

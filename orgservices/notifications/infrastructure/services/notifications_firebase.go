@@ -22,7 +22,7 @@ func NewNotificationsFirebase(app *firebase.App) *NotificationsFirebase {
 	}
 }
 
-func (nf *NotificationsFirebase) Push(userID string, n audience.Notification) error {
+func (nf *NotificationsFirebase) Push(n *audience.Notification) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)

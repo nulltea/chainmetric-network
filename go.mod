@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	firebase.google.com/go/v4 v4.6.0
+	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
@@ -21,6 +22,7 @@ require (
 	github.com/timoth-y/chainmetric-core v0.0.0-20210627221658-07365c2edb0d
 	github.com/ztrue/shutdown v0.1.1
 	go.mongodb.org/mongo-driver v1.7.1
+	google.golang.org/api v0.40.0
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 )
