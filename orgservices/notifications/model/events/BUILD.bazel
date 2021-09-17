@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "events",
+    srcs = ["requirement_violation.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/model/events",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/model/audience",
+        "//orgservices/notifications/model/intention",
+        "@com_github_timoth_y_chainmetric_core//models",
+    ],
+)

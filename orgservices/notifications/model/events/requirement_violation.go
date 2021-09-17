@@ -12,13 +12,17 @@ const (
 	RequirementsViolationTopic intention.EventTopic = "requirements_violation"
 )
 
-type RequirementsViolationEvent struct {
-	intention.EventConcernBase
-	Args struct{
+type (
+	RequirementsViolationEvent struct {
+		intention.EventConcernBase
+		Args RequirementsViolationArgs `bson:"args"`
+	}
+
+	RequirementsViolationArgs struct{
 		AssetID  string        `bson:"asset_id"`
 		Metric   models.Metric `bson:"metric"`
 	}
-}
+)
 
 func (rv *RequirementsViolationEvent) Filter() string {
 	return fmt.Sprintf("asset.%s.requirements.%s.violation", rv.Args.AssetID, rv.Args.Metric)

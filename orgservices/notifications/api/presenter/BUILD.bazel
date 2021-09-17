@@ -31,6 +31,11 @@ go_library(
     embed = [":presenter_go_proto"],
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/presenter",
     visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/model/events",
+        "//orgservices/notifications/model/intention",
+        "@com_github_timoth_y_chainmetric_core//models",
+    ],
 )
 
 go_proto_link(

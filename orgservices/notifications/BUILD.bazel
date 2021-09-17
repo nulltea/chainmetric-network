@@ -5,6 +5,14 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications",
     visibility = ["//visibility:private"],
+    deps = [
+        "//orgservices/notifications/api/rpc",
+        "//orgservices/notifications/usecase/eventproxy",
+        "//orgservices/shared/core",
+        "//orgservices/shared/middleware",
+        "//orgservices/shared/server",
+        "@com_github_ztrue_shutdown//:shutdown",
+    ],
 )
 
 go_binary(

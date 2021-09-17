@@ -7,7 +7,7 @@ import "orgservices/notifications/api/presenter/subscription.proto";
 import "orgservices/shared/proto/status.proto";
 import "google/protobuf/empty.proto";
 
-service SubscribeService {
+service SubscriberService {
   rpc subscribe(SubscriptionRequest) returns (shared.StatusResponse);
   rpc cancel(CancellationRequest) returns (shared.StatusResponse);
 }
