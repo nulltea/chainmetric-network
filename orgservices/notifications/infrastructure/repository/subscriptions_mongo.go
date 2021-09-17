@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/audience"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -23,10 +23,10 @@ func NewSubscriptionsMongo(client *mongo.Client) *SubscriptionsMongo {
 	}
 }
 
-// GetBySubID retrieves subscription tickets from the collection by given subscription id.
-func (r *SubscriptionsMongo) GetBySubID(subID string) ([]model.SubscriptionTicket, error) {
+// GetByToken retrieves audience.SubscriptionTicket from the collection by given `token` of intention.EventConcern.
+func (r *SubscriptionsMongo) GetByToken(token string) ([]audience.SubscriptionTicket, error) {
 	var (
-		results     []model.SubscriptionTicket
+		results     []audience.SubscriptionTicket
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
@@ -34,7 +34,7 @@ func (r *SubscriptionsMongo) GetBySubID(subID string) ([]model.SubscriptionTicke
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{
-		"sub_id": subID,
+		"concern_token": token,
 	})
 	if err != nil {
 		return nil, err
@@ -47,8 +47,8 @@ func (r *SubscriptionsMongo) GetBySubID(subID string) ([]model.SubscriptionTicke
 	return results, err
 }
 
-// Insert stores subscription ticket in the database.
-func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
+// Insert stores audience.SubscriptionTicket in the database.
+func (r *SubscriptionsMongo) Insert(tickets ...audience.SubscriptionTicket) error {
 	var (
 		docs []interface{}
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
@@ -65,16 +65,27 @@ func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
 	return err
 }
 
-// DeleteByIDs removes subscription ticket from the database by given `ids`.
-func (r *SubscriptionsMongo) DeleteByIDs(ids ...string) error {
+// DeleteByToken removes audience.SubscriptionTicket from the database by given intention.EventConcern `token`.
+func (r *SubscriptionsMongo) DeleteByToken(token string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 
 	defer cancel()
 
 	_, err := r.collection.DeleteMany(ctx, bson.M{
-		"id": bson.M{
-			"$in": ids,
-		},
+		"concern_token": token,
+	})
+
+	return err
+}
+
+// DeleteByUserID removes audience.SubscriptionTicket from the database by given `userID`.
+func (r *SubscriptionsMongo) DeleteByUserID(userID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+
+	defer cancel()
+
+	_, err := r.collection.DeleteMany(ctx, bson.M{
+		"user_id": userID,
 	})
 
 	return err

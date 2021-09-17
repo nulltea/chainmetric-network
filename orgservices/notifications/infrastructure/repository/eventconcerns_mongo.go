@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/events"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,10 +25,10 @@ func NewEventConcernsMongo(client *mongo.Client) *EventConcernsMongo {
 	}
 }
 
-// GetAll retrieves all model.EventConcern from the collection.
-func (r *EventConcernsMongo) GetAll() ([]model.EventConcern, error) {
+// GetAll retrieves all intention.EventConcern from the collection.
+func (r *EventConcernsMongo) GetAll() ([]intention.EventConcern, error) {
 	var (
-		results     []model.EventConcern
+		results     []intention.EventConcern
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
@@ -41,13 +42,13 @@ func (r *EventConcernsMongo) GetAll() ([]model.EventConcern, error) {
 
 	for cursor.Next(ctx) {
 		var (
-			record model.EventConcern
-			topic = model.EventTopic(cursor.Current.Lookup("event_topic").String())
+			record intention.EventConcern
+			topic  = intention.EventTopic(cursor.Current.Lookup("event_topic").String())
 		)
 
 		switch topic {
-		case model.RequirementsViolationTopic:
-			record = new(model.RequirementsViolationConcern)
+		case events.RequirementsViolationTopic:
+			record = new(events.RequirementsViolationEvent)
 		default:
 			core.Logrus.WithField("topic", topic).
 				Warn("unknown topic: document cannot be decoded")
@@ -62,8 +63,8 @@ func (r *EventConcernsMongo) GetAll() ([]model.EventConcern, error) {
 	return results, err
 }
 
-// Insert stores model.EventConcern in the database.
-func (r *EventConcernsMongo) Insert(concerns ...model.EventConcern) error {
+// Insert stores intention.EventConcern in the database.
+func (r *EventConcernsMongo) Insert(concerns ...intention.EventConcern) error {
 	var (
 		docs []interface{}
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
@@ -80,15 +81,15 @@ func (r *EventConcernsMongo) Insert(concerns ...model.EventConcern) error {
 	return err
 }
 
-// DeleteByIDs removes model.EventConcern from the database by given `ids`.
-func (r *EventConcernsMongo) DeleteByIDs(ids ...string) error {
+// DeleteByTokens removes intention.EventConcern from the database by given `ids`.
+func (r *EventConcernsMongo) DeleteByTokens(tokens ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 
 	defer cancel()
 
 	_, err := r.collection.DeleteMany(ctx, bson.M{
-		"id": bson.M{
-			"$in": ids,
+		"subscription_token": bson.M{
+			"$in": tokens,
 		},
 	})
 

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/repository"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,7 +28,7 @@ func Stop() {
 	cancelAll()
 }
 
-func eventLoop(ctx context.Context, concern model.EventConcern) {
+func eventLoop(ctx context.Context, concern intention.EventConcern) {
 	var (
 		contract           = core.Fabric.GetContract(concern.SourceContract())
 		reg, notifier, err = contract.RegisterEvent(concern.Filter())

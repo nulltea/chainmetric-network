@@ -1,4 +1,4 @@
-package model
+package audience
 
 type Notification struct {
 	Caption     string            `json:"caption"`

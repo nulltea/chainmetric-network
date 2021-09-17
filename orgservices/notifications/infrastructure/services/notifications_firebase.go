@@ -7,7 +7,7 @@ import (
 	"firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
 	"github.com/timoth-y/chainmetric-core/utils"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/audience"
 )
 
 // NotificationsFirebase defines service for sending notification via Firebase Cloud Messaging protocol.
@@ -22,7 +22,7 @@ func NewNotificationsFirebase(app *firebase.App) *NotificationsFirebase {
 	}
 }
 
-func (nf *NotificationsFirebase) Push(userID string, n model.Notification) error {
+func (nf *NotificationsFirebase) Push(userID string, n audience.Notification) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)

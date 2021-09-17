@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/viper"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/services"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model"
+	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type event struct {
-	model.EventConcern
+	intention.EventConcern
 	payload []byte
 }
 
@@ -49,17 +49,17 @@ func redirect(e event) error {
 	notification, err := e.Notification(e.payload)
 	if err != nil {
 		return fmt.Errorf("failed to form notification for '%s' concern with '%s' topic: %w",
-			e.OfTopic(), e.SubscriptionID(), err)
+			e.OfTopic(), e.SubscriptionToken(), err)
 	}
 
-	subs, err := repository.NewSubscriptionsMongo(core.MongoDB).GetBySubID(e.SubscriptionID())
+	subs, err := repository.NewSubscriptionsMongo(core.MongoDB).GetByToken(e.SubscriptionToken())
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return Revoke(e.SubscriptionID())
+			return Revoke(e.SubscriptionToken())
 		}
 
 		return fmt.Errorf("failed to retrive subscribtion tickets for '%s' concern: %w",
-			e.SubscriptionID(), err)
+			e.SubscriptionToken(), err)
 	}
 
 
@@ -67,7 +67,7 @@ func redirect(e event) error {
 		if err = fcmService.Push(sub.UserID, notification); err != nil {
 			core.Logrus.WithError(err).
 				WithField("topic", e.OfTopic()).
-				WithField("sub_id", e.SubscriptionID()).
+				WithField("sub_id", e.SubscriptionToken()).
 				WithField("user_id", sub.UserID).
 				Errorf("failed to push notification via FCM")
 
