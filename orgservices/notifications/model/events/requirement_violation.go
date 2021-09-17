@@ -24,7 +24,7 @@ func (rv *RequirementsViolationEvent) Filter() string {
 	return fmt.Sprintf("asset.%s.requirements.%s.violation", rv.Args.AssetID, rv.Args.Metric)
 }
 
-func (rv *RequirementsViolationEvent) NotificationFor(audience string, data []byte) (*audience.Notification, error) {
+func (rv *RequirementsViolationEvent) NotificationWith(data []byte) (*audience.Notification, error) {
 	return nil, nil
 }
 

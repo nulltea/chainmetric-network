@@ -2,15 +2,11 @@ package eventproxy
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/services"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type event struct {
@@ -18,10 +14,14 @@ type event struct {
 	payload []byte
 }
 
-var eventsPipe chan event
+var (
+	eventsPipe chan event
+	fcmService *services.NotificationsFirebase
+)
 
 func init() {
 	eventsPipe = make(chan event, viper.GetInt("api.notifications.events_buffer_size"))
+	fcmService = services.NewNotificationsFirebase(core.Firebase)
 }
 
 func spawnReceivers() {
@@ -32,7 +32,7 @@ func spawnReceivers() {
 			for {
 				select {
 				case e := <-eventsPipe:
-					_ = e // TODO: redirect to subscribed users
+					forwardEvent(e)
 				case <-ctx.Done():
 					return
 				}
@@ -41,38 +41,19 @@ func spawnReceivers() {
 	}
 }
 
-func redirect(e event) error {
-	var fcmService = services.NewNotificationsFirebase(core.Firebase)
+func forwardEvent(e event) {
+	notification, err := e.NotificationWith(e.payload)
 
-	subs, err := repository.NewSubscriptionsMongo(core.MongoDB).GetByToken(e.SubscriptionToken())
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return Revoke(e.SubscriptionToken())
-		}
+		core.Logrus.WithError(err).
+			WithField("topic", e.OfTopic()).
+			WithField("sub_token", e.SubscriptionToken()).
+			Errorf("failed to form notification")
 
-		return fmt.Errorf("failed to retrive subscribtion tickets for '%s' concern: %w",
-			e.SubscriptionToken(), err)
+	} else if err = fcmService.Push(notification); err != nil {
+		core.Logrus.WithError(err).
+			WithField("topic", e.Filter()).
+			WithField("sub_token", e.SubscriptionToken()).
+			Errorf("failed to push notification via FCM")
 	}
-
-	for i, sub := range subs {
-		notification, err := e.NotificationFor(sub.UserID, e.payload)
-		if err != nil {
-			return fmt.Errorf("failed to form notification for '%s' concern with '%s' topic: %w",
-				e.OfTopic(), e.SubscriptionToken(), err)
-		}
-
-		if err = fcmService.Push(notification); err != nil {
-			core.Logrus.WithError(err).
-				WithField("topic", e.OfTopic()).
-				WithField("sub_id", e.SubscriptionToken()).
-				WithField("user_id", sub.UserID).
-				Errorf("failed to push notification via FCM")
-
-			continue
-		}
-
-		subs[i].ReceivedTimes++
-	}
-
-	return nil
 }

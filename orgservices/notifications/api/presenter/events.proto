@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package chainmetric.notifications;
+
+option go_package = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/presenter";
+
+import "validate/validate.proto";
+
+message RequirementsViolationEventArgs {
+  string assetID = 1          [(validate.rules).string = {min_len: 5}];
+  repeated string metrics = 2 [(validate.rules).repeated = {min_items: 1}];
+}
+
+message NoopEventArgs {
+
+}

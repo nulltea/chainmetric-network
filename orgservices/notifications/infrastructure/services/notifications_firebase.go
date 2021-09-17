@@ -22,25 +22,50 @@ func NewNotificationsFirebase(app *firebase.App) *NotificationsFirebase {
 	}
 }
 
-func (nf *NotificationsFirebase) Push(n *audience.Notification) error {
+func (nf *NotificationsFirebase) Push(nft *audience.Notification) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)
 	}
 
 	if _, err = client.Send(context.Background(), &messaging.Message{
-		Topic: string(n.Topic),
 		Notification: &messaging.Notification{
-			Title: n.Caption,
-			Body: n.Description,
+			Title: nft.Caption,
+			Body: nft.Description,
 		},
 		Data: map[string]string{
-			"data": utils.MustEncode(n.Data),
+			"data": utils.MustEncode(nft.Data),
 		},
+		Topic: nft.Topic,
 	}); err != nil {
-		return fmt.Errorf("failed to send %s notification: %w", n.Topic, err)
+		return fmt.Errorf("failed to send %s notification: %w", nft.Topic, err)
 	}
 
 	return nil
 }
 
+func (nf *NotificationsFirebase) SubscribeToTopic(topic string, userTokens ...string) error {
+	client, err := nf.app.Messaging(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to use message client: %w", err)
+	}
+
+	if _, err = client.SubscribeToTopic(context.Background(), userTokens, topic); err != nil {
+		return fmt.Errorf("failed subscribing users to %s topic: %w", topic, err)
+	}
+
+	return nil
+}
+
+func (nf *NotificationsFirebase) UnsubscribeFromTopic(topic string, userTokens ...string) error {
+	client, err := nf.app.Messaging(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to use message client: %w", err)
+	}
+
+	if _, err = client.UnsubscribeFromTopic(context.Background(), userTokens, topic); err != nil {
+		return fmt.Errorf("failed subscribing users to %s topic: %w", topic, err)
+	}
+
+	return nil
+}

@@ -13,7 +13,7 @@ type (
 		SourceContract() string
 		OfTopic() EventTopic
 		Context(context.Context) (context.Context, context.CancelFunc)
-		NotificationFor(string, []byte) (*audience.Notification, error)
+		NotificationWith([]byte) (*audience.Notification, error)
 	}
 
 	EventTopic string

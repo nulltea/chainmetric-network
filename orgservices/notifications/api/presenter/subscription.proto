@@ -4,12 +4,16 @@ package chainmetric.notifications;
 
 option go_package = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/presenter";
 
+import "orgservices/notifications/api/presenter/events.proto"
 import "validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 message SubscriptionRequest {
-  string assetID = 1                     [(validate.rules).string = {min_len: 5}];
-  repeated string metrics = 2            [(validate.rules).repeated = {min_items: 1}];
+  oneof args {
+    RequirementsViolationEventArgs requirementsViolation = 1;
+    NoopEventArgs noop = 2;
+  }
+
   google.protobuf.Timestamp expireAt = 3 [(validate.rules).timestamp = {required: false}];
 }
 
@@ -21,3 +25,4 @@ message CancellationRequestItem {
   string assetID = 1;
   string metrics = 2;
 }
+
