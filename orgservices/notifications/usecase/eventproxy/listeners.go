@@ -20,19 +20,19 @@ func init() {
 	cancelMap = make(map[string]context.CancelFunc)
 }
 
-func Include(tickets ...model.SubscriptionTicket) error {
-	if err := repository.NewSubscriptionsMongo(core.MongoDB).Insert(tickets...); err != nil {
-		return fmt.Errorf("failed to persist new subscribtions tickets: %w", err)
+func Include(concerns ...model.EventConcern) error {
+	if err := repository.NewEventConcernsMongo(core.MongoDB).Insert(concerns...); err != nil {
+		return fmt.Errorf("failed to persist new event concers: %w", err)
 	}
 
-	spawnListeners(tickets...)
+	spawnListeners(concerns...)
 
 	return nil
 }
 
 func Revoke(ids ...string) error {
-	if err := repository.NewSubscriptionsMongo(core.MongoDB).DeleteByIDs(ids...); err != nil {
-		return fmt.Errorf("failed to delete new subscribtions tickets: %w", err)
+	if err := repository.NewEventConcernsMongo(core.MongoDB).DeleteByIDs(ids...); err != nil {
+		return fmt.Errorf("failed to delete event concers: %w", err)
 	}
 
 	for i := range ids {
@@ -44,22 +44,11 @@ func Revoke(ids ...string) error {
 	return nil
 }
 
-func spawnListeners(tickets ...model.SubscriptionTicket) {
-	for i := range tickets {
-		var (
-			ticket = tickets[i]
-			ctxSub context.Context
-			cancel context.CancelFunc
-		)
+func spawnListeners(concerns ...model.EventConcern) {
+	for _, current := range concerns {
+		ctx, cancel := current.Context(ctx)
+		cancelMap[current.SubscriptionID()] = cancel
 
-		if ticket.ExpireAt != nil {
-			ctxSub, cancel = context.WithDeadline(ctx, *ticket.ExpireAt)
-		} else {
-			ctxSub, cancel = context.WithCancel(ctx)
-		}
-
-		cancelMap[ticket.ID] = cancel
-
-		go eventLoop(ctxSub, &ticket)
+		go eventLoop(ctx, current)
 	}
 }

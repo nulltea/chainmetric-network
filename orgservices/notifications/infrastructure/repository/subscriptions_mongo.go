@@ -23,27 +23,31 @@ func NewSubscriptionsMongo(client *mongo.Client) *SubscriptionsMongo {
 	}
 }
 
-// GetAll retrieves all model.Subscription from the collection.
-func (r *SubscriptionsMongo) GetAll() ([]model.SubscriptionTicket, error) {
+// GetBySubID retrieves subscription tickets from the collection by given subscription id.
+func (r *SubscriptionsMongo) GetBySubID(subID string) ([]model.SubscriptionTicket, error) {
 	var (
-		subs []model.SubscriptionTicket
+		results     []model.SubscriptionTicket
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
 
 	defer cancel()
 
-	cursor, err := r.collection.Find(ctx, bson.M{})
+	cursor, err := r.collection.Find(ctx, bson.M{
+		"sub_id": subID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	cursor.All(ctx, &subs)
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
 
-	return subs, err
+	return results, err
 }
 
-// Insert stores model.Subscription in the database.
+// Insert stores subscription ticket in the database.
 func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
 	var (
 		docs []interface{}
@@ -61,7 +65,7 @@ func (r *SubscriptionsMongo) Insert(tickets ...model.SubscriptionTicket) error {
 	return err
 }
 
-// DeleteByIDs removes model.Subscription from the database by given `ids`.
+// DeleteByIDs removes subscription ticket from the database by given `ids`.
 func (r *SubscriptionsMongo) DeleteByIDs(ids ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 
