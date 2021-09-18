@@ -111,7 +111,7 @@ func (r *SubscriptionsMongo) CountByTopics(userToken string, topics ...string) (
 
 	pipeline = append(pipeline, bson.D{
 		{"$group", bson.M{
-			"_id":   bson.M{"$toLower": "$role"},
+			"_id":   "concern_hash",
 			"count": bson.M{"$sum": 1},
 		}},
 	}, bson.D{

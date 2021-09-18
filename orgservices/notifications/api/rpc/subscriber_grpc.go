@@ -52,5 +52,5 @@ func (subscriberService) Cancel(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return nil, nil
+	return proto.NewStatusResponse(proto.Status_OK), nil
 }

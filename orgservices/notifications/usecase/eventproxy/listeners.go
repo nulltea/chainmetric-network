@@ -30,14 +30,13 @@ func Include(concerns ...intention.EventConcern) error {
 	return nil
 }
 
-func Revoke(topic ...string) error {
-	// TODO delete by hash
-	if err := repository.NewEventConcernsMongo(core.MongoDB).DeleteByHashes(topic...); err != nil {
+func revoke(hashes ...string) error {
+	if err := repository.NewEventConcernsMongo(core.MongoDB).DeleteByHashes(hashes...); err != nil {
 		return fmt.Errorf("failed to delete event concers: %w", err)
 	}
 
-	for i := range topic {
-		if cancel, ok := cancelMap[topic[i]]; ok {
+	for i := range hashes {
+		if cancel, ok := cancelMap[hashes[i]]; ok {
 			cancel()
 		}
 	}

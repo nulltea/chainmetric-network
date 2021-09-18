@@ -13,6 +13,7 @@ import (
 
 func init() {
 	core.Init()
+	eventproxy.Init()
 	shutdown.Add(eventproxy.Stop)
 }
 
@@ -33,6 +34,7 @@ func main() {
 		server.WithServiceRegistrar(
 			rpc.RegisterSubscriberService,
 		),
+		server.WithLogger(core.Logrus),
 	)
 
 	shutdown.Listen(syscall.SIGINT, syscall.SIGTERM)

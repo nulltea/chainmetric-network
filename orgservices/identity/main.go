@@ -35,5 +35,6 @@ func main() {
 			rpc.RegisterUserService,
 			rpc.RegisterAdminService,
 		),
+		server.WithLogger(core.Logrus),
 	)
 }

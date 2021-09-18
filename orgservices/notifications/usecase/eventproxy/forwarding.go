@@ -24,7 +24,7 @@ var (
 	fcmService *services.NotificationsFirebase
 )
 
-func init() {
+func Init() {
 	eventsPipe = make(chan event, viper.GetInt("api.notifications.events_buffer_size"))
 	fcmService = services.NewNotificationsFirebase(core.Firebase)
 	subsRepo = repository.NewSubscriptionsMongo(core.MongoDB)
@@ -74,9 +74,9 @@ func CancelForwarding(userToken string, topics ...string) error {
 
 	remainMap, err := subsRepo.CountByTopics(userToken, topics...)
 	if err != nil {
-		for topic, remained := range remainMap {
+		for hash, remained := range remainMap {
 			if remained == 0 {
-				Revoke(topic) //
+				revoke(hash) //
 			}
 		}
 	}

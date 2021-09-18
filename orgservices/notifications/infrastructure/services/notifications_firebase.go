@@ -39,7 +39,7 @@ func (nf *NotificationsFirebase) Push(topic string, nft *audience.Notification) 
 		},
 		Topic: topic,
 	}); err != nil {
-		return fmt.Errorf("failed to send %s notification: %w", nft.Kind, err)
+		return fmt.Errorf("failed to send notification on topic %s: %w", topic, err)
 	}
 
 	return nil
