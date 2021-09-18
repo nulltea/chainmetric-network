@@ -34,7 +34,9 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/notifications/api/presenter",
+        "//orgservices/notifications/model/intention",
         "//orgservices/notifications/usecase/eventproxy",
+        "//orgservices/shared/middleware",
         "//orgservices/shared/proto",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//codes",

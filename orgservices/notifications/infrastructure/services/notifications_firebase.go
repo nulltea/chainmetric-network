@@ -22,7 +22,8 @@ func NewNotificationsFirebase(app *firebase.App) *NotificationsFirebase {
 	}
 }
 
-func (nf *NotificationsFirebase) Push(nft *audience.Notification) error {
+// Push broadcasts notification on topic.
+func (nf *NotificationsFirebase) Push(topic string, nft *audience.Notification) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)
@@ -36,36 +37,41 @@ func (nf *NotificationsFirebase) Push(nft *audience.Notification) error {
 		Data: map[string]string{
 			"data": utils.MustEncode(nft.Data),
 		},
-		Topic: nft.Topic,
+		Topic: topic,
 	}); err != nil {
-		return fmt.Errorf("failed to send %s notification: %w", nft.Topic, err)
+		return fmt.Errorf("failed to send %s notification: %w", nft.Kind, err)
 	}
 
 	return nil
 }
 
-func (nf *NotificationsFirebase) SubscribeToTopic(topic string, userTokens ...string) error {
+func (nf *NotificationsFirebase) SubscribeToTopics(userTokens string, topics ...string) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)
 	}
 
-	if _, err = client.SubscribeToTopic(context.Background(), userTokens, topic); err != nil {
-		return fmt.Errorf("failed subscribing users to %s topic: %w", topic, err)
+	for i := range topics {
+		if _, err = client.SubscribeToTopic(context.Background(), []string{userTokens}, topics[i]); err != nil {
+			return fmt.Errorf("failed subscribing users to %s topic: %w", topics[i], err)
+		}
 	}
 
 	return nil
 }
 
-func (nf *NotificationsFirebase) UnsubscribeFromTopic(topic string, userTokens ...string) error {
+func (nf *NotificationsFirebase) UnsubscribeFromTopics(userTokens string, topics ...string) error {
 	client, err := nf.app.Messaging(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to use message client: %w", err)
 	}
 
-	if _, err = client.UnsubscribeFromTopic(context.Background(), userTokens, topic); err != nil {
-		return fmt.Errorf("failed subscribing users to %s topic: %w", topic, err)
+	for i := range topics {
+		if _, err = client.UnsubscribeFromTopic(context.Background(), []string{userTokens}, topics[i]); err != nil {
+			return fmt.Errorf("failed subscribing users to %s topic: %w", topics[i], err)
+		}
 	}
 
 	return nil
 }
+

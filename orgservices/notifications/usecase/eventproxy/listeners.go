@@ -30,13 +30,14 @@ func Include(concerns ...intention.EventConcern) error {
 	return nil
 }
 
-func Revoke(tokens ...string) error {
-	if err := repository.NewEventConcernsMongo(core.MongoDB).DeleteByTokens(tokens...); err != nil {
+func Revoke(topic ...string) error {
+	// TODO delete by hash
+	if err := repository.NewEventConcernsMongo(core.MongoDB).DeleteByHashes(topic...); err != nil {
 		return fmt.Errorf("failed to delete event concers: %w", err)
 	}
 
-	for i := range tokens {
-		if cancel, ok := cancelMap[tokens[i]]; ok {
+	for i := range topic {
+		if cancel, ok := cancelMap[topic[i]]; ok {
 			cancel()
 		}
 	}
@@ -46,8 +47,12 @@ func Revoke(tokens ...string) error {
 
 func spawnListeners(concerns ...intention.EventConcern) {
 	for _, current := range concerns {
+		if _, ok := cancelMap[current.Hash()]; ok {
+			continue
+		}
+
 		ctx, cancel := current.Context(ctx)
-		cancelMap[current.SubscriptionToken()] = cancel
+		cancelMap[current.Hash()] = cancel
 
 		go eventLoop(ctx, current)
 	}

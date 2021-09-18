@@ -30,7 +30,6 @@ func (r *SubscriptionsMongo) GetByToken(token string) ([]audience.SubscriptionTi
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
-
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{
@@ -50,7 +49,7 @@ func (r *SubscriptionsMongo) GetByToken(token string) ([]audience.SubscriptionTi
 // Insert stores audience.SubscriptionTicket in the database.
 func (r *SubscriptionsMongo) Insert(tickets ...audience.SubscriptionTicket) error {
 	var (
-		docs []interface{}
+		docs        []interface{}
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
@@ -65,28 +64,77 @@ func (r *SubscriptionsMongo) Insert(tickets ...audience.SubscriptionTicket) erro
 	return err
 }
 
-// DeleteByToken removes audience.SubscriptionTicket from the database by given intention.EventConcern `token`.
-func (r *SubscriptionsMongo) DeleteByToken(token string) error {
+// DeleteByTopicsForUser removes audience.SubscriptionTicket from the database by given intention.EventConcern `token`.
+func (r *SubscriptionsMongo) DeleteByTopicsForUser(userToken string, topics ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 
 	defer cancel()
 
 	_, err := r.collection.DeleteMany(ctx, bson.M{
-		"concern_token": token,
+		"$and": bson.A{
+			bson.M{"user_token": userToken},
+			bson.M{"topic": bson.M{
+				"$in": topics,
+			}},
+		},
 	})
 
 	return err
 }
 
-// DeleteByUserID removes audience.SubscriptionTicket from the database by given `userID`.
-func (r *SubscriptionsMongo) DeleteByUserID(userID string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+// CountByTopics removes audience.SubscriptionTicket from the database by given `userID`.
+func (r *SubscriptionsMongo) CountByTopics(userToken string, topics ...string) (map[string]int, error) {
+	var (
+		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
+		pipeline mongo.Pipeline
+		results map[string]int
+	)
+
+	if len(topics) > 0 {
+		pipeline = append(pipeline, bson.D{
+			{"$match", bson.M{
+				"$and": bson.A{
+					bson.M{"user_token": userToken},
+					bson.M{"topic": bson.M{
+						"$in": topics,
+					}},
+				},
+			}},
+		})
+	} else {
+		pipeline = append(pipeline, bson.D{
+			{"$match", bson.M{
+				"user_token": userToken,
+			}},
+		})
+	}
+
+	pipeline = append(pipeline, bson.D{
+		{"$group", bson.M{
+			"_id":   bson.M{"$toLower": "$role"},
+			"count": bson.M{"$sum": 1},
+		}},
+	}, bson.D{
+		{"$group", bson.M{
+			"_id":    nil,
+			"counts": bson.M{"k": "$_id", "v": "$count"},
+		}},
+	}, bson.D{
+		{"$replaceRoot", bson.M{
+			"newRoot": bson.M{"$arrayToObject": "$counts"},
+		}},
+	})
 
 	defer cancel()
 
-	_, err := r.collection.DeleteMany(ctx, bson.M{
-		"user_id": userID,
-	})
+	cursor, err := r.collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	if err = cursor.Decode(&results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

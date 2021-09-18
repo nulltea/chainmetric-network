@@ -43,15 +43,15 @@ func (r *EventConcernsMongo) GetAll() ([]intention.EventConcern, error) {
 	for cursor.Next(ctx) {
 		var (
 			record intention.EventConcern
-			topic  = intention.EventTopic(cursor.Current.Lookup("event_topic").String())
+			kind   = intention.EventKind(cursor.Current.Lookup("event_kind").String())
 		)
 
-		switch topic {
-		case events.RequirementsViolationTopic:
-			record = new(events.RequirementsViolationEvent)
+		switch kind {
+		case events.RequirementsViolationEvent:
+			record = new(events.RequirementsViolationEventConcern)
 		default:
-			core.Logrus.WithField("topic", topic).
-				Warn("unknown topic: document cannot be decoded")
+			core.Logrus.WithField("kind", kind).
+				Warn("unknown kind: document cannot be decoded")
 			break
 		}
 
@@ -81,15 +81,15 @@ func (r *EventConcernsMongo) Insert(concerns ...intention.EventConcern) error {
 	return err
 }
 
-// DeleteByTokens removes intention.EventConcern from the database by given `ids`.
-func (r *EventConcernsMongo) DeleteByTokens(tokens ...string) error {
+// DeleteByHashes removes intention.EventConcern from the database by given `hashes`.
+func (r *EventConcernsMongo) DeleteByHashes(hashes ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 
 	defer cancel()
 
 	_, err := r.collection.DeleteMany(ctx, bson.M{
-		"subscription_token": bson.M{
-			"$in": tokens,
+		"hash": bson.M{
+			"$in": hashes,
 		},
 	})
 

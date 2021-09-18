@@ -3,28 +3,34 @@ package presenter
 import (
 	"fmt"
 
-	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/events"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
 )
 
 // ToEventConcerns casts SubscriptionRequest to one or multiple event concerns.
 func (r *SubscriptionRequest) ToEventConcerns() ([]intention.EventConcern, error) {
-	var concerns []intention.EventConcern
-
 	switch args := r.Args.(type) {
 	case *SubscriptionRequest_RequirementsViolation:
-		for _, metric := range args.RequirementsViolation.Metrics {
-			concerns = append(concerns, &events.RequirementsViolationEvent{
-				Args: events.RequirementsViolationArgs{
-					AssetID: args.RequirementsViolation.AssetID,
-					Metric: models.Metric(metric),
-				},
-			})
-		}
+		return events.NewRequirementsViolationConcerns(
+			args.RequirementsViolation.AssetID,
+			args.RequirementsViolation.Metrics...,
+		), nil
+	case *SubscriptionRequest_Noop:
+		return nil, fmt.Errorf("noop event is for testing only")
 	default:
-		return nil, fmt.Errorf("noop event is no accepted for production")
+		return nil, fmt.Errorf("unsupported arguments type for subscribtion")
+	}
+}
+
+// NewSubscriptionResponse presents SubscriptionResponse with topics defined by given
+func NewSubscriptionResponse(concerns ...intention.EventConcern) *SubscriptionResponse {
+	var topics = make([]string, len(concerns))
+
+	for i := range concerns {
+		topics[i] = concerns[i].Topic()
 	}
 
-	return concerns, nil
+	return &SubscriptionResponse{
+		Topics: topics,
+	}
 }

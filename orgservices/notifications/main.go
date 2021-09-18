@@ -23,10 +23,12 @@ func main() {
 		server.WithUnaryMiddlewares(
 			middleware.JWTForUnaryGRPC(),
 			middleware.AuthForUnaryGRPC(),
+			middleware.FirebaseForUnaryGRPC(true),
 		),
 		server.WithStreamMiddlewares(
 			middleware.JWTForStreamGRPC(),
 			middleware.AuthForStreamGRPC(),
+			middleware.FirebaseForStreamGRPC(true),
 		),
 		server.WithServiceRegistrar(
 			rpc.RegisterSubscriberService,

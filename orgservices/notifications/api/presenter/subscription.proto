@@ -16,19 +16,19 @@ message SubscriptionRequest {
   google.protobuf.Timestamp expireAt = 3 [(validate.rules).timestamp = {required: false}];
 
   message RequirementsViolationEventArgs {
-    string assetID = 1          [(validate.rules).string = {min_len: 5}];
-    repeated string metrics = 2 [(validate.rules).repeated = {min_items: 1}];
+    string assetID = 1 [(validate.rules).string = {min_len: 5}];
+    repeated string metrics = 2;
   }
 
   message NoopEventArgs {}
 }
 
-message CancellationRequest {
-  repeated CancellationRequestItem targets = 1;
+message SubscriptionResponse {
+  repeated string topics = 1;
 }
 
-message CancellationRequestItem {
-  string assetID = 1;
-  string metrics = 2;
+message CancellationRequest {
+  repeated string topics = 1;
 }
+
 

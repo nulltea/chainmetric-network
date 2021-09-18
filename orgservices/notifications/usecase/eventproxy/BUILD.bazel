@@ -14,7 +14,7 @@ go_library(
         "//orgservices/notifications/infrastructure/services",
         "//orgservices/notifications/model/intention",
         "//orgservices/shared/core",
-        "@com_github_cenkalti_backoff//v4:backoff",
+        "@com_github_cenkalti_backoff_v4//:backoff",
         "@com_github_spf13_viper//:viper",
         "@org_mongodb_go_mongo_driver//mongo",
     ],

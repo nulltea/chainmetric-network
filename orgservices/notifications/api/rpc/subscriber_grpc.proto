@@ -8,6 +8,6 @@ import "orgservices/shared/proto/status.proto";
 import "google/protobuf/empty.proto";
 
 service SubscriberService {
-  rpc subscribe(SubscriptionRequest) returns (shared.StatusResponse);
+  rpc subscribe(SubscriptionRequest) returns (SubscriptionResponse);
   rpc cancel(CancellationRequest) returns (shared.StatusResponse);
 }

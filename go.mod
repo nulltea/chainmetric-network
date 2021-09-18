@@ -5,6 +5,7 @@ go 1.16
 require (
 	firebase.google.com/go/v4 v4.6.0
 	github.com/cenkalti/backoff/v4 v4.1.1
+	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0

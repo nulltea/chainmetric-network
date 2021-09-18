@@ -34,7 +34,6 @@ go_library(
     deps = [
         "//orgservices/notifications/model/events",
         "//orgservices/notifications/model/intention",
-        "@com_github_timoth_y_chainmetric_core//models",
     ],
 )
 

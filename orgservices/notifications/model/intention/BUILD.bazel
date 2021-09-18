@@ -8,5 +8,8 @@ go_library(
     ],
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention",
     visibility = ["//visibility:public"],
-    deps = ["//orgservices/notifications/model/audience"],
+    deps = [
+        "//orgservices/notifications/model/audience",
+        "@com_github_cnf_structhash//:structhash",
+    ],
 )

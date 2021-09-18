@@ -8,13 +8,15 @@ import (
 
 type (
 	EventConcern interface {
-		SubscriptionToken() string
+		Hash() string
+		Topic() string
 		Filter() string
 		SourceContract() string
-		OfTopic() EventTopic
+		OfKind() EventKind
 		Context(context.Context) (context.Context, context.CancelFunc)
 		NotificationWith([]byte) (*audience.Notification, error)
+		IsEqual(EventConcern) bool
 	}
 
-	EventTopic string
+	EventKind string
 )

@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "auth_grpc.go",
         "ctx_grpc.go",
+        "firebase_grpc.go",
         "jwt_grpc.go",
     ],
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/shared/middleware",
