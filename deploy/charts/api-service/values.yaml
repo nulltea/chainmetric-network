@@ -7,7 +7,7 @@ deployement:
   replicaCount: 1
 
 image:
-  repository: chainmetric/api.identity
+  repository: chainmetric/identity
   pullPolicy: Always
   tag: latest
 
@@ -40,13 +40,7 @@ serviceAccount:
 
 volumes:
   - type: secret
-    name: identity-chipa-inu-org-hlf-connection
-    mountPath: /app/config
-  - type: secret
-    name: identity.chipa-inu.org.chainmetric.network-tls
-    mountPath: /app/certs/grpc
-  - type: secret
-    name: identity-chipa-inu-org-jwt-keys
+    name: jwt-keys
     mountPath: /app/certs/jwt
   - type: claim
     name: artifacts

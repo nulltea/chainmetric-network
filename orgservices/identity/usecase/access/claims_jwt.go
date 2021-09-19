@@ -20,7 +20,7 @@ func GenerateJWT(user *model.User) (string, error) {
 	var (
 		token        = jwt.New(jwt.SigningMethodRS512)
 		org          = viper.GetString("organization")
-		expiresAfter = viper.GetDuration("api.jwt_expiration")
+		expiresAfter = viper.GetDuration("jwt_expiration")
 
 		claims = &jwt.StandardClaims{
 			Id:       user.ID,
@@ -65,7 +65,7 @@ func VerifyJWT(token string) (*jwt.StandardClaims, error) {
 }
 
 func jwtSigningPrivateKey() *rsa.PrivateKey {
-	var path = viper.GetString("api.jwt_signing_key")
+	var path = viper.GetString("jwt_signing_key")
 
 	keyBytes, err := os.ReadFile(path)
 	if err != nil {
@@ -84,7 +84,7 @@ func jwtSigningPrivateKey() *rsa.PrivateKey {
 }
 
 func jwtSigningPublicKey() *rsa.PublicKey {
-	var path = viper.GetString("api.jwt_signing_cert")
+	var path = viper.GetString("jwt_signing_cert")
 
 	keyBytes, err := os.ReadFile(path)
 	if err != nil {

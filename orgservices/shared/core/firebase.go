@@ -13,8 +13,12 @@ var Firebase *firebase.App
 func initFirebase() {
 	var err error
 
+	if !viper.GetBool("firebase_enabled") {
+		return
+	}
+
 	if Firebase, err = firebase.NewApp(context.Background(), nil,
-		option.WithCredentialsFile(viper.GetString("api.firebase_credentials")),
+		option.WithCredentialsFile(viper.GetString("firebase_credentials")),
 	); err != nil {
 		Logger.Fatalf("failed to initialize Firebase client: %v", err)
 	}

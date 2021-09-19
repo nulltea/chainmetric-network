@@ -4,14 +4,15 @@ go_library(
     name = "eventproxy",
     srcs = [
         "eventloop.go",
+        "forwarding.go",
         "listeners.go",
-        "receivers.go",
     ],
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/usecase/eventproxy",
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/notifications/infrastructure/repository",
         "//orgservices/notifications/infrastructure/services",
+        "//orgservices/notifications/model/audience",
         "//orgservices/notifications/model/intention",
         "//orgservices/shared/core",
         "@com_github_cenkalti_backoff_v4//:backoff",

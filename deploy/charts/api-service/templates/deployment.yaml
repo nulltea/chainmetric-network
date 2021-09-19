@@ -42,7 +42,7 @@ spec:
           {{- range .Values.envs }}
             - name: {{ .name }}
           {{- if eq .type "value" }}
-              value: {{ .value }}
+              value: "{{ .value }}"
           {{- else if eq .type "secret" }}
               valueFrom:
                 secretKeyRef:
@@ -56,6 +56,9 @@ spec:
             {{- range .Values.volumes }}
             - name: {{ .name | replace "." "-" }}
               mountPath: {{ .mountPath }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
             {{- end }}
       restartPolicy: Always
       volumes:
@@ -74,7 +77,7 @@ spec:
           {{- if eq .type "claim" }}
           persistentVolumeClaim:
             claimName: {{ .name }}
-          {{- else if eq .type "configMap" }}
+          {{- else if eq .type "configmap" }}
           configMap:
             name: {{ .name }}
           {{ else if eq .type "secret" }}

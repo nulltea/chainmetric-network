@@ -180,6 +180,4 @@ Licensed under the [Apache 2.0][license file].
 [chainmetric sensorsys repo]: https://github.com/timoth-y/chainmetric-sensorsys
 [chainmetric app repo]: https://github.com/timoth-y/chainmetric-app
 
-
-
 [license file]: https://github.com/timoth-y/chainmetric-network/blob/main/LICENSE

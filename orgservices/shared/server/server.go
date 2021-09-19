@@ -30,8 +30,8 @@ func Init(options ...Option) error {
 			},
 		}
 
-		certPath = viper.GetString("api.grpc_tls_cert")
-		keyPath  = viper.GetString("api.grpc_tls_key")
+		certPath = viper.GetString("grpc_tls_cert")
+		keyPath  = viper.GetString("grpc_tls_key")
 	)
 
 	for i := range options {

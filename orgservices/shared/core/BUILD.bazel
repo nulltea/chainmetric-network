@@ -16,7 +16,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/shared/server",
-        "//orgservices/shared/utils",
         "@com_github_hashicorp_vault_api//:api",
         "@com_github_hyperledger_fabric_sdk_go//pkg/core/config",
         "@com_github_hyperledger_fabric_sdk_go//pkg/gateway",

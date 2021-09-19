@@ -25,7 +25,7 @@ var (
 )
 
 func Init() {
-	eventsPipe = make(chan event, viper.GetInt("api.notifications.events_buffer_size"))
+	eventsPipe = make(chan event, viper.GetInt("notifications.events_buffer_size"))
 	fcmService = services.NewNotificationsFirebase(core.Firebase)
 	subsRepo = repository.NewSubscriptionsMongo(core.MongoDB)
 }
@@ -85,7 +85,7 @@ func CancelForwarding(userToken string, topics ...string) error {
 }
 
 func spawnReceivers() {
-	var receiverCount = viper.GetInt("api.notifications.event_receivers_count")
+	var receiverCount = viper.GetInt("notifications.event_receivers_count")
 
 	for i := 0; i < receiverCount; i++ {
 		go func(ctx context.Context) {

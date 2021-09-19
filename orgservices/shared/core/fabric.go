@@ -15,13 +15,13 @@ var (
 
 func initFabric() {
 	var (
-		signCert = viper.GetString("api.fabric_cert")
-		signKey = viper.GetString("api.fabric_key")
-		channel = viper.GetString("api.channel")
+		signCert = viper.GetString("fabric_cert")
+		signKey = viper.GetString("fabric_key")
+		channel = viper.GetString("channel")
 	)
 
 	wallet = gateway.NewInMemoryWallet()
-	identity := gateway.NewX509Identity(viper.GetString("api.organization"), "", "")
+	identity := gateway.NewX509Identity(viper.GetString("organization"), "", "")
 
 	if payload, err := ioutil.ReadFile(signCert); err != nil {
 		Logger.Fatalf("failed to read fabric identity certificate on path %s: %v", signCert, err)
@@ -39,7 +39,7 @@ func initFabric() {
 	wallet.Put("service", identity)
 
 	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile(viper.GetString("api.connection_config_path"))),
+		gateway.WithConfig(config.FromFile(viper.GetString("connection_config_path"))),
 		gateway.WithIdentity(wallet, "service"),
 	)
 

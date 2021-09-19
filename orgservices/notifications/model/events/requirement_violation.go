@@ -71,6 +71,10 @@ func (rv RequirementsViolationEventConcern) Filter() string {
 }
 
 func (rv RequirementsViolationEventConcern) NotificationWith(data []byte) (*audience.Notification, error) {
-	return nil, nil
+	return &audience.Notification{
+		Caption: "Requirements violation",
+		Description: "",
+		Data: data,
+	}, nil
 }
 

@@ -1,0 +1,45 @@
+image:
+  repository: chainmetric/notifications-service
+  pullPolicy: Always
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 8080
+
+externalAccess:
+  enabled: true
+  domain: chainmetric.network
+  ownershipMsp: chipa-inu.org
+  serviceHostname: notifications
+
+volumes:
+  - type: secret
+    name: notifications-chipa-inu-org-fabric-connection
+    mountPath: /app/config/fabric
+  - type: secret
+    name: notifications.chipa-inu.org.chainmetric.network-tls
+    mountPath: /app/certs/grpc
+  - type: secret
+    name: jwt-keys
+    mountPath: /app/certs/jwt
+  - type: claim
+    name: artifacts
+    mountPath: /app/crypto
+  - type: secret
+    name: firebase-credentials
+    mountPath: /app/certs/firebase
+  - type: secret
+    name: privileges-config
+    mountPath: /app/config/privileges
+
+envs:
+  - type: value
+    name: FIREBASE_ENABLED
+    value: true
+  - type: value
+    name: FABRIC_CERT
+    value: /app/crypto/crypto-config/peerOrganizations/chipa-inu.org.chainmetric.network/users/Admin@chipa-inu.org.chainmetric.network/msp/signcerts/Admin@chipa-inu.org.chainmetric.network-cert.pem
+  - type: value
+    name: FABRIC_KEY
+    value: /app/crypto/crypto-config/peerOrganizations/chipa-inu.org.chainmetric.network/users/Admin@chipa-inu.org.chainmetric.network/msp/keystore/priv_sk

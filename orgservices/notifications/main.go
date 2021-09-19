@@ -8,11 +8,13 @@ import (
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/middleware"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/server"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/usecase/privileges"
 	"github.com/ztrue/shutdown"
 )
 
 func init() {
 	core.Init()
+	privileges.Init()
 	eventproxy.Init()
 	shutdown.Add(eventproxy.Stop)
 }

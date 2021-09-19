@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/privileges"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/usecase/privileges"
 )
 
 // Enroll generates msp.SigningIdentity for user and confirms one.

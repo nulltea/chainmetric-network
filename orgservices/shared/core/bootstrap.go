@@ -9,10 +9,10 @@ import (
 // BootstrapGRPCServer performs start sequence of the gRPC server.
 func BootstrapGRPCServer(port int, options ...server.Option) {
 	if err := server.Init(options...); err != nil {
-		Logrus.Fatalln("failed to initialize server")
+		Logrus.WithError(err).Fatalln("failed to initialize server")
 	}
 
 	if err := server.Serve(fmt.Sprintf(":%d", port)); err != nil {
-		Logrus.Fatalln("failed to initialize gRPC server")
+		Logrus.WithError(err).Fatalln("failed to start gRPC server")
 	}
 }

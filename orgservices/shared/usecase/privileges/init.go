@@ -16,11 +16,12 @@ func Init() {
 
 	config.SetConfigType("yaml")
 	config.SetConfigName("privileges")
-	config.AddConfigPath("data")
-	config.AddConfigPath("orgservices/shared/data")
+	config.AddConfigPath(viper.GetString("privileges_config"))
+
 
 	if err := config.ReadInConfig(); err != nil {
-		core.Logrus.Fatal("failed to read privileges config")
+		core.Logrus.WithError(err).
+			Fatalf("failed to read privileges config on path %s", viper.GetString("privileges_config"))
 	}
 }
 
