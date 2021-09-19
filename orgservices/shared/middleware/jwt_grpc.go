@@ -6,9 +6,9 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
+	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/access"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

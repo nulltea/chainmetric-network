@@ -1,5 +1,6 @@
 # IDE & Editors configs
 .vscode
+.idea/workspace.xml
 
 # Binaries for programs and plugins
 *.exe
@@ -19,6 +20,7 @@
 
 .env
 .lego
+config.yaml
 connection.yaml
 connection-local.yaml
 

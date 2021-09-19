@@ -1,0 +1,51 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@golink//proto:proto.bzl", "go_proto_link")
+
+proto_library(
+    name = "rpc_proto",
+    srcs = ["subscriber_grpc.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/api/presenter:presenter_proto",
+        "//orgservices/shared/proto:proto_proto",
+        "@com_google_protobuf//:empty_proto",
+    ],
+)
+
+go_proto_library(
+    name = "rpc_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/rpc",
+    proto = ":rpc_proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/api/presenter",
+        "//orgservices/shared/proto",
+    ],
+)
+
+go_library(
+    name = "rpc",
+    srcs = ["subscriber_grpc.go"],
+    embed = [":rpc_go_proto"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/api/rpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/api/presenter",
+        "//orgservices/notifications/model/intention",
+        "//orgservices/notifications/usecase/eventproxy",
+        "//orgservices/shared/middleware",
+        "//orgservices/shared/proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+go_proto_link(
+    name = "rpc_go_proto_link",
+    dep = ":rpc_go_proto",
+    version = "v1",
+)

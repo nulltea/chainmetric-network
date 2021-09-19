@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -19,30 +18,31 @@ var server *grpc.Server
 // Init performs initialization of the gRPC server.
 func Init(options ...Option) error {
 	var (
-		loggerEntry = logrus.NewEntry(core.Logrus)
-
 		args = &gRPCArgsStub{
 			unaryInterceptors: []grpc.UnaryServerInterceptor{
 				tags.UnaryServerInterceptor(),
 				recovery.UnaryServerInterceptor(),
-				grpclogrus.UnaryServerInterceptor(loggerEntry),
 			},
 
 			streamInterceptors: []grpc.StreamServerInterceptor{
 				tags.StreamServerInterceptor(),
 				recovery.StreamServerInterceptor(),
-				grpclogrus.StreamServerInterceptor(loggerEntry),
 			},
 		}
 
-		certPath = viper.GetString("api.grpc_tls_cert")
-		keyPath  = viper.GetString("api.grpc_tls_key")
+		certPath = viper.GetString("grpc_tls_cert")
+		keyPath  = viper.GetString("grpc_tls_key")
 	)
-
-	grpclogrus.ReplaceGrpcLogger(loggerEntry)
 
 	for i := range options {
 		options[i](args)
+	}
+
+	if entry := logrus.NewEntry(args.logger); entry.Logger != nil {
+		grpclogrus.ReplaceGrpcLogger(entry)
+
+		args.unaryInterceptors = append(args.unaryInterceptors, grpclogrus.UnaryServerInterceptor(entry))
+		args.streamInterceptors = append(args.streamInterceptors, grpclogrus.StreamServerInterceptor(entry))
 	}
 
 	tls, err := credentials.NewServerTLSFromFile(certPath, keyPath)

@@ -8,8 +8,7 @@ import (
 // Vault is an instance of the Vault client for managing secrets.
 var Vault *vault.Client
 
-// InitVault performs initialization of the Vault client.
-func InitVault() {
+func initVault() {
 	var (
 		addr = viper.GetString("vault_address")
 		err error

@@ -16,9 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type accessService struct{
-	UnimplementedAccessServiceServer
-}
+type accessService struct{}
 
 // RegisterAccessService registers AccessServiceServer fir given gRPC `server` instance.
 func RegisterAccessService(server *grpc.Server) {

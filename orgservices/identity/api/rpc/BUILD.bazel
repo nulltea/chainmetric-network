@@ -14,14 +14,15 @@ go_library(
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc",
     visibility = ["//visibility:public"],
     deps = [
-        "//orgservices/identity/api/middleware",
         "//orgservices/identity/api/presenter",
         "//orgservices/identity/infrastructure/repository",
         "//orgservices/identity/model",
         "//orgservices/identity/usecase/access",
         "//orgservices/identity/usecase/identity",
-        "//orgservices/identity/usecase/privileges",
         "//orgservices/shared/core",
+        "//orgservices/shared/middleware",
+        "//orgservices/shared/proto",
+        "//orgservices/shared/usecase/privileges",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//codes",
         "@org_golang_google_grpc//status",
@@ -40,6 +41,7 @@ proto_library(
     visibility = ["//visibility:public"],
     deps = [
         "//orgservices/identity/api/presenter:presenter_proto",
+        "//orgservices/shared/proto:proto_proto",
         "@com_google_protobuf//:empty_proto",
     ],
 )
@@ -50,7 +52,10 @@ go_proto_library(
     importpath = "github.com/timoth-y/chainmetric-network/orgservices/identity/api/rpc",
     proto = ":rpc_proto",
     visibility = ["//visibility:public"],
-    deps = ["//orgservices/identity/api/presenter"],
+    deps = [
+        "//orgservices/identity/api/presenter",
+        "//orgservices/shared/proto",
+    ],
 )
 
 go_proto_link(

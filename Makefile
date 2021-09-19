@@ -38,65 +38,74 @@ mongodb:
 	kubectl -n=kube-system exec vault-0 -- vault secrets enable -path=/fabric/identity kv-v1
 	kubectl -n=kube-system exec vault-0 -- vault auth enable userpass
 
-hyperledger-init:
+fabric-init:
 	kubectl create namespace network || echo "Namespace 'network' already exists"
 	kubectl config set-context --current --namespace=network
-	fabnctl gen artifacts -a=arm64 -d=chainmetric.network -f ./network-config.yaml
+	fabnctl gen artifacts -a=arm64 -d=chainmetric.network -f ./network-config.yaml \
+    	--charts=./deploy/charts
 
-hyperledger-deploy:
-	fabnctl deploy orderer -a=arm64 -d=chainmetric.network
+fabric-install:
+	fabnctl install orderer -a=arm64 -d=chainmetric.network \
+		--charts=./deploy/charts
 
 	kubectl create secret generic couchdb-auth \
 		--from-literal=user=${COUCHDB_USERNAME} --from-literal=password=${COUCHDB_PASSWORD} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0
-	fabnctl deploy peer -a=arm64 -d=chainmetric.network -o moon-lan -p peer0
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0 \
+		--charts=./deploy/charts
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0 \
+		--charts=./deploy/charts
+	fabnctl install peer -a=arm64 -d=chainmetric.network -o moon-lan -p peer0 \
+		--charts=./deploy/charts
 
-	fabnctl deploy channel -a=arm64 -d=chainmetric.network -c=supply-channel \
+	fabnctl install channel -a=arm64 -d=chainmetric.network -c=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/assets.Dockerfile \
+		--image=chainmetric/assets-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/devices.Dockerfile \
+		--image=chainmetric/devices-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/requirements.Dockerfile \
+		--image=chainmetric/requirements-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
-	fabnctl deploy cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		-r iotchainnetwork -f deploy/docker/readings.Dockerfile \
+		--image=chainmetric/readings-contract \
 		--rebuild=false \
-		../contracts
+		--charts=./deploy/charts \
+		../smartcontracts
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
 			-o=chipa-inu \
 			-o=blueberry-go \
 			-o=moon-lan
 
-hyperledger-clear:
+fabric-clear:
 	helm uninstall peer0-chipa-inu || echo "Chart 'peer/peer0-chipa-inu' already uninstalled"
 	helm uninstall peer0-blueberry-go || echo "Chart 'peer/peer0-blueberry-go' already uninstalled"
 	helm uninstall peer0-moon-lan || echo "Chart 'peer/peer0-moon-lan' already uninstalled"
@@ -121,54 +130,72 @@ hyperledger-clear:
 
 	# helm uninstall artifacts || echo "Chart 'artifacts/artifacts' already uninstalled"
 
-deploy-identity:
-	kubectl create -n network secret tls identity.${ORG}.org.${DOMAIN}-tls \
-		--key="data/certs/grpc/server.key" \
-		--cert="data/certs/grpc/server.crt" \
+install-orgservice:
+	kubectl create -n network secret tls ${service}.${ORG}.org.${DOMAIN}-tls \
+		--key=".data/certs/grpc/${service}/server.key" \
+		--cert=".data/certs/grpc/${service}/server.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic identity.${ORG}.org.${DOMAIN}-ca \
-		--from-file="data/certs/grpc/ca.crt" \
+	kubectl create secret generic ${service}.${ORG}.org.${DOMAIN}-ca \
+		--from-file=".data/certs/grpc/${service}/ca.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic identity-${ORG}-org-hlf-connection \
-		--from-file=connection.yaml \
+	kubectl create secret generic ${service}-${ORG}-org-fabric-connection \
+		--from-file=".data/config/${service}/connection.yaml" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic identity-${ORG}-org-jwt-keys \
-		--from-file=data/certs/jwt/jwt-cert.pem \
-		--from-file=data/certs/jwt/jwt-key.pem \
+	kubectl create secret generic jwt-keys \
+		--from-file=".data/certs/jwt/jwt-cert.pem" \
+		--from-file=".data/certs/jwt/jwt-key.pem" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
 	kubectl create secret generic vault-credentials \
 		--from-literal=token=${VAULT_TOKEN} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	helm upgrade --install identity-chipa-inu deploy/charts/api-service
+	helm upgrade --install ${service}-${ORG} deploy/charts/api-service -f deploy/config/orgservices/${service}.yaml
 
-docker-build:
-	sudo docker buildx build \
-		--platform linux/arm64 -t chainmetric/api.identity \
-		-f ./deploy/docker/identity.Dockerfile --push .
+	kubectl create secret generic vault-credentials \
+		--from-literal=token=${VAULT_TOKEN} \
+		--dry-run=client -o yaml | kubectl apply -f -
 
-deploy-build: docker-build deploy-identity
+	kubectl create secret generic privileges-config \
+		--from-file=orgservices/shared/data/privileges.yaml \
+		--dry-run=client -o yaml | kubectl apply -f -
 
-grpc-gen:
-	protoc \
-		-I=src \
-		-I=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
-		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-	    --go_out=paths=source_relative:orgservices \
-	    --validate_out=lang=go,paths=source_relative:orgservices \
-		./orgservices/identity/api/presenter/*.proto
+	helm upgrade --install ${service}-${ORG} deploy/charts/api-service
 
-	protoc \
-		-I=src \
-		-I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.1 \
-		--go-grpc_out=paths=source_relative:./orgservices \
-		./orgservices/identity/api/rpc/*.proto
+build-orgservice:
+	bazel run //:gazelle
+	bazel build //orgservices/${service}
+	bazel run //orgservices/${service}:multiacrh
+	bazel run //orgservices/${service}:multiacrh-push
 
-	ls ./orgservices/identity/api/rpc/*_grpc_grpc.pb.go | sed -E "p;s/(.*)_grpc_grpc\.pb\.go/\1_grpc\.pb.\go/" | xargs -n2 mv
+build-install-orgservice: build-orgservice install-orgservice
+
+grpc-tls-gen:
+	mkdir .data/certs/grpc/${service} || echo "directory .data/certs/grpc/${service} exists"
+	openssl genrsa \
+		-out .data/certs/grpc/${service}/ca.key 2048
+
+	openssl req \
+		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${ORG}.org.${DOMAIN}" \
+		-new -x509 -days 365 -key .data/certs/grpc/${service}/ca.key -out .data/certs/grpc/${service}/ca.crt
+
+	openssl req -newkey rsa:2048 \
+		-nodes -keyout .data/certs/grpc/${service}/server.key \
+		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${ORG}.org.${DOMAIN}" \
+		-out .data/certs/grpc/${service}/server.csr
+
+	openssl x509 -req \
+		-in .data/certs/grpc/${service}/server.csr \
+		-CA .data/certs/grpc/${service}/ca.crt -CAkey .data/certs/grpc/${service}/ca.key -CAcreateserial -days 365 \
+		-extfile <(printf "subjectAltName=DNS:${service}.${ORG}.org.${DOMAIN},DNS:localhost,DNS:${service}-${ORG}-org") \
+		-out .data/certs/grpc/${service}/server.crt
+
+cp-proto-app:
+	cp ./orgservices/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
+	cp ./orgservices/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto
 
 grpc-ui:
 	grpcui \
@@ -180,26 +207,3 @@ grpc-ui:
  		-proto ./orgservices/identity/api/rpc/identity.proto \
  		-proto ./orgservices/identity/api/rpc/access.proto \
  		identity.chipa-inu.org.chainmetric.network:443
-
-grpc-tls-gen:
-	openssl genrsa \
-		-out .data/certs/ca.key 2048
-
-	openssl req \
-		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=identity.${ORG}.org.${DOMAIN}" \
-		-new -x509 -days 365 -key .data/certs/ca.key -out .data/certs/ca.crt
-
-	openssl req -newkey rsa:2048 \
-		-nodes -keyout .data/certs/server.key \
-		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=identity.${ORG}.org.${DOMAIN}" \
-		-out .data/certs/server.csr
-
-	openssl x509 -req \
-		-in .data/certs/server.csr \
-		-CA .data/certs/ca.crt -CAkey .data/certs/ca.key -CAcreateserial -days 365 \
-		-extfile <(printf "subjectAltName=DNS:identity.${ORG}.org.${DOMAIN},DNS:localhost,DNS:identity-${ORG}-org") \
-		-out .data/certs/server.crt
-
-cp-proto-app:
-	cp ./orgservices/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
-	cp ./orgservices/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto

@@ -5,13 +5,14 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/model"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/access"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/middleware"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/proto"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -19,9 +20,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type userService struct{
-	UnimplementedUserServiceServer
-}
+type userService struct{}
 
 // RegisterUserService registers UserServiceServer fir given gRPC `server` instance.
 func RegisterUserService(server *grpc.Server) {
@@ -93,7 +92,7 @@ func (s userService) PingAccountStatus(ctx context.Context, _ *emptypb.Empty) (*
 func (userService) ChangePassword(
 	ctx context.Context,
 	request *presenter.ChangePasswordRequest,
-) (*presenter.StatusResponse, error) {
+) (*proto.StatusResponse, error) {
 	var user = middleware.MustRetrieveUser(ctx)
 
 	if err := request.Validate(); err != nil {
@@ -115,5 +114,5 @@ func (userService) ChangePassword(
 		return nil, status.Error(codes.Internal, "failed to update user pass on Vault")
 	}
 
-	return presenter.NewStatusResponse(presenter.Status_OK), nil
+	return proto.NewStatusResponse(proto.Status_OK), nil
 }

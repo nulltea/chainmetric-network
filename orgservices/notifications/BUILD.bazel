@@ -1,0 +1,71 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("//build/docker:multiarch.bzl", "multiarch_image")
+
+go_library(
+    name = "notifications_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//orgservices/notifications/api/rpc",
+        "//orgservices/notifications/usecase/eventproxy",
+        "//orgservices/shared/core",
+        "//orgservices/shared/middleware",
+        "//orgservices/shared/server",
+        "//orgservices/shared/usecase/privileges",
+        "@com_github_ztrue_shutdown//:shutdown",
+    ],
+)
+
+go_binary(
+    name = "notifications",
+    embed = [":notifications_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_image(
+    name = "base_image",
+    embed = [":notifications_lib"],
+    goarch = "arm64",
+    goos = "linux",
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "image",
+    base = ":base_image",
+    repository = "chainmetric",
+    stamp = True,
+    visibility = ["//visibility:public"],
+)
+
+container_push(
+    name = "image-push",
+    format = "Docker",
+    image = ":image",
+    registry = "index.docker.io",
+    repository = "chainmetric/identity-service",
+)
+
+multiarch_image(
+    name = "multiacrh",
+    base = "@alpine//image",
+    embed = [":notifications_lib"],
+    goarch = [
+        "amd64",
+        "arm64",
+    ],
+    goos = ["linux"],
+    repository = "chainmetric",
+    visibility = ["//visibility:public"],
+)
+
+container_push(
+    name = "multiacrh-push",
+    format = "Docker",
+    image = ":image",
+    registry = "index.docker.io",
+    repository = "chainmetric/notifications-service",
+)

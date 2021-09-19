@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "repository",
+    srcs = [
+        "eventconcerns_mongo.go",
+        "subscriptions_mongo.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/repository",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/model/audience",
+        "//orgservices/notifications/model/events",
+        "//orgservices/notifications/model/intention",
+        "//smartcontracts/shared/core",
+        "@com_github_spf13_viper//:viper",
+        "@org_mongodb_go_mongo_driver//bson",
+        "@org_mongodb_go_mongo_driver//mongo",
+    ],
+)

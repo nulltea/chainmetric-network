@@ -19,7 +19,7 @@ func MustRetrieveUser(ctx context.Context) *model.User {
 		return model.User{}.Decode(values[0])
 	}
 
-	panic("user_model is missing in context")
+	panic("'user_model' is missing in context")
 }
 
 // TryRetrieveUser returns user model from a given gRPC `ctx` if there is one, otherwise returns error.
@@ -33,7 +33,7 @@ func TryRetrieveUser(ctx context.Context) (*model.User, error) {
 		return model.User{}.Decode(values[0]), nil
 	}
 
-	return nil, fmt.Errorf("user model is missing in context")
+	return nil, fmt.Errorf("'user_model' is missing in context")
 }
 
 // MustRetrieveUserID returns `user_id` from a given gRPC `ctx` if there is one, otherwise it panics.
@@ -47,5 +47,19 @@ func MustRetrieveUserID(ctx context.Context) string {
 		return values[0]
 	}
 
-	panic("user_id is missing in context")
+	panic("'user_id' is missing in context")
+}
+
+// MustRetrieveFirebaseToken returns `firebase_token` from a given gRPC `ctx` if there is one, otherwise it panics.
+func MustRetrieveFirebaseToken(ctx context.Context) string {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		panic("failed to get metadata from context")
+	}
+
+	if values := md.Get("firebase_token"); len(values) == 1 {
+		return values[0]
+	}
+
+	panic("'firebase_token' is missing in context")
 }

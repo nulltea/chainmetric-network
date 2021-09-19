@@ -19,7 +19,7 @@ func Init() error {
 		err error
 	)
 
-	if sdk, err = fabsdk.New(config.FromFile(viper.GetString("api.connection_config_path"))); err != nil {
+	if sdk, err = fabsdk.New(config.FromFile(viper.GetString("connection_config_path"))); err != nil {
 		return errors.Wrap(err, "failed to connect to the blockchain network")
 	}
 

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -11,6 +12,7 @@ type (
 		streamInterceptors   []grpc.StreamServerInterceptor
 		servicesRegistrars   []RegistrarFunc
 		transportCredentials credentials.TransportCredentials
+		logger *logrus.Logger
 	}
 
 	// Option defines parameter for configuring grpc.Server.
@@ -38,5 +40,12 @@ func WithStreamMiddlewares(middlewares ...grpc.StreamServerInterceptor) Option {
 func WithServiceRegistrar(registrars ...RegistrarFunc) Option {
 	return func(args *gRPCArgsStub) {
 		args.servicesRegistrars = append(args.servicesRegistrars, registrars...)
+	}
+}
+
+// WithLogger can be used to pass logger for logging gRPC transactions.
+func WithLogger(logger *logrus.Logger) Option {
+	return func(args *gRPCArgsStub) {
+		args.logger = logger
 	}
 }

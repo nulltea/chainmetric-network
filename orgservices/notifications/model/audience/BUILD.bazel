@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "audience",
+    srcs = [
+        "notification.go",
+        "subscription.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/model/audience",
+    visibility = ["//visibility:public"],
+)

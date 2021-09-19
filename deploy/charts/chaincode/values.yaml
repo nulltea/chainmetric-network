@@ -4,9 +4,9 @@ component: chaincode
 logging: DEBUG
 
 image:
-  repository: iotchainnetwork/cc.requirements
-  pullPolicy: Always
+  repository: chainmetric/assets-contract
   tag: latest
+  pullPolicy: Always
 
 service:
   type: ClusterIP

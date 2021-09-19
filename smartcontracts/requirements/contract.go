@@ -6,12 +6,11 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
+	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
-	utils2 "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
-
-	"github.com/timoth-y/chainmetric-core/models"
+	sharedutils "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 )
 
 // RequirementsContract implements requirements-managing Smart Contract transaction handlers.
@@ -27,7 +26,7 @@ func NewRequirementsContract() *RequirementsContract {
 // Retrieve retrieves single models.Requirements record from blockchain ledger by a given `id`.
 func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Requirements, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
@@ -41,7 +40,7 @@ func (rc *RequirementsContract) Retrieve(ctx contractapi.TransactionContextInter
 func (rc *RequirementsContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Requirements, error) {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.RequirementsRecordType, []string{})
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	return rc.drain(iter), nil
@@ -54,7 +53,7 @@ func (rc *RequirementsContract) ForAsset(
 ) ([]*models.Requirements, error) {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.RequirementsRecordType, []string{utils.Hash(assetID)})
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	return rc.drain(iter), nil
@@ -76,7 +75,7 @@ func (rc *RequirementsContract) ForAssets(
 
 	iter, err := ctx.GetStub().GetQueryResult(core.BuildQuery(qMap))
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	return rc.drain(iter), nil
@@ -91,14 +90,14 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 	)
 
 	if requirements, err = requirements.Decode([]byte(data)); err != nil {
-		return "", utils2.LoggedError(err, "failed to deserialize input")
+		return "", sharedutils.LoggedError(err, "failed to deserialize input")
 	}
 
 	if len(requirements.ID) == 0 {
 		event = "inserted"
 
 		if requirements.ID, err = generateCompositeKey(ctx, requirements); err != nil {
-			return "", utils2.LoggedError(err, "failed to generate composite key")
+			return "", sharedutils.LoggedError(err, "failed to generate composite key")
 		}
 	}
 
@@ -107,8 +106,16 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 	}
 
 	if err = rc.save(ctx, requirements, event); err != nil {
-		return "", utils2.LoggedError(err, "failed saving requirements record")
+		return "", sharedutils.LoggedError(err, "failed saving requirements record")
 	}
+
+	defer func() {
+		if _, e := sharedutils.CrossChaincodeCall(ctx,
+			"readings", "NotifyRequirementsChange", string(requirements.Encode()),
+		); e != nil {
+			core.Logger.Error(e)
+		}
+	}()
 
 	return requirements.ID, nil
 }
@@ -116,7 +123,7 @@ func (rc *RequirementsContract) Assign(ctx contractapi.TransactionContextInterfa
 // Exists determines whether the models.Requirements exists in the blockchain ledger.
 func (rc *RequirementsContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return false, utils2.LoggedError(err, "failed to read from world state")
+		return false, sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
 	return data != nil, nil
@@ -133,11 +140,11 @@ func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterfa
 	}
 
 	if err = ctx.GetStub().DelState(id); err != nil {
-		return utils2.LoggedErrorf(err, "failed to remove requirements record with id: %s", id)
+		return sharedutils.LoggedErrorf(err, "failed to remove requirements record with id: %s", id)
 	}
 
 	if err = ctx.GetStub().SetEvent("requirements.removed", models.Requirements{ID: id}.Encode()); err != nil {
-		return utils2.LoggedErrorf(err, "failed to emit event on requirements remove")
+		return sharedutils.LoggedErrorf(err, "failed to emit event on requirements remove")
 	}
 
 	return nil
@@ -148,10 +155,10 @@ func (rc *RequirementsContract) Revoke(ctx contractapi.TransactionContextInterfa
 func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.RequirementsRecordType, []string{})
 	if err != nil {
-		return utils2.LoggedError(err, "failed to read from world state")
+		return sharedutils.LoggedError(err, "failed to read from world state")
 	}
 
-	utils2.Iterate(iter, func(key string, _ []byte) error {
+	sharedutils.Iterate(iter, func(key string, _ []byte) error {
 		if err = ctx.GetStub().DelState(key); err != nil {
 			return errors.Wrap(err, "failed to remove requirements record")
 		}
@@ -169,7 +176,7 @@ func (rc *RequirementsContract) RemoveAll(ctx contractapi.TransactionContextInte
 func (rc *RequirementsContract) drain(iter shim.StateQueryIteratorInterface) []*models.Requirements {
 	requirements := make([]*models.Requirements, 0)
 
-	utils2.Iterate(iter, func(_ string, value []byte) error {
+	sharedutils.Iterate(iter, func(_ string, value []byte) error {
 		requirement, err := models.Requirements{}.Decode(value); if err != nil {
 			return errors.Wrap(err, "failed to deserialize requirements record")
 		}

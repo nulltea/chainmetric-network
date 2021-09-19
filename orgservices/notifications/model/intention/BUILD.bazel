@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "intention",
+    srcs = [
+        "eventconcern_base.go",
+        "eventconcern_interface.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/model/audience",
+        "@com_github_cnf_structhash//:structhash",
+    ],
+)

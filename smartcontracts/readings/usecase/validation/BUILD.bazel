@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "validation",
+    srcs = [
+        "cache.go",
+        "rules.go",
+    ],
+    importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/readings/usecase/validation",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//smartcontracts/shared/utils",
+        "@com_github_hyperledger_fabric_contract_api_go//contractapi",
+        "@com_github_timoth_y_chainmetric_core//models",
+        "@com_github_timoth_y_chainmetric_core//utils",
+    ],
+)

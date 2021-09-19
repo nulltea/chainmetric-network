@@ -8,7 +8,6 @@ proto_library(
     srcs = [
         "access.proto",
         "admin.proto",
-        "common.proto",
         "user.proto",
     ],
     visibility = ["//visibility:public"],
@@ -35,7 +34,6 @@ go_library(
     srcs = [
         "access.go",
         "admin.go",
-        "common.go",
         "user.go",
     ],
     embed = [":presenter_go_proto"],

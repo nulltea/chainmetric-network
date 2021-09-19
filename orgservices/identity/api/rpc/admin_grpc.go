@@ -3,21 +3,19 @@ package rpc
 import (
 	"context"
 
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/middleware"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/api/presenter"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/infrastructure/repository"
 	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/identity"
-	"github.com/timoth-y/chainmetric-network/orgservices/identity/usecase/privileges"
 	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/middleware"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/usecase/privileges"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type adminService struct{
-	UnimplementedAdminServiceServer
-}
+type adminService struct{}
 
 // RegisterAdminService registers IdentityServiceServer fir given gRPC `server` instance.
 func RegisterAdminService(server *grpc.Server) {

@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "services",
+    srcs = ["notifications_firebase.go"],
+    importpath = "github.com/timoth-y/chainmetric-network/orgservices/notifications/infrastructure/services",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//orgservices/notifications/model/audience",
+        "@com_github_timoth_y_chainmetric_core//utils",
+        "@com_google_firebase_go_v4//:go",
+        "@com_google_firebase_go_v4//messaging",
+    ],
+)

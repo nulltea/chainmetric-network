@@ -15,8 +15,8 @@ go_library(
     deps = [
         "//orgservices/identity/infrastructure/repository",
         "//orgservices/identity/model",
-        "//orgservices/identity/usecase/privileges",
         "//orgservices/shared/core",
+        "//orgservices/shared/usecase/privileges",
         "@com_github_hyperledger_fabric_sdk_go//pkg/client/msp",
         "@com_github_hyperledger_fabric_sdk_go//pkg/common/providers/msp",
         "@com_github_hyperledger_fabric_sdk_go//pkg/core/config",

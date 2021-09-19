@@ -1,0 +1,58 @@
+# Docs: https://hyperledger-fabric.readthedocs.io/en/release-2.2/developapps/connectionprofile.html
+# Example: https://github.com/hyperledger/fabric/blob/main/internal/peer/chaincode/testdata/connectionprofile.yaml
+
+name: application
+description: Connection profile configuration for Org1 owned application
+version: 1.0
+
+client:
+  organization: org1
+  channel: supply-channel
+  cryptoconfig:
+    path: ./crypto/peerOrganizations/org1.example.network
+
+  credentialStore:
+    path: ./data/users
+    cryptoStore:
+      path: ./data/wallet
+
+organizations:
+  org1:
+    mspid: org1MSP
+    peers:
+      - peer0.org1.example.network
+    certificateAuthorities:
+      - ca.org1.example.network
+    cryptoPath: users/Admin@org1.example.network/msp
+
+orderers:
+  orderer.example.network:
+    url: "grpcs://orderer.example.network:443"
+    grpcOptions:
+      hostnameOverride: orderer.example.network
+      ssl-target-name-override: orderer.example.network
+    tlsCACerts:
+      pem: |
+
+
+peers:
+  peer0.org1.example.network:
+    url: "grpcs://peer0.org1.example.network:443"
+    grpcOptions:
+      hostnameOverride: peer0.org1.example.network
+      ssl-target-name-override: peer0.org1.example.network
+    tlsCACerts:
+      pem: |
+
+certificateAuthorities:
+  ca.org1.example.network:
+    url: "http://ca-org1:7054"
+    caName: ca-org1
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      pem:
+        - |
