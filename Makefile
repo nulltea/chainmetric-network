@@ -165,6 +165,14 @@ install-orgservice:
 
 	helm upgrade --install ${service}-${ORG} deploy/charts/api-service
 
+build-orgservice:
+	bazel run //:gazelle
+	bazel build //orgservices/${service}
+	bazel run //orgservices/${service}:multiacrh
+	bazel run //orgservices/${service}:multiacrh-push
+
+build-install-orgservice: build-orgservice install-orgservice
+
 grpc-tls-gen:
 	mkdir .data/certs/grpc/${service} || echo "directory .data/certs/grpc/${service} exists"
 	openssl genrsa \
