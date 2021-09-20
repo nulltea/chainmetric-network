@@ -20,11 +20,11 @@ func main() {
 	core.BootstrapGRPCServer(8080,
 		server.WithUnaryMiddlewares(
 			middleware.JWTForUnaryGRPC(
-				"UserService/register",
-				"AccessService/requestFabricCredentials",
-				"AccessService/authWithSigningIdentity",
+				"identity.UserService/Register",
+				"identity.AccessService/RequestFabricCredentials",
+				"identity.AccessService/AuthWithSigningIdentity",
 			),
-			middleware.AuthForUnaryGRPC("UserService/pingAccountStatus"),
+			middleware.AuthForUnaryGRPC("identity.UserService/PingAccountStatus"),
 		),
 		server.WithStreamMiddlewares(
 			middleware.JWTForStreamGRPC(),

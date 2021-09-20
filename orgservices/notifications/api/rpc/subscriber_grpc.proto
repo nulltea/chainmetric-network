@@ -5,7 +5,6 @@ option go_package = "github.com/timoth-y/chainmetric-network/orgservices/notific
 
 import "orgservices/notifications/api/presenter/subscription.proto";
 import "orgservices/shared/proto/status.proto";
-import "google/protobuf/empty.proto";
 
 service SubscriberService {
   rpc subscribe(SubscriptionRequest) returns (SubscriptionResponse);

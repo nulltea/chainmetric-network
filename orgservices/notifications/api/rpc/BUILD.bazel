@@ -10,7 +10,6 @@ proto_library(
     deps = [
         "//orgservices/notifications/api/presenter:presenter_proto",
         "//orgservices/shared/proto:proto_proto",
-        "@com_google_protobuf//:empty_proto",
     ],
 )
 

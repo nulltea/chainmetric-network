@@ -34,6 +34,10 @@ volumes:
     mountPath: /app/config/privileges
 
 envs:
+  - type: secret
+    name: VAULT_TOKEN
+    secretName: vault-credentials
+    secretKey: token
   - type: value
     name: FIREBASE_ENABLED
     value: true

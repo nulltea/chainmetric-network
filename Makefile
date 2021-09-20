@@ -29,7 +29,7 @@ mongodb:
  		--from-literal=username=${MONGO_USERNAME} --from-literal=password=${MONGO_PASSWORD} \
  		--dry-run=client -o yaml | kubectl apply -f -
 
- vault:
+vault:
 	helm upgrade --install vault -n=kube-system -f=charts/helm-values/vault.yaml \
 		hashicorp/vault
 	kubectl -n=kube-system exec vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > .secrets/cluster-keys.json
@@ -130,6 +130,19 @@ fabric-clear:
 
 	# helm uninstall artifacts || echo "Chart 'artifacts/artifacts' already uninstalled"
 
+build-install-chaincode:
+	fabnctl install cc -a=arm64 -d=chainmetric.network -c ${cc} -C=supply-channel \
+		-o=chipa-inu -p=peer0 \
+		-o=blueberry-go -p=peer0 \
+		-o=moon-lan -p=peer0 \
+		--ssh --host=192.168.50.88 -u=ubuntu \
+		--ignore="bazel-*" \
+		--image=chainmetric/${cc}-contract \
+		--source=./smartcontracts/${cc} \
+		--charts=./deploy/charts \
+		--push \
+		.
+
 install-orgservice:
 	kubectl create -n network secret tls ${service}.${ORG}.org.${DOMAIN}-tls \
 		--key=".data/certs/grpc/${service}/server.key" \
@@ -192,10 +205,6 @@ grpc-tls-gen:
 		-CA .data/certs/grpc/${service}/ca.crt -CAkey .data/certs/grpc/${service}/ca.key -CAcreateserial -days 365 \
 		-extfile <(printf "subjectAltName=DNS:${service}.${ORG}.org.${DOMAIN},DNS:localhost,DNS:${service}-${ORG}-org") \
 		-out .data/certs/grpc/${service}/server.crt
-
-cp-proto-app:
-	cp ./orgservices/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
-	cp ./orgservices/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto
 
 grpc-ui:
 	grpcui \

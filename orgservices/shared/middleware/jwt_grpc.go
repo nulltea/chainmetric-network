@@ -116,7 +116,7 @@ func skipValidation(method string, skipMethods []string) bool {
 	}
 
 	for i := range skipMethods {
-		if fmt.Sprintf("/chainmetric.identity.service.%s", skipMethods[i]) == method {
+		if fmt.Sprintf("/chainmetric.%s", skipMethods[i]) == method {
 			skip = true
 			break
 		}
