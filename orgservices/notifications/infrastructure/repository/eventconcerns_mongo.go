@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/events"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
-	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

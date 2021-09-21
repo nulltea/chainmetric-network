@@ -12,7 +12,7 @@ go_library(
         "//orgservices/notifications/model/audience",
         "//orgservices/notifications/model/events",
         "//orgservices/notifications/model/intention",
-        "//smartcontracts/shared/core",
+        "//orgservices/shared/core",
         "@com_github_spf13_viper//:viper",
         "@org_mongodb_go_mongo_driver//bson",
         "@org_mongodb_go_mongo_driver//mongo",
