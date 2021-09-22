@@ -64,41 +64,46 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc assets -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/assets-contract \
 		--rebuild=false \
+		--source=./smartcontracts/assets \
 		--charts=./deploy/charts \
-		../smartcontracts
+		./smartcontracts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
+	fabnctl install cc devices -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/devices-contract \
 		--rebuild=false \
+		--source=./smartcontracts/devices \
 		--charts=./deploy/charts \
-		../smartcontracts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
+	fabnctl install cc requirements -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/requirements-contract \
 		--rebuild=false \
+		--source=./smartcontracts/requirements \
 		--charts=./deploy/charts \
-		../smartcontracts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
+	fabnctl install cc readings -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/readings-contract \
 		--rebuild=false \
+		--source=./smartcontracts/readings \
 		--charts=./deploy/charts \
-		../smartcontracts
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
 			-o=chipa-inu \
@@ -130,18 +135,21 @@ fabric-clear:
 
 	# helm uninstall artifacts || echo "Chart 'artifacts/artifacts' already uninstalled"
 
-build-install-chaincode:
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c ${cc} -C=supply-channel \
+build-chaincode:
+	fabnctl build cc ${cc} . --ssh --host=192.168.50.88 -u=ubuntu \
+			--target=smartcontracts/${cc} --ignore="bazel-*" --push
+
+install-chaincode:
+	fabnctl install cc ${cc} -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
-		--ssh --host=192.168.50.88 -u=ubuntu \
-		--ignore="bazel-*" \
 		--image=chainmetric/${cc}-contract \
 		--source=./smartcontracts/${cc} \
 		--charts=./deploy/charts \
-		--push \
-		.
+
+deploy-chaincode: build-chaincode install-chaincode
 
 install-orgservice:
 	kubectl create -n network secret tls ${service}.${ORG}.org.${DOMAIN}-tls \
@@ -184,7 +192,7 @@ build-orgservice:
 	bazel run //orgservices/${service}:multiacrh
 	bazel run //orgservices/${service}:multiacrh-push
 
-build-install-orgservice: build-orgservice install-orgservice
+deploy-orgservice: build-orgservice install-orgservice
 
 grpc-tls-gen:
 	mkdir .data/certs/grpc/${service} || echo "directory .data/certs/grpc/${service} exists"
