@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//orgservices/notifications/model/audience",
         "//orgservices/notifications/model/intention",
+        "//orgservices/shared/core",
         "@com_github_timoth_y_chainmetric_core//models",
     ],
 )
