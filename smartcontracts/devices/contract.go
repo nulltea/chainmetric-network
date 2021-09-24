@@ -6,10 +6,10 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
-	"github.com/timoth-y/chainmetric-core/utils"
+	coreutils "github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
-	utils2 "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 
 	"github.com/timoth-y/chainmetric-core/models"
 
@@ -29,7 +29,7 @@ func NewDevicesContact() *DevicesContract {
 // Retrieve retrieves single models.Device record from blockchain ledger  by a given `id`.
 func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, id string) (*models.Device, error) {
 	data, err := ctx.GetStub().GetState(id); if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, utils.LoggedError(err, "failed to read from world state")
 	}
 
 	if data == nil {
@@ -43,7 +43,7 @@ func (c *DevicesContract) Retrieve(ctx contractapi.TransactionContextInterface, 
 func (c *DevicesContract) All(ctx contractapi.TransactionContextInterface) ([]*models.Device, error) {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.DeviceRecordType, []string{})
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, utils.LoggedError(err, "failed to read from world state")
 	}
 
 	return c.drain(iter, nil), nil
@@ -58,14 +58,14 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 	)
 
 	if device, err = device.Decode([]byte(payload)); err != nil {
-		return "", utils2.LoggedError(err, "failed to deserialize request")
+		return "", utils.LoggedError(err, "failed to deserialize request")
 	}
 
 	if len(device.ID) == 0 {
 		event = "inserted"
 
 		if device.ID, err = generateCompositeKey(ctx, device); err != nil {
-			return "", utils2.LoggedError(err, "failed to generate composite key")
+			return "", utils.LoggedError(err, "failed to generate composite key")
 		}
 	}
 
@@ -74,7 +74,7 @@ func (c *DevicesContract) Register(ctx contractapi.TransactionContextInterface, 
 	}
 
 	if err := c.save(ctx, device, event); err != nil {
-		return "", utils2.LoggedError(err, "failed saving device")
+		return "", utils.LoggedError(err, "failed saving device")
 	}
 
 	return device.ID, nil
@@ -94,7 +94,7 @@ func (c *DevicesContract) Update(
 	}
 
 	req, err := requests.DeviceUpdateRequest{}.Decode([]byte(payload)); if err != nil {
-		return nil, utils2.LoggedError(err, "failed to deserialize request")
+		return nil, utils.LoggedError(err, "failed to deserialize request")
 	}
 
 	req.Update(device)
@@ -104,7 +104,7 @@ func (c *DevicesContract) Update(
 	}
 
 	if err := c.save(ctx, device, "updated"); err != nil {
-		return nil, utils2.LoggedError(err, "failed to save device record")
+		return nil, utils.LoggedError(err, "failed to save device record")
 	}
 
 	return device, nil
@@ -129,10 +129,10 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 	}
 
 	if err = ctx.GetStub().DelState(id); err != nil {
-		return utils2.LoggedErrorf(err, "failed to unbind device with id: %s", id)
+		return utils.LoggedErrorf(err, "failed to unbind device with id: %s", id)
 	}
 
-	return utils2.LoggedError(
+	return utils.LoggedError(
 		ctx.GetStub().SetEvent("devices.removed", models.Device{ID: id}.Encode()),
 		"failed to emit event on device remove",
 	)
@@ -143,10 +143,10 @@ func (c *DevicesContract) Unbind(ctx contractapi.TransactionContextInterface, id
 func (c *DevicesContract) RemoveAll(ctx contractapi.TransactionContextInterface) error {
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(couchdb.DeviceRecordType, []string{})
 	if err != nil {
-		return utils2.LoggedError(err, "failed to read from world state")
+		return utils.LoggedError(err, "failed to read from world state")
 	}
 
-	utils2.Iterate(iter, func(key string, _ []byte) error {
+	utils.Iterate(iter, func(key string, _ []byte) error {
 		if err = ctx.GetStub().DelState(key); err != nil {
 			return errors.Wrap(err, "failed to remove device record")
 		}
@@ -167,7 +167,7 @@ func (c *DevicesContract) drain(
 ) []*models.Device {
 	var devices []*models.Device
 
-	utils2.Iterate(iter, func(_ string, value []byte) error {
+	utils.Iterate(iter, func(_ string, value []byte) error {
 		device, err := models.Device{}.Decode(value); if err != nil {
 			return errors.Wrap(err, "failed to deserialize device record")
 		}
@@ -209,7 +209,7 @@ func (c *DevicesContract) save(
 
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, dev *models.Device) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(couchdb.DeviceRecordType, []string{
-		utils.Hash(dev.Hostname),
-		utils.Hash(dev.Holder),
+		coreutils.Hash(dev.Hostname),
+		coreutils.Hash(dev.Holder),
 	})
 }

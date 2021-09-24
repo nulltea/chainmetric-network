@@ -70,10 +70,8 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/assets-contract \
-		--rebuild=false \
 		--source=./smartcontracts/assets \
-		--charts=./deploy/charts \
-		./smartcontracts
+		--charts=./deploy/charts
 
 	fabnctl install cc devices -a=arm64 -d=chainmetric.network \
 		-C=supply-channel \
@@ -81,9 +79,8 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/devices-contract \
-		--rebuild=false \
 		--source=./smartcontracts/devices \
-		--charts=./deploy/charts \
+		--charts=./deploy/charts
 
 	fabnctl install cc requirements -a=arm64 -d=chainmetric.network \
 		-C=supply-channel \
@@ -91,9 +88,8 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/requirements-contract \
-		--rebuild=false \
 		--source=./smartcontracts/requirements \
-		--charts=./deploy/charts \
+		--charts=./deploy/charts
 
 	fabnctl install cc readings -a=arm64 -d=chainmetric.network \
 		-C=supply-channel \
@@ -101,9 +97,8 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/readings-contract \
-		--rebuild=false \
 		--source=./smartcontracts/readings \
-		--charts=./deploy/charts \
+		--charts=./deploy/charts
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
 			-o=chipa-inu \

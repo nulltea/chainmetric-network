@@ -132,9 +132,11 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 
 	go rc.sendToSocketListeners(ctx, readings)
 
-	if err = validation.Validate(ctx, readings); err != nil {
-		return "", sharedutils.LoggedError(err, "failed to validate readings")
-	}
+	defer func() {
+		if err = validation.Validate(ctx, readings); err != nil {
+			core.Logger.Error(err, "failed to validate readings")
+		}
+	}()
 
 	return readings.ID, rc.save(ctx, readings)
 }

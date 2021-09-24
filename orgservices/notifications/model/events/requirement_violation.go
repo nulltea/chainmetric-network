@@ -74,7 +74,7 @@ func (rv RequirementsViolationEventConcern) Topic() string {
 
 func (rv RequirementsViolationEventConcern) Filter() string {
 	if rv.Args.Any {
-		return fmt.Sprintf("asset.%s.requirements.*.violation", rv.Args.AssetID)
+		return fmt.Sprintf("asset.%s.requirements.[a-z]+.violation", rv.Args.AssetID)
 	}
 
 	return fmt.Sprintf("asset.%s.requirements.%s.violation", rv.Args.AssetID, rv.Args.Metric)

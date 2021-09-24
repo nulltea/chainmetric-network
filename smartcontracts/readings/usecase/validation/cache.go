@@ -13,13 +13,13 @@ var rqmCache map[string]map[models.Metric][]models.Requirement
 func SyncRequirements(ctx contractapi.TransactionContextInterface) error {
 	var reqs []*models.Requirements
 
-	payload, err := utils.CrossChaincodeCall(ctx, "rqmCache", "All")
+	payload, err := utils.CrossChaincodeCall(ctx, "requirements", "All")
 	if err != nil {
-		return utils.LoggedError(err, "failed to request rqmCache for validator")
+		return utils.LoggedError(err, "failed to request requirements for validator")
 	}
 
 	if err = json.Unmarshal(payload, &reqs); err != nil {
-		return utils.LoggedError(err, "failed to decode rqmCache")
+		return utils.LoggedError(err, "failed to decode requirements")
 	}
 
 	rqmCache = make(map[string]map[models.Metric][]models.Requirement)

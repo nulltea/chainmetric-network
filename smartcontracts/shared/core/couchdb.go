@@ -1,8 +1,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/timoth-y/chainmetric-core/utils"
 )
 
@@ -21,8 +19,6 @@ func BuildQuery(selector map[string]interface{}, sort ...string) string {
 	if len(sort) > 0 {
 		query["sort"] = bindSortingPairs("asc", sort...)
 	}
-
-	fmt.Println(utils.MustEncode(query))
 
 	return utils.MustEncode(query)
 }

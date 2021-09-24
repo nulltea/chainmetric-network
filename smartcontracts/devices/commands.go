@@ -7,17 +7,17 @@ import (
 	"github.com/pkg/errors"
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-core/models/requests"
-	"github.com/timoth-y/chainmetric-core/utils"
+	coreutils "github.com/timoth-y/chainmetric-core/utils"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
 	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/model/couchdb"
-	utils2 "github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
+	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/utils"
 )
 
 // Command handles models.DeviceCommand execution requests for devices.
 // It will also log execution status in as a models.DeviceCommandLogEntry in the blockchain ledger.
 func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, payload string) error {
 	req, err := requests.DeviceCommandRequest{}.Decode([]byte(payload)); if err != nil {
-		return utils2.LoggedError(err, "failed to deserialize request")
+		return utils.LoggedError(err, "failed to deserialize request")
 	}
 
 	if err = req.Validate(); err != nil {
@@ -25,18 +25,18 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 	}
 
 	if exists, err := c.Exists(ctx, req.DeviceID); err != nil {
-		return utils2.LoggedError(err, "failed to verify device existence")
+		return utils.LoggedError(err, "failed to verify device existence")
 	} else if !exists {
 		return errors.Errorf("device with id '%s' does not registered in the blockchain", req.DeviceID)
 	}
 
 	var key string
 	if key, err = ctx.GetStub().CreateCompositeKey(couchdb.CommandLogEntryRecordType, []string{
-		utils.Hash(req.DeviceID),
-		utils.Hash(string(req.Command)),
-		utils.Hash(req.IssuedAt.UTC().String()),
+		coreutils.Hash(req.DeviceID),
+		coreutils.Hash(string(req.Command)),
+		coreutils.Hash(req.IssuedAt.UTC().String()),
 	}); err != nil {
-		return utils2.LoggedError(err, "failed to generate device command composite key")
+		return utils.LoggedError(err, "failed to generate device command composite key")
 	}
 
 	if err = ctx.GetStub().PutState(key, couchdb.NewDeviceCommandLogEntry(&models.DeviceCommandLogEntry{
@@ -46,14 +46,14 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 		Status: models.DeviceCmdProcessing,
 		Timestamp: req.IssuedAt.UTC(),
 	}).Encode()); err != nil {
-		return utils2.LoggedError(err, "failed to log device command in blockchain ledger")
+		return utils.LoggedError(err, "failed to log device command in blockchain ledger")
 	}
 
 	if err = ctx.GetStub().SetEvent(fmt.Sprintf("devices.%s.command", req.DeviceID), requests.DeviceCommandEventPayload{
 		ID: key,
 		DeviceCommandRequest: *req,
 	}.Encode()); err != nil {
-		return utils2.LoggedErrorf(err,
+		return utils.LoggedErrorf(err,
 			"failed to emit '%s' command event for device '%s'", req.Command, req.DeviceID,
 		)
 	}
@@ -64,22 +64,22 @@ func (c *DevicesContract) Command(ctx contractapi.TransactionContextInterface, p
 // SubmitCommandResults updates models.DeviceCommandLogEntry in the blockchain ledger.
 func (c *DevicesContract) SubmitCommandResults(ctx contractapi.TransactionContextInterface, entryID string, payload string) error {
 	req, err := requests.DeviceCommandResultsSubmitRequest{}.Decode([]byte(payload)); if err != nil {
-		return utils2.LoggedError(err, "failed to deserialize request")
+		return utils.LoggedError(err, "failed to deserialize request")
 	}
 
 	// Verify command source
 	if data, err := ctx.GetStub().GetState(entryID); err != nil {
-		return utils2.LoggedError(err, "failed to verify command log entry existence")
+		return utils.LoggedError(err, "failed to verify command log entry existence")
 	} else if data == nil {
 		return errors.Errorf("command with id '%s' wasn't issued by devices contract, it is invalid", entryID)
 	}
 
 	data, err := ctx.GetStub().GetState(entryID); if err != nil {
-		return utils2.LoggedErrorf(err, "failed to retrieve command log entry with id '%s", entryID)
+		return utils.LoggedErrorf(err, "failed to retrieve command log entry with id '%s", entryID)
 	}
 
 	entry, err := models.DeviceCommandLogEntry{}.Decode(data); if err != nil {
-		return utils2.LoggedErrorf(err, "failed to deserialize command log entry with id '%s", entryID)
+		return utils.LoggedErrorf(err, "failed to deserialize command log entry with id '%s", entryID)
 	}
 
 	if err = req.Apply(entry); err != nil {
@@ -87,7 +87,7 @@ func (c *DevicesContract) SubmitCommandResults(ctx contractapi.TransactionContex
 	}
 
 	if err := ctx.GetStub().PutState(entryID, couchdb.NewDeviceCommandLogEntry(entry).Encode()); err != nil {
-		return utils2.LoggedError(err, "failed to update command log entry state")
+		return utils.LoggedError(err, "failed to update command log entry state")
 	}
 
 	return nil
@@ -97,17 +97,17 @@ func (c *DevicesContract) SubmitCommandResults(ctx contractapi.TransactionContex
 func (c *DevicesContract) CommandsLog(ctx contractapi.TransactionContextInterface, deviceID string) ([]*models.DeviceCommandLogEntry, error) {
 	// Verify target device
 	if exists, err := c.Exists(ctx, deviceID); err != nil {
-		return nil, utils2.LoggedError(err, "failed to verify device existence")
+		return nil, utils.LoggedError(err, "failed to verify device existence")
 	} else if !exists {
 		return nil, errors.Errorf("device with id '%s' does not registered in the blockchain", deviceID)
 	}
 
 	iter, err := ctx.GetStub().GetStateByPartialCompositeKey(
 		couchdb.CommandLogEntryRecordType,
-		[]string{utils.Hash(deviceID)},
+		[]string{coreutils.Hash(deviceID)},
 	)
 	if err != nil {
-		return nil, utils2.LoggedError(err, "failed to read from world state")
+		return nil, utils.LoggedError(err, "failed to read from world state")
 	}
 
 	var entries []*models.DeviceCommandLogEntry

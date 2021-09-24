@@ -10,9 +10,9 @@ import (
 )
 
 type Violation struct {
-	Value     float64 `json:"value"`
+	Value     float64   `json:"value"`
 	Timestamp time.Time `json:"timestamp"`
-	Location  string `json:"location"`
+	Location  string    `json:"location"`
 }
 
 type Notification struct {
@@ -42,23 +42,21 @@ func Validate(ctx contractapi.TransactionContextInterface, r *models.MetricReadi
 						violations[r.AssetID] = make(map[models.Metric][]Violation)
 					}
 
-					vs := violations[r.AssetID][m]
-
-					vs = append(violations[r.AssetID][m], Violation{
+					violations[r.AssetID][m] = append(violations[r.AssetID][m], Violation{
 						Value:     v,
 						Timestamp: r.Timestamp,
 						Location:  r.Location,
 					})
 
-					if len(vs) % 5 == 0 {
-						_ = ctx.GetStub().SetEvent(
-							fmt.Sprintf("asset.%s.requirements.%s.violation", r.AssetID, m),
+					if vs := violations[r.AssetID][m]; len(vs)%2 == 0 {
+						if err := ctx.GetStub().SetEvent(fmt.Sprintf("asset.%s.requirements.%s.violation", r.AssetID, m),
 							[]byte(utils.MustEncode(Notification{
-								AssetID: r.AssetID,
-								Metric: m,
-								Occurrences: vs,
+								AssetID:     r.AssetID,
+								Metric:      m,
 							})),
-						)
+						); err != nil {
+							return err
+						}
 					}
 				}
 			}
