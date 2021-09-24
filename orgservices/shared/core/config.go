@@ -31,9 +31,10 @@ func initConfig() {
 	viper.SetDefault("privileges_config","/app/config/privileges")
 
 	viper.SetDefault("notifications.events_buffer_size", 1000)
+	viper.SetDefault("notifications.event_receivers_count", 10)
 
 	viper.SetDefault("mongo_enabled", true)
-	viper.SetDefault("mongo_address", "mongodb://localhost:27017")
+	viper.SetDefault("mongo_address", "mongodb://localhost:27018")
 	viper.SetDefault("mongo_connection_timeout", "10s")
 	viper.SetDefault("mongo_query_timeout", "30s")
 	viper.SetDefault("mongo_auth", false)

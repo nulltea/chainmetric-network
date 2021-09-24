@@ -29,7 +29,7 @@ mongodb:
  		--from-literal=username=${MONGO_USERNAME} --from-literal=password=${MONGO_PASSWORD} \
  		--dry-run=client -o yaml | kubectl apply -f -
 
- vault:
+vault:
 	helm upgrade --install vault -n=kube-system -f=charts/helm-values/vault.yaml \
 		hashicorp/vault
 	kubectl -n=kube-system exec vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > .secrets/cluster-keys.json
@@ -64,41 +64,41 @@ fabric-install:
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc assets -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/assets-contract \
-		--rebuild=false \
-		--charts=./deploy/charts \
-		../smartcontracts
+		--source=./smartcontracts/assets \
+		--charts=./deploy/charts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c devices -C=supply-channel \
+	fabnctl install cc devices -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/devices-contract \
-		--rebuild=false \
-		--charts=./deploy/charts \
-		../smartcontracts
+		--source=./smartcontracts/devices \
+		--charts=./deploy/charts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c requirements -C=supply-channel \
+	fabnctl install cc requirements -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/requirements-contract \
-		--rebuild=false \
-		--charts=./deploy/charts \
-		../smartcontracts
+		--source=./smartcontracts/requirements \
+		--charts=./deploy/charts
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c readings -C=supply-channel \
+	fabnctl install cc readings -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
 		-o=moon-lan -p=peer0 \
 		--image=chainmetric/readings-contract \
-		--rebuild=false \
-		--charts=./deploy/charts \
-		../smartcontracts
+		--source=./smartcontracts/readings \
+		--charts=./deploy/charts
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
 			-o=chipa-inu \
@@ -129,6 +129,22 @@ fabric-clear:
 	helm uninstall orderer || echo "Chart 'orderer/orderer' already uninstalled"
 
 	# helm uninstall artifacts || echo "Chart 'artifacts/artifacts' already uninstalled"
+
+build-chaincode:
+	fabnctl build cc ${cc} . --ssh --host=192.168.50.88 -u=ubuntu \
+			--target=smartcontracts/${cc} --ignore="bazel-*" --push
+
+install-chaincode:
+	fabnctl install cc ${cc} -a=arm64 -d=chainmetric.network \
+		-C=supply-channel \
+		-o=chipa-inu -p=peer0 \
+		-o=blueberry-go -p=peer0 \
+		-o=moon-lan -p=peer0 \
+		--image=chainmetric/${cc}-contract \
+		--source=./smartcontracts/${cc} \
+		--charts=./deploy/charts \
+
+deploy-chaincode: build-chaincode install-chaincode
 
 install-orgservice:
 	kubectl create -n network secret tls ${service}.${ORG}.org.${DOMAIN}-tls \
@@ -171,7 +187,7 @@ build-orgservice:
 	bazel run //orgservices/${service}:multiacrh
 	bazel run //orgservices/${service}:multiacrh-push
 
-build-install-orgservice: build-orgservice install-orgservice
+deploy-orgservice: build-orgservice install-orgservice
 
 grpc-tls-gen:
 	mkdir .data/certs/grpc/${service} || echo "directory .data/certs/grpc/${service} exists"
@@ -192,10 +208,6 @@ grpc-tls-gen:
 		-CA .data/certs/grpc/${service}/ca.crt -CAkey .data/certs/grpc/${service}/ca.key -CAcreateserial -days 365 \
 		-extfile <(printf "subjectAltName=DNS:${service}.${ORG}.org.${DOMAIN},DNS:localhost,DNS:${service}-${ORG}-org") \
 		-out .data/certs/grpc/${service}/server.crt
-
-cp-proto-app:
-	cp ./orgservices/users/api/presenter/users.proto ../app/app/assets/proto/user.proto
-	cp ./orgservices/users/api/rpc/identity.proto ../app/app/assets/proto/identity_grpc.proto
 
 grpc-ui:
 	grpcui \

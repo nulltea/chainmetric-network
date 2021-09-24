@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/viper"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/events"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
-	"github.com/timoth-y/chainmetric-network/smartcontracts/shared/core"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -32,7 +33,6 @@ func (r *EventConcernsMongo) GetAll() ([]intention.EventConcern, error) {
 		ctx, cancel = context.WithTimeout(context.Background(), viper.GetDuration("mongo_query_timeout"))
 	)
 
-
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{})
@@ -43,7 +43,7 @@ func (r *EventConcernsMongo) GetAll() ([]intention.EventConcern, error) {
 	for cursor.Next(ctx) {
 		var (
 			record intention.EventConcern
-			kind   = intention.EventKind(cursor.Current.Lookup("event_kind").String())
+			kind   = intention.EventKind(cursor.Current.Lookup("event_kind").StringValue())
 		)
 
 		switch kind {
@@ -56,8 +56,10 @@ func (r *EventConcernsMongo) GetAll() ([]intention.EventConcern, error) {
 		}
 
 		if err = cursor.Decode(record); err != nil {
-			results = append(results, record)
+			return nil, fmt.Errorf("failed to decode concern to type %t: %w", record, err)
 		}
+
+		results = append(results, record)
 	}
 
 	return results, err

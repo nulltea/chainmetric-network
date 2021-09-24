@@ -17,7 +17,7 @@ func Init() {
 	config.SetConfigType("yaml")
 	config.SetConfigName("privileges")
 	config.AddConfigPath(viper.GetString("privileges_config"))
-
+	config.AddConfigPath("orgservices/shared/data")
 
 	if err := config.ReadInConfig(); err != nil {
 		core.Logrus.WithError(err).

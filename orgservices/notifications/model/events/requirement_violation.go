@@ -2,10 +2,12 @@ package events
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/timoth-y/chainmetric-core/models"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/audience"
 	"github.com/timoth-y/chainmetric-network/orgservices/notifications/model/intention"
+	"github.com/timoth-y/chainmetric-network/orgservices/shared/core"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 type (
 	// RequirementsViolationEventConcern implements intention.EventConcern for requirements violations events on chain.
 	RequirementsViolationEventConcern struct {
-		intention.EventConcernBase
+		intention.EventConcernBase `bson:",inline"`
 		Args RequirementsViolationArgs `bson:"args"`
 	}
 
@@ -29,7 +31,7 @@ type (
 
 // NewRequirementsViolationConcerns constructs one or multiple RequirementsViolationEventConcern.
 func NewRequirementsViolationConcerns(assetID string, metrics ...string) []intention.EventConcern {
-	if len(metrics) > 0 {
+	if len(metrics) == 0 {
 		args := RequirementsViolationArgs{
 			AssetID: assetID, Any: true,
 		}
@@ -58,23 +60,47 @@ func NewRequirementsViolationConcerns(assetID string, metrics ...string) []inten
 	return cs
 }
 
+// Topic ...
 func (rv RequirementsViolationEventConcern) Topic() string {
-	return rv.Filter()
+	var (
+		assetID = strings.ReplaceAll(rv.Args.AssetID, "\x00", "")
+		metric = string(rv.Args.Metric)
+	)
+
+	if rv.Args.Any {
+		return fmt.Sprintf("%s.requirements.violation", assetID)
+	}
+
+	return fmt.Sprintf("asset.%s.requirements.%s.violation", assetID, metric)
 }
 
+// Filter ...
 func (rv RequirementsViolationEventConcern) Filter() string {
 	if rv.Args.Any {
-		return fmt.Sprintf("asset.%s.requirements.*.violation", rv.Args.AssetID)
+		return fmt.Sprintf("asset.%s.requirements.[a-z]+.violation", rv.Args.AssetID)
 	}
 
 	return fmt.Sprintf("asset.%s.requirements.%s.violation", rv.Args.AssetID, rv.Args.Metric)
 }
 
 func (rv RequirementsViolationEventConcern) NotificationWith(data []byte) (*audience.Notification, error) {
+	payload, err := core.Fabric.GetContract("assets").EvaluateTransaction("Retrieve", rv.Args.AssetID)
+	if err != nil {
+		return nil, fmt.Errorf("faiiled to retrive asset with id '%s': %w", rv.Args.AssetID, err)
+	}
+
+	asset, err := models.Asset{}.Decode(payload)
+	if err != nil {
+		return nil, fmt.Errorf("faiiled to decode asset with id '%s': %w", rv.Args.AssetID, err)
+	}
+
 	return &audience.Notification{
-		Caption: "Requirements violation",
-		Description: "",
-		Data: data,
+		Caption: fmt.Sprintf("Warning: %s requiremnts viiolation", asset.SKU),
+		Description: fmt.Sprintf("Latest %s readings are violating requiremnts for %s", asset.SKU),
+		Data: map[string]interface{}{
+			"asset_id": rv.Args.AssetID,
+			"metric": rv.Args.Metric,
+		},
 	}, nil
 }
 
