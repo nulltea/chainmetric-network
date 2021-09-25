@@ -1,13 +1,5 @@
 # Chainmetric: Smart Contracts
 
-[![golang badge]][golang]&nbsp;
-[![commit activity badge]][repo commit activity]&nbsp;
-[![blockchain badge]][hyperledger fabric url]&nbsp;
-[![kubernetes badge]][kubernetes url]&nbsp;
-[![license badge]][license url]
-
-## Overview
-
 _**Chainmetric Smart Contracts**_ are designed to grand access to blockchain-stored data while implementing such data validation, aggregation, and management functionality.
 
 Being a part of a permissioned blockchain network based on Hyperledger Fabric stack,
@@ -116,7 +108,7 @@ readings, err := network.GetContract("readings").EvaluateTransaction("ForMetric"
 
 [Chaincodes][chaincode] (alternative to Smart Contracts) in Hyperledger Fabric infrastructure can be deployed both by embedding their source code into the blockchain peers and by deploying them [as external services][chaincode as external service], which is a way more versatile option especially for Kubernetes cluster environment where such Chaincodes can be deployed as a pods.
 
-For chaincodes initial deployment or further updates use `deploy cc` command as following: 
+For chaincodes initial deployment or further updates use `install cc` command as following: 
 
 ```shell
 fabnctl install cc --arch=arm64 --domain=chainmetric.network --chaincode=assets -C=supply-channel \
@@ -133,10 +125,8 @@ For more detailed instructions please refer to `fabnctl` [documentation](https:/
 - [x] Device remote commands over blockchain events [(#1)](https://github.com/timoth-y/chainmetric-network/pull/1)
 - [x] Cache layer for storing contracts operational data e.g. `EventSocketSubscriptionTicket` [(#4)](https://github.com/timoth-y/chainmetric-network/pull/4)
 - [x] Devices location management business logic [(#2)](https://github.com/timoth-y/chainmetric-network/pull/2)
-- [ ] Requirements violation notification
+- [x] Requirements violation notification
 - [ ] Requirements violations rule engine
-- [ ] Transaction for assets changes history retrieving
-- [ ] Users contract
 
 ## Wrap up
 
