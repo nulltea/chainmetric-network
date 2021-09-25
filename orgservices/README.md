@@ -20,6 +20,13 @@ As mentioned services are deployed per-organization and are therefore accessed o
 Services export their functionality via gRPC API, which have a positive impact both of communication speed and thereafter user experience, as well as integration ease and developer experience.
 
 ### Identity service
-User management in a permissioned blockchain infrastructure is complicated and security intensive enough t
+Manages user's identities: creates new ones on sign-up, authenticates existing users, authorities based on roles and privileges.
 
-### Notificatiions  s
+See details at: [**orgservices/identity**](https://github.com/timoth-y/chainmetric-network/tree/main/orgservices/identity).
+
+### Notifications service
+Allows users to subscribe to changes and events on Blockchain ledger with intend to receive convenient push notifications even when application is closed.
+
+See details at: [**orgservices/notifications**](https://github.com/timoth-y/chainmetric-network/main/orgservices/notifications).
+
+## Deployment
