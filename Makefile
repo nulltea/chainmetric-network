@@ -131,7 +131,7 @@ fabric-clear:
 	# helm uninstall artifacts || echo "Chart 'artifacts/artifacts' already uninstalled"
 
 build-chaincode:
-	fabnctl build cc ${cc} . --ssh --host=192.168.50.88 -u=ubuntu \
+	fabnctl build cc ${cc} . --ssh --host=${NODE_IP} -u=ubuntu \
 			--target=smartcontracts/${cc} --ignore="bazel-*" --push
 
 install-chaincode:

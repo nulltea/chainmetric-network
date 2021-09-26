@@ -220,10 +220,12 @@ hyperledger-deploy:
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0
 
-	fabnctl install cc -a=arm64 -d=chainmetric.network -c assets -C=supply-channel \
+	fabnctl install cc assets -a=arm64 -d=chainmetric.network -C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-r iotchainnetwork ../contracts
+		--image=chainmetric/assets-contract \
+		--source=./smartcontracts/assets \
+		--charts=./deploy/charts
 	# ... remaining chaincodes deploy commands
 
 	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
@@ -261,6 +263,25 @@ Refer to [timoth-y/chainmetric-iot][chainmetric iot repo] repo for build and dep
 Controlling edge devices, registering new and existing assets, defining requirements for them, and monitoring environment in real time.
 All of those and more can be done via Chainmetric mobile application for admins and other users.
 Please refer to [timoth-y/chainmetric-app][chainmetric app repo] repo for installation and usage instructions.
+
+## Development
+For initializing local development environment use `bazel run` command specified gazelle plugin target.
+
+```bash
+$ bazel run //:gazelle
+```
+
+Initially it is required to update third-party dependencies for bazel build based on `go.mod`. Use following command:
+
+```bash
+$ gazelle update-repos --from_file=go.mod -index=false -to_macro=go_third_party.bzl%go_dependencies
+```
+
+To link Protobuf generated files in directories where proto files are defined use following command:
+
+```bash
+$ bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run
+```
 
 ## Roadmap
 

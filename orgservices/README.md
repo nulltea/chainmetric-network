@@ -54,7 +54,7 @@ For initializing local development environment use `bazel run` command specified
 $ bazel run //:gazelle
 ```
 
-To paste Protobuf generated files in directories where proto files are defined use following command:
+To link Protobuf generated files in directories where proto files are defined use following command:
 
 ```bash
 $ bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run

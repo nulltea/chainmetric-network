@@ -12,7 +12,7 @@ Such constraint is unacceptable for mobile applications, which for handling push
 
 ![flowchart]
 
-[flowchart]: https://github.com/timoth-y/chainmetric-network/blob/github/update_readme/docs/notifications-service-flowchart.png?raw=true
+[flowchart]: https://github.com/timoth-y/chainmetric-network/blob/main/docs/notifications-service-flowchart.png?raw=true
 
 
 ## API Reference
