@@ -4,6 +4,8 @@ User management in a permissioned blockchain infrastructure is complicated and s
 
 Current service integrates Fabric CA with HashiCorp Vault and exposes gRPC methods for hiding complexity of issuing identity X509 certificates and private key pairs, intricate access control, and blockchain authentication behind plain userpass login and registration scheme.
 
+## Flowchart
+
 ![flowchart]
 *Identity management flow chart*
 
@@ -43,3 +45,7 @@ Returns user data stored on server.
 #### rpc ChangePassword([ChangePasswordRequest](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/identity/api/presenter/user.proto#L46)) returns ([StatusResponse](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/shared/proto/status.proto))
 
 Allows to change password.
+
+## License
+
+Licensed under the [Apache 2.0](https://github.com/timoth-y/chainmetric-network/blob/main/LICENSE).
