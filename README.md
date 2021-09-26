@@ -252,7 +252,7 @@ So you can make required changes in [`hyperledger-deploy`](https://github.com/ti
 make hyperledger-deploy
 ```
 
-#### Off-chain services installation
+### Off-chain services installation
 
 Chainmetric also introduces off-chain per-organisation services with intention to support and extend both functionality and availability of Blockchain network.
 
