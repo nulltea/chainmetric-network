@@ -62,7 +62,7 @@ $ fabnctl build cc assets . \
 Or use make rule `build-chaincode` specifying both name of the contract as following:
 
 ```bash
-$ make cc=assets build-chaincode
+make cc=assets build-chaincode
 ```
 
 ### Installation
@@ -70,7 +70,7 @@ $ make cc=assets build-chaincode
 For chaincodes installation or further updates use `install cc` command as following: 
 
 ```bash
-$ fabnctl install cc assets --arch=arm64 --domain=chainmetric.network -C=supply-channel \
+fabnctl install cc assets --arch=arm64 --domain=chainmetric.network -C=supply-channel \
    -o=org1 -p=peer0 \
    -o=org2 -p=peer0 \
    -o=org3 -p=peer0 \
@@ -82,12 +82,12 @@ $ fabnctl install cc assets --arch=arm64 --domain=chainmetric.network -C=supply-
 Or use make rule `install-chaincode` specifying both name of the contract as following:
 
 ```bash
-$ make cc=assets install-chaincode
+make cc=assets install-chaincode
 ```
 
 Rule `deploy-chaincode` is a combination of both previous ones:
 ```bash
-$ make service=identity deploy-chaincode
+make service=identity deploy-chaincode
 ```
 
 For more detailed instructions please refer to `fabnctl` [documentation](https://github.com/timoth-y/fabnctl#deploy-chaincodes).
@@ -96,7 +96,7 @@ For more detailed instructions please refer to `fabnctl` [documentation](https:/
 For initializing local development environment use `bazel run` command specified gazelle plugin target.
 
 ```bash
-$ bazel run //:gazelle
+bazel run //:gazelle
 ```
 
 ## Roadmap

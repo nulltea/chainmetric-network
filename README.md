@@ -114,6 +114,18 @@ make storage
 
 Now to request volume provisioning `local-path` Storage Class can be used in Kubernetes deploy configs.
 
+#### HashiCorp Vault
+
+HashiCorp Vault is a centralised secured secret manager service that used for storing x509 identities of Fabric network users,
+providing convenient [SSO authentication](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/identity/README.md),
+issuing TLS certificates for gRPC APIs, etc.
+
+To install it please use `vault` make rule.
+
+```shell
+make vault
+```
+
 ### Generate network artifacts
 
 Hyperledger Fabric is a permissioned blockchain, thus you cannot simply spin up the node and start participating in network activities,
@@ -234,17 +246,23 @@ hyperledger-deploy:
 			-o=moon-lan
 ```
 
-So you can make required changes in [`hyperledger-deploy`](https://github.com/timoth-y/chainmetric-network/blob/github/update_readme/Makefile#L23) rule and run it:
+So you can make required changes in [`hyperledger-deploy`](https://github.com/timoth-y/chainmetric-network/blob/main/Makefile#L23) rule and run it:
 
 ```shell
 make hyperledger-deploy
 ```
 
+#### Off-chain services installation
+
+Chainmetric also introduces off-chain per-organisation services with intention to support and extend both functionality and availability of Blockchain network.
+
+For installation of such services please refer to [orgservice README](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/README.md)
+
 That's it! Chainmetric network is up and ready to receive data from [IoT devices][chainmetric iot repo]
 and dedicated [mobile app][chainmetric app repo], and on-chain [Smart Contracts][chainmetric contracts repo]
 would constantly process data to validated it against assigned requirements.
 
-[network config]: https://github.com/timoth-y/chainmetric-network/blob/github/update_readme/network-config.yaml
+[network config]: https://github.com/timoth-y/chainmetric-network/blob/main/network-config.yaml
 
 ## What's next?
 
@@ -268,19 +286,19 @@ Please refer to [timoth-y/chainmetric-app][chainmetric app repo] repo for instal
 For initializing local development environment use `bazel run` command specified gazelle plugin target.
 
 ```bash
-$ bazel run //:gazelle
+bazel run //:gazelle
 ```
 
 Initially it is required to update third-party dependencies for bazel build based on `go.mod`. Use following command:
 
 ```bash
-$ gazelle update-repos --from_file=go.mod -index=false -to_macro=go_third_party.bzl%go_dependencies
+gazelle update-repos --from_file=go.mod -index=false -to_macro=go_third_party.bzl%go_dependencies
 ```
 
 To link Protobuf generated files in directories where proto files are defined use following command:
 
 ```bash
-$ bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run
+bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run
 ```
 
 ## Roadmap

@@ -23,7 +23,7 @@ infrastructure:
 		infrastructure charts/infrastructure
 
 mongodb:
-	helm upgrade --install chipa-inu-org-mongodb \
+	helm upgrade --install ${org}-org-mongodb \
 		--set auth.password=${MONGO_PASSWORD} -f ./charts/helm-values/mongodb.yaml bitnami/mongodb
 	kubectl create secret generic mongo-auth \
  		--from-literal=username=${MONGO_USERNAME} --from-literal=password=${MONGO_PASSWORD} \
@@ -169,7 +169,7 @@ install-orgservice:
 		--from-literal=token=${VAULT_TOKEN} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	helm upgrade --install ${service}-${ORG} deploy/charts/api-service -f deploy/config/orgservices/${service}.yaml
+	helm upgrade --install ${service}-${org} deploy/charts/api-service -f deploy/config/orgservices/${service}.yaml
 
 	kubectl create secret generic vault-credentials \
 		--from-literal=token=${VAULT_TOKEN} \
@@ -195,18 +195,18 @@ grpc-tls-gen:
 		-out .data/certs/grpc/${service}/ca.key 2048
 
 	openssl req \
-		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${ORG}.org.${DOMAIN}" \
+		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${org}.org.${DOMAIN}" \
 		-new -x509 -days 365 -key .data/certs/grpc/${service}/ca.key -out .data/certs/grpc/${service}/ca.crt
 
 	openssl req -newkey rsa:2048 \
 		-nodes -keyout .data/certs/grpc/${service}/server.key \
-		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${ORG}.org.${DOMAIN}" \
+		-subj "/C=UA/ST=Kiev/O=Chainmetric, Inc./CN=${service}.${org}.org.${DOMAIN}" \
 		-out .data/certs/grpc/${service}/server.csr
 
 	openssl x509 -req \
 		-in .data/certs/grpc/${service}/server.csr \
 		-CA .data/certs/grpc/${service}/ca.crt -CAkey .data/certs/grpc/${service}/ca.key -CAcreateserial -days 365 \
-		-extfile <(printf "subjectAltName=DNS:${service}.${ORG}.org.${DOMAIN},DNS:localhost,DNS:${service}-${ORG}-org") \
+		-extfile <(printf "subjectAltName=DNS:${service}.${org}.org.${DOMAIN},DNS:localhost,DNS:${service}-${org}-org") \
 		-out .data/certs/grpc/${service}/server.crt
 
 grpc-ui:

@@ -1,6 +1,6 @@
 # Chainmetric: Off-Chain Services
 
-In order to support and extend both functionality and availability of Chainmetric's blockchain network, additional per-organization off-chain API services are introduced.
+In order to support and extend both functionality and availability of Chainmetric's Blockchain network, additional per-organization off-chain API services are introduced.
 
 Such services outsource execution of operations that require integration with various infrastructure components (HashiCorp Vault, Mongo DB, Firebase) and cannot be performed in a deterministic way as Fabric's on-chain Smart Contracts require.
 
@@ -30,34 +30,57 @@ Allows users to subscribe to changes and events on Blockchain ledger with intend
 See details at: [**orgservices/notifications**](https://github.com/timoth-y/chainmetric-network/main/orgservices/notifications).
 
 ## Deployment
+
+### Installing Mongo DB
+
+Each organization can have its own instance of Mongo DB database for storing sensitive user data, notification subscriptions, etc.
+
+To install it please use `mongodb` make rule specifying target organization as following:
+
+```bash
+make org=org1 mongodb
+```
+
+### Building for source
+
 For building image out of source code use `build-orgservice` rule specifying name of the service as following:
 ```bash
-$ make service=identity build-orgservice
+make service=identity build-orgservice
 ```
+
+### gRPC TLS generation
+
+For generation TLS certificates for gRPC user `grpc-tls-gen` rule specifying both name of the service and target organization as following:
+
+```bash
+make service=identity org=org1 grpc-tls-gen
+```
+
+### Installation
 
 For installing service with pre-build image use `install-orgservice` rule specifying both name of the service and target organization as following:
 ```bash
-$ make service=identity org=org1 install-orgservice
+make service=identity org=org1 install-orgservice
 ```
 
 This will create all required secrets in current Kube context and `upgrade --install` Helm chart.
 
 Rule `deploy-orgservice` is a combination of both previous ones:
 ```bash
-$ make service=identity org=org1 deploy-orgservice
+make service=identity org=org1 deploy-orgservice
 ```
 
 ## Development
 For initializing local development environment use `bazel run` command specified gazelle plugin target.
 
 ```bash
-$ bazel run //:gazelle
+bazel run //:gazelle
 ```
 
 To link Protobuf generated files in directories where proto files are defined use following command:
 
 ```bash
-$ bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run
+bazel query 'kind("proto_link", //...)'  | xargs -L 1 bazel run
 ```
 
 ## Wrap up
