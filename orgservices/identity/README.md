@@ -7,9 +7,8 @@ Current service integrates Fabric CA with HashiCorp Vault and exposes gRPC metho
 ## Flowchart
 
 ![flowchart]
-*Identity management flow chart*
 
-[flowchart]: https://github.com/timoth-y/chainmetric-network/blob/github/update_readme/docs/identity-service-flowchart.png?raw=true
+[flowchart]: https://github.com/timoth-y/chainmetric-network/blob/main/docs/identity-service-flowchart.png?raw=true
 
 ## API Reference
 
