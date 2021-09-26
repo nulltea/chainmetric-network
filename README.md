@@ -246,21 +246,21 @@ hyperledger-deploy:
 			-o=moon-lan
 ```
 
-So you can make required changes in [`hyperledger-deploy`](https://github.com/timoth-y/chainmetric-network/blob/main/Makefile#L23) rule and run it:
+So you can make required changes in [`hyperledger-install`](https://github.com/timoth-y/chainmetric-network/blob/main/Makefile#L23) rule and run it:
 
 ```shell
-make hyperledger-deploy
+make hyperledger-install
 ```
+
+That's it! Chainmetric network is up and ready to receive data from [IoT devices][chainmetric iot repo]
+and dedicated [mobile app][chainmetric app repo], and on-chain [Smart Contracts][chainmetric contracts repo]
+would constantly process data to validated it against assigned requirements.
 
 ### Off-chain services installation
 
 Chainmetric also introduces off-chain per-organisation services with intention to support and extend both functionality and availability of Blockchain network.
 
 For installation of such services please refer to [orgservice README](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/README.md)
-
-That's it! Chainmetric network is up and ready to receive data from [IoT devices][chainmetric iot repo]
-and dedicated [mobile app][chainmetric app repo], and on-chain [Smart Contracts][chainmetric contracts repo]
-would constantly process data to validated it against assigned requirements.
 
 [network config]: https://github.com/timoth-y/chainmetric-network/blob/main/network-config.yaml
 
