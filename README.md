@@ -116,7 +116,7 @@ Now to request volume provisioning `local-path` Storage Class can be used in Kub
 
 #### HashiCorp Vault
 
-HashiCorp Vault is a centralised secured secret manager service that used for storing x509 identities of Fabric network users,
+[HashiCorp Vault](https://www.hashicorp.com/products/vault) is a centralised secured secret manager service that used for storing x509 identities of Fabric network users,
 providing convenient [SSO authentication](https://github.com/timoth-y/chainmetric-network/blob/main/orgservices/identity/README.md),
 issuing TLS certificates for gRPC APIs, etc.
 
