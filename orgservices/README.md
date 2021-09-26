@@ -31,7 +31,7 @@ See details at: [**orgservices/notifications**](https://github.com/timoth-y/chai
 
 ## Deployment
 
-### Installing Mongo DB
+### Mongo DB installation
 
 Each organization can have its own instance of Mongo DB database for storing sensitive user data, notification subscriptions, etc.
 
