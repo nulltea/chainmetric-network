@@ -9,17 +9,19 @@ import (
 	"github.com/timoth-y/chainmetric-core/utils"
 )
 
-type ViolationOccurrence struct {
-	Value     float64   `json:"value"`
-	Timestamp time.Time `json:"timestamp"`
-	Location  string    `json:"location"`
-}
+type (
+	ViolationOccurrence struct {
+		Value     float64   `json:"value"`
+		Timestamp time.Time `json:"timestamp"`
+		Location  string    `json:"location"`
+	}
 
-type Notification struct {
-	AssetID      string                `json:"asset_id"`
-	Metric       models.Metric         `json:"metric"`
-	Occurrences  []ViolationOccurrence `json:"occurrences"`
-}
+	Notification struct {
+		AssetID      string                `json:"asset_id"`
+		Metric       models.Metric         `json:"metric"`
+		Occurrences  []ViolationOccurrence `json:"occurrences"`
+	}
+)
 
 var violations = make(map[string]map[models.Metric][]ViolationOccurrence)
 
