@@ -31,7 +31,7 @@ mongodb:
 
 vault:
 	helm upgrade --install vault -n=kube-system -f=charts/helm-values/vault.yaml \
-		hashicorp/vault
+		hashicorp/vault --wait
 	kubectl -n=kube-system exec vault-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > .secrets/cluster-keys.json
 	kubectl -n=kube-system exec vault-0 -- vault operator unseal $(cat .secrets/cluster-keys.json | jq -r ".unseal_keys_b64[]")
 	kubectl -n=kube-system exec vault-0 -- vault login $(cat .secrets/cluster-keys.json | jq -r ".root_token")
@@ -39,71 +39,63 @@ vault:
 	kubectl -n=kube-system exec vault-0 -- vault auth enable userpass
 
 fabric-init:
-	kubectl create namespace network || echo "Namespace 'network' already exists"
-	kubectl config set-context --current --namespace=network
-	fabnctl gen artifacts -a=arm64 -d=chainmetric.network -f ./network-config.yaml \
+	fabnctl gen artifacts -a=arm64 -d=chainmetric.network --namespace=${NAMESPACE} -f ./network-config.yaml \
     	--charts=./deploy/charts
 
 fabric-install:
-	fabnctl install orderer -a=arm64 -d=chainmetric.network \
+	fabnctl install orderer -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		--charts=./deploy/charts
 
-	kubectl create secret generic couchdb-auth \
+	kubectl -n ${NAMESPACE} create secret generic couchdb-auth \
 		--from-literal=user=${COUCHDB_USERNAME} --from-literal=password=${COUCHDB_PASSWORD} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	fabnctl install peer -a=arm64 -d=chainmetric.network -o chipa-inu -p peer0 \
+	fabnctl install peer -a=arm64 -d=chainmetric.network -n ${NAMESPACE} -o chipa-inu -p peer0 \
 		--charts=./deploy/charts
-	fabnctl install peer -a=arm64 -d=chainmetric.network -o blueberry-go -p peer0 \
+	fabnctl install peer -a=arm64 -d=chainmetric.network -n ${NAMESPACE} -o blueberry-go -p peer0 \
 		--charts=./deploy/charts
-	fabnctl install peer -a=arm64 -d=chainmetric.network -o moon-lan -p peer0 \
-		--charts=./deploy/charts
+#	fabnctl install peer -a=arm64 -d=chainmetric.network -n ${NAMESPACE} -o moon-lan -p peer0 \
+#		--charts=./deploy/charts
 
-	fabnctl install channel -a=arm64 -d=chainmetric.network -c=supply-channel \
+	fabnctl install channel -a=arm64 -d=chainmetric.network -n ${NAMESPACE} -c=supply-channel \
 		-o=chipa-inu -p=peer0 \
-		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0
+		-o=blueberry-go -p=peer0
 
-	fabnctl install cc assets -a=arm64 -d=chainmetric.network \
+	fabnctl install cc assets -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0 \
 		--image=chainmetric/assets-contract \
 		--source=./smartcontracts/assets \
 		--charts=./deploy/charts
 
-	fabnctl install cc devices -a=arm64 -d=chainmetric.network \
+	fabnctl install cc devices -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0 \
 		--image=chainmetric/devices-contract \
 		--source=./smartcontracts/devices \
 		--charts=./deploy/charts
 
-	fabnctl install cc requirements -a=arm64 -d=chainmetric.network \
+	fabnctl install cc requirements -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0 \
 		--image=chainmetric/requirements-contract \
 		--source=./smartcontracts/requirements \
 		--charts=./deploy/charts
 
-	fabnctl install cc readings -a=arm64 -d=chainmetric.network \
+	fabnctl install cc readings -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0 \
 		--image=chainmetric/readings-contract \
 		--source=./smartcontracts/readings \
 		--charts=./deploy/charts
 
-	fabnctl update channel -a=arm64 -d=chainmetric.network --setAnchors -c=supply-channel \
+	fabnctl update channel -a=arm64 -d=chainmetric.network -n ${NAMESPACE} --setAnchors -c=supply-channel \
 			-o=chipa-inu \
-			-o=blueberry-go \
-			-o=moon-lan
+			-o=blueberry-go
 
 fabric-clear:
 	helm uninstall peer0-chipa-inu || echo "Chart 'peer/peer0-chipa-inu' already uninstalled"
@@ -135,11 +127,10 @@ build-chaincode:
 			--target=smartcontracts/${cc} --ignore="bazel-*" --push
 
 install-chaincode:
-	fabnctl install cc ${cc} -a=arm64 -d=chainmetric.network \
+	fabnctl install cc ${cc} -a=arm64 -d=chainmetric.network -n ${NAMESPACE} \
 		-C=supply-channel \
 		-o=chipa-inu -p=peer0 \
 		-o=blueberry-go -p=peer0 \
-		-o=moon-lan -p=peer0 \
 		--image=chainmetric/${cc}-contract \
 		--source=./smartcontracts/${cc} \
 		--charts=./deploy/charts \
@@ -147,39 +138,33 @@ install-chaincode:
 deploy-chaincode: build-chaincode install-chaincode
 
 install-orgservice:
-	kubectl create -n network secret tls ${service}.${ORG}.org.${DOMAIN}-tls \
+	kubectl -n ${NAMESPACE} create secret tls ${service}.${org}.org.${DOMAIN}-tls \
 		--key=".data/certs/grpc/${service}/server.key" \
 		--cert=".data/certs/grpc/${service}/server.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic ${service}.${ORG}.org.${DOMAIN}-ca \
+	kubectl -n ${NAMESPACE} create secret generic ${service}.${org}.org.${DOMAIN}-ca \
 		--from-file=".data/certs/grpc/${service}/ca.crt" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic ${service}-${ORG}-org-fabric-connection \
+	kubectl -n ${NAMESPACE} create secret generic ${service}-${org}-org-fabric-connection \
 		--from-file=".data/config/${service}/connection.yaml" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic jwt-keys \
+	kubectl -n ${NAMESPACE} create secret generic jwt-keys \
 		--from-file=".data/certs/jwt/jwt-cert.pem" \
 		--from-file=".data/certs/jwt/jwt-key.pem" \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl create secret generic vault-credentials \
+	kubectl -n ${NAMESPACE} create secret generic vault-credentials \
 		--from-literal=token=${VAULT_TOKEN} \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	helm upgrade --install ${service}-${org} deploy/charts/api-service -f deploy/config/orgservices/${service}.yaml
-
-	kubectl create secret generic vault-credentials \
-		--from-literal=token=${VAULT_TOKEN} \
-		--dry-run=client -o yaml | kubectl apply -f -
-
-	kubectl create secret generic privileges-config \
+	kubectl -n ${NAMESPACE} create secret generic privileges-config \
 		--from-file=orgservices/shared/data/privileges.yaml \
 		--dry-run=client -o yaml | kubectl apply -f -
 
-	helm upgrade --install ${service}-${ORG} deploy/charts/api-service
+	helm -n ${NAMESPACE} upgrade --install ${service}-${org} deploy/charts/api-service -f deploy/config/orgservices/${service}.yaml
 
 build-orgservice:
 	bazel run //:gazelle

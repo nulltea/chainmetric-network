@@ -3,8 +3,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "validation",
     srcs = [
-        "cache.go",
-        "rules.go",
+        "requirements_cache.go",
+        "validation.go",
     ],
     importpath = "github.com/timoth-y/chainmetric-network/smartcontracts/readings/usecase/validation",
     visibility = ["//visibility:public"],

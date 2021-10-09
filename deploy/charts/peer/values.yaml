@@ -70,4 +70,4 @@ orderer:
   domain: example.com
   hostname: orderer
 
-storageClass: local-path
+storageClass: longhorn

@@ -18,6 +18,7 @@ go_library(
         "//smartcontracts/shared/model/couchdb",
         "//smartcontracts/shared/model/response",
         "//smartcontracts/shared/utils",
+        "@com_github_cnf_structhash//:structhash",
         "@com_github_hyperledger_fabric_chaincode_go//shim",
         "@com_github_hyperledger_fabric_contract_api_go//contractapi",
         "@com_github_pkg_errors//:errors",

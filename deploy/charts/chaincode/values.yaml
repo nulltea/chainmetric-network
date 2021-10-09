@@ -14,7 +14,7 @@ service:
 
 persistence:
   enabled: true
-  storageClass: local-path
+  storageClass: longhorn
   path: /app/storage
 
 org:

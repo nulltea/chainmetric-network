@@ -35,7 +35,7 @@ logs:
     level: DEBUG
 
 additionalArguments:
-  - --certificatesResolvers.le.acme.email=timothy@chainmetric.network
+  - --certificatesResolvers.le.acme.email=timothy@timoth.io
   - --certificatesresolvers.le.acme.storage=/data/acme.json
 # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
 # - --certificatesresolvers.le.acme.httpchallenge=true
@@ -80,7 +80,7 @@ autoscaling:
   enabled: false
 
 persistence:
-  enabled: false
+  enabled: true
   name: data
   accessMode: ReadWriteOnce
   size: 128Mi

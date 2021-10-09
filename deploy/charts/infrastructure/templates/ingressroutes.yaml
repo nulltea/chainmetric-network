@@ -1,5 +1,6 @@
+{{ $ns := .Release.Namespace }}
 {{ $root := .Values }}
-{{- range  .Values.ingressroutes }}
+  {{- range  .Values.ingressroutes }}
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -8,6 +9,7 @@ metadata:
   labels:
     project: {{ $root.project }}
     component: traefik-dashboard
+  namespace: {{  .namespace | default $ns }}
 spec:
   entryPoints:
   {{- toYaml .entrypoints | nindent 4 }}
@@ -16,11 +18,14 @@ spec:
       kind: Rule
       services:
         {{- with .service }}
-          - name: {{ .name }}
-            port: {{ .port }}
-            kind: {{ .kind }}
-            scheme: {{ .scheme }}
-        {{- end }}
+        - name: {{ .name }}
+          port: {{ .port }}
+          kind: {{ .kind }}
+          scheme: {{ .scheme }}
+          {{- with .namespace }}
+          namespace: {{ . }}
+        {{- end}}
+  {{- end }}
   {{- if .tls.enabled }}
   tls:
     certResolver: {{ .tls.certResolver }}
@@ -29,11 +34,13 @@ spec:
   {{- if .tls.enabled }}
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
+
 metadata:
   name: {{ .name }}
   labels:
     project: {{ $root.project }}
     component: traefik-dashboard
+  namespace: {{  .namespace | default $ns }}
 spec:
   entryPoints:
     - web
@@ -42,10 +49,13 @@ spec:
       kind: Rule
       services:
         {{- with .service }}
-          - name: {{ .name }}
-            port: {{ .port }}
-            kind: {{ .kind }}
-            scheme: {{ .scheme }}
-        {{- end }}
+        - name: {{ .name }}
+          port: {{ .port }}
+          kind: {{ .kind }}
+          scheme: {{ .scheme }}
+          {{- with .namespace }}
+          namespace: {{ . }}
+        {{- end}}
   {{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}

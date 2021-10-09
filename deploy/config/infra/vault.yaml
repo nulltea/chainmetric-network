@@ -2,7 +2,7 @@ dataStorage:
   enabled: true
   size: 5Gi
   mountPath: "/vault/data"
-  storageClass: local-path
+  storageClass: longhorn
 
 dev:
   enabled: true

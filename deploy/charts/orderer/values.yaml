@@ -37,4 +37,4 @@ config:
   profile: OrdererGenesis
   tls: true
 
-storageClass: local-path
+storageClass: longhorn

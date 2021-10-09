@@ -2,7 +2,7 @@ project: chainmetric
 
 ingressroutes:
   - name: traefik-dashboard
-    domain: chainmetric.network
+    domain: timoth.io
     serviceHostname: traefik.dev
     entrypoints:
       - web
@@ -16,17 +16,32 @@ ingressroutes:
     tls:
       enabled: true
       certResolver: le
-  - name: vault
-    domain: chainmetric.network
-    serviceHostname: vault.infra
+#  - name: vault
+#    domain: timoth.io
+#    serviceHostname: vault.infra
+#    entrypoints:
+#      - web
+#      - websecure
+#    service:
+#      name: vault
+#      kind: Service
+#      port: 8200
+#      scheme: http
+#    tls:
+#      enabled: true
+#      certResolver: le
+  - name: longhorn
+    domain: timoth.io
+    serviceHostname: longhorn.dev
     entrypoints:
       - web
       - websecure
     service:
-      name: vault
+      name: longhorn-frontend
       kind: Service
-      port: 8200
+      port: 80
       scheme: http
     tls:
       enabled: true
       certResolver: le
+    namespace: longhorn-system

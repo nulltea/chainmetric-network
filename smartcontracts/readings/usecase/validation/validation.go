@@ -55,7 +55,6 @@ func Validate(ctx contractapi.TransactionContextInterface, r *models.MetricReadi
 							[]byte(utils.MustEncode(Notification{
 								AssetID:     r.AssetID,
 								Metric:      m,
-								Occurrences: vs,
 							})),
 						); err != nil {
 							return err

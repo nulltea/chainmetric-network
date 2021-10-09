@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/cnf/structhash"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/pkg/errors"
@@ -132,7 +133,7 @@ func (rc *ReadingsContract) Post(ctx contractapi.TransactionContextInterface, pa
 
 	go rc.sendToSocketListeners(ctx, readings)
 
-	defer func() {
+	go func() {
 		if err = validation.Validate(ctx, readings); err != nil {
 			core.Logger.Error(err, "failed to validate readings")
 		}
@@ -220,6 +221,6 @@ func (rc *ReadingsContract) save(ctx contractapi.TransactionContextInterface, re
 func generateCompositeKey(ctx contractapi.TransactionContextInterface, req *models.MetricReadings) (string, error) {
 	return ctx.GetStub().CreateCompositeKey(couchdb.ReadingsRecordType, []string{
 		utils.Hash(req.AssetID),
-		utils.Hash(string(req.Encode())),
+		utils.Hash(string(structhash.Dump(req, 1))),
 	})
 }

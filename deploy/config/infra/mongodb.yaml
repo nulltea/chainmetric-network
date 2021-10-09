@@ -8,7 +8,7 @@ readinessProbe:
   enabled: false
 
 persistence:
-  storageClass: local-path
+  storageClass: longhorn
   mountPath: /data/db
   size: 1Gi
 

@@ -30,7 +30,7 @@ externalAccess:
 
 persistence:
   enabled: true
-  storageClass: local-path
+  storageClass: longhorn
   path: /app/data
 
 serviceAccount:
