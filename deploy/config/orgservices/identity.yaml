@@ -40,7 +40,7 @@ envs:
     value: https://vault.infra.timoth.io:443
   - type: value
     name: MONGO_ADDRESS
-    value: mongodb//mongodb.infra:443
+    value: mongodb://mongodb.infra:27017
   - type: value
     name: FABRIC_CERT
     value: /app/crypto/crypto-config/peerOrganizations/chipa-inu.org.chainmetric.network/users/Admin@chipa-inu.org.chainmetric.network/msp/signcerts/Admin@chipa-inu.org.chainmetric.network-cert.pem

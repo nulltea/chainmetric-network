@@ -82,7 +82,7 @@ autoscaling:
 persistence:
   enabled: true
   name: data
-  accessMode: ReadWriteOnce
+  accessMode: ReadWriteMany
   size: 128Mi
   storageClass: local-path
   path: /data

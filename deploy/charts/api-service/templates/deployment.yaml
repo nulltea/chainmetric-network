@@ -27,8 +27,8 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
           env:
-            - name: MONGO_ADDRESS
-              value: mongodb://{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}-mongodb:27017
+{{/*            - name: MONGO_ADDRESS*/}}
+{{/*              value: mongodb://{{ .Values.externalAccess.ownershipMsp | replace "." "-" }}-mongodb:27017*/}}
             - name: MONGO_USERNAME
               valueFrom:
                 secretKeyRef:

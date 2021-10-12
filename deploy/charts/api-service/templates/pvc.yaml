@@ -6,7 +6,7 @@ metadata:
 spec:
   storageClassName: {{ .Values.persistence.storageClass }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 1Gi

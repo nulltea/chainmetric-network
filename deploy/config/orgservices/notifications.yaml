@@ -43,7 +43,7 @@ envs:
     value: https://vault.infra.timoth.io:443
   - type: value
     name: MONGO_ADDRESS
-    value: mongodb//mongodb.infra:443
+    value: mongodb://mongodb.infra:27017
   - type: value
     name: FIREBASE_ENABLED
     value: true
